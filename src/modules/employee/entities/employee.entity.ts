@@ -3,128 +3,128 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity({ name: 'TBLCATEMP' })
 export class Employee {
   @PrimaryGeneratedColumn({ name: 'LNGCLVEMP' })
-  id: number; // ID del registro
+  id: number;
 
   @Column({ name: 'LNGNOEMP', type: 'int', default: 0 })
-  employeeNumber: number; // Número de registro del empleado
+  employeeNumber: number;
 
   @Column({ name: 'STRRFCEMP', type: 'nvarchar', length: 13 })
-  rfc: string; // RFC del empleado
+  rfc: string;
 
   @Column({ name: 'STRCRPEMP', type: 'nvarchar', length: 18 })
-  curp: string; // CURP del empleado
+  curp: string;
 
   @Column({ name: 'STRNOMEMP', type: 'nvarchar', length: 255 })
-  firstName: string; // Nombre del empleado
+  firstName: string;
 
   @Column({ name: 'STRAPPEMP', type: 'nvarchar', length: 255 })
-  lastName: string; // Apellido paterno
+  lastName: string;
 
   @Column({ name: 'STRAPMEMP', type: 'nvarchar', length: 255 })
-  middleName: string; // Apellido materno
+  middleName: string;
 
   @Column({ name: 'STRCALEMP', type: 'nvarchar', length: 255 })
-  street: string; // Calle del domicilio
-
+  street: string;
   @Column({ name: 'STRNXTEMP', type: 'nvarchar', length: 50 })
-  exteriorNumber: string; // Número exterior
+  exteriorNumber: string;
 
   @Column({ name: 'STRNNTEMP', type: 'nvarchar', length: 50 })
-  interiorNumber: string; // Número interior
+  interiorNumber: string;
 
   @Column({ name: 'STRCOLEMP', type: 'nvarchar', length: 150 })
-  neighborhood: string; // Colonia
+  neighborhood: string;
 
   @Column({ name: 'STRLOCEMP', type: 'nvarchar', length: 150 })
-  locality: string; // Localidad
+  locality: string;
 
   @Column({ name: 'STRDMNEMP', type: 'nvarchar', length: 100 })
-  municipality: string; // Delegación / Municipio
+  municipality: string;
 
   @Column({ name: 'STRREFEMP', type: 'nvarchar', length: 255 })
-  reference: string; // Referencia
+  reference: string;
 
   @Column({ name: 'STREDOEMP', type: 'nvarchar', length: 50 })
-  state: string; // Estado
+  state: string;
 
   @Column({ name: 'STRPAIEMP', type: 'nvarchar', length: 50 })
-  country: string; // País
+  country: string;
 
   @Column({ name: 'STRCDPEMP', type: 'nvarchar', length: 5 })
-  postalCode: string; // Código postal
+  postalCode: string;
 
+  // TODO: review photo location
   @Column({ name: 'STRFOTEMP', type: 'nvarchar', length: 250 })
-  photoUrl: string; // URL de la foto del empleado
+  photo: string;
 
   @Column({ name: 'DTFNCEMP', type: 'nvarchar', length: 10 })
-  birthDate: string; // Fecha de nacimiento
+  birthDate: string;
 
   @Column({ name: 'INTSEXEMP', type: 'int' })
-  gender: number; // 0 = Masculino, 1 = Femenino (según tu aplicación)
+  gender: number; // 2 - female  1 - male
 
   @Column({ name: 'STRGRPSNG', type: 'nvarchar', length: 6 })
-  bloodType: string; // Grupo sanguíneo
+  bloodType: string;
 
   @Column({ name: 'INTSTDCVL', type: 'smallint' })
-  maritalStatus: number; // Estado civil
+  maritalStatus: number;
 
   @Column({ name: 'STRNMRTLF', type: 'nvarchar', length: 12 })
-  landline: string; // Teléfono fijo
+  landline: string;
 
   @Column({ name: 'STRNMRCLL', type: 'nvarchar', length: 12 })
-  mobile: string; // Teléfono celular
+  mobile: string;
 
   @Column({ name: 'STRCRRELC', type: 'nvarchar', length: 50 })
-  email: string; // Correo electrónico
+  email: string;
 
   @Column({ name: 'DTFCTEMP', type: 'nvarchar', length: 10 })
-  hireDate: string; // Fecha de contratación
+  hireDate: string;
 
   @Column({ name: 'STRNSSEMP', type: 'nvarchar', length: 50 })
-  socialSecurityNumber: string; // Número de Seguridad Social
+  socialSecurityNumber: string;
 
   @Column({ name: 'STRDPTEMP', type: 'nvarchar', length: 255 })
-  department: string; // Departamento del empleado
+  department: string;
 
   @Column({ name: 'STRPSTEMP', type: 'nvarchar', length: 255 })
-  jobTitle: string; // Puesto del empleado
+  jobTitle: string;
 
   @Column({ name: 'BLNUSREMP', type: 'bit' })
-  isUser: boolean; // ¿Es usuario del sistema?
+  isUser: boolean;
 
   @Column({ name: 'STRNCKEMP', type: 'nvarchar', length: 100 })
-  username: string; // Nombre de usuario en el sistema
+  username: string;
 
   @Column({ name: 'STRPWSEMP', type: 'nvarchar', length: 100 })
-  password: string; // Contraseña del sistema
+  password: string;
 
   @Column({ name: 'DBLPRCDST', type: 'float' })
   statusCode: number; // Código de estado (activo/suspendido)
 
   @Column({ name: 'Suspendido', type: 'bit' })
-  isSuspended: boolean; // ¿Está suspendido?
+  isSuspended: boolean;
 
   @Column({ name: 'BLNBLQRGS', type: 'bit' })
-  isBlocked: boolean; // Estado de bloqueo del registro
+  isBlocked: boolean;
 
   @Column({ name: 'LNGCLVMPL_BLQ', type: 'int' })
-  blockedByUserId: number; // Clave de usuario que bloqueó
+  blockedByUserId: number;
 
   @Column({ name: 'DTFCHRGS', type: 'nvarchar', length: 10 })
-  createdAt: string; // Fecha de alta del registro
+  createdAt: string;
 
   @Column({ name: 'LNGCLVMPL_RGS', type: 'int' })
-  createdByUserId: number; // Usuario que dio de alta
+  createdByUserId: number;
 
   @Column({ name: 'LNGCLVQPM_RGS', type: 'int' })
-  createdFromDeviceId: number; // Equipo desde donde se dio de alta
+  createdFromDeviceId: number;
 
   @Column({ name: 'DTFCHPDT', type: 'nvarchar', length: 10 })
-  updatedAt: string; // Fecha de última modificación
+  updatedAt: string;
 
   @Column({ name: 'LNGCLVMPL_PDT', type: 'int' })
-  updatedByUserId: number; // Usuario que modificó
+  updatedByUserId: number;
 
   @Column({ name: 'LNGCLVQPM_PDT', type: 'int' })
-  updatedFromDeviceId: number; // Equipo desde donde se modificó
+  updatedFromDeviceId: number;
 }
