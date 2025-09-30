@@ -10,6 +10,7 @@ import { ResponseInterceptor } from '@shared/interceptors/response.interceptor';
 import { HttpExceptionFilter } from '@shared/filters/http-exception.filter';
 
 import { EmployeeModule } from '@mod/employee/employee.module';
+import { VehiclesModule } from '@mod/vehicles/vehicles.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { EmployeeModule } from '@mod/employee/employee.module';
       }),
     }),
     EmployeeModule,
+    VehiclesModule,
   ],
   providers: [
     // {
