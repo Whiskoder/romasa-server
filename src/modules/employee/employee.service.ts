@@ -47,7 +47,11 @@ export class EmployeeService {
 
     const queryBuilder = () => {
       // TODO: move to fn and add sortBy & orderBy
-      const qb = this.employeeRepository.createQueryBuilder('employee');
+      const qb = this.employeeRepository.createQueryBuilder('employee').where({
+        isSuspended: 0,
+        isBlocked: 0,
+        isUser: 0,
+      });
 
       if (likeFullName) {
         qb.where(`UPPER(${fullNameConcat}) LIKE UPPER(:fullName)`, {

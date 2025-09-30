@@ -109,3 +109,12 @@ En progreso
 ### Notas
 
 - El proyecto está en desarrollo activo.
+
+<!-- # Generar migración
+npm run migration:generate src/migrations/CreateUsersTable
+
+# Ejecutar migración
+npm run migration:run
+
+# Revertir última migración
+npm run migration:revert -->

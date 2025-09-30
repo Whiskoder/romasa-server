@@ -8,6 +8,9 @@ export class ServiceOperations {
   @Column({ type: 'bit', default: false })
   affectsOperability: boolean;
 
+  @Column({ type: 'varchar', length: 20, nullable: false })
+  branch: string;
+
   @Column({ type: 'datetime', nullable: false })
   createdAt: number;
 

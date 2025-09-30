@@ -11,6 +11,7 @@ import { HttpExceptionFilter } from '@shared/filters/http-exception.filter';
 
 import { EmployeeModule } from '@mod/employee/employee.module';
 import { VehiclesModule } from '@mod/vehicles/vehicles.module';
+import { ServiceOperationsModule } from '@mod/service-operations/service-operations.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { VehiclesModule } from '@mod/vehicles/vehicles.module';
     }),
     EmployeeModule,
     VehiclesModule,
+    ServiceOperationsModule,
   ],
   providers: [
     // {
