@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Controller,
   Get,
@@ -6,14 +7,26 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
-@Controller('employee')
+import { ApiResponse } from '@shared/decorators/response.decorator';
+import { QueryEmployeeDto } from './dto/query-employee.dto';
+import { ResponseEmployeeDto } from './dto/response-employee.dto';
+import { EmployeeMapper } from './mappers/employee.mapper';
+
+@Controller({
+  version: '1',
+  path: 'employees',
+})
 export class EmployeeController {
-  constructor(private readonly employeeService: EmployeeService) {}
+  constructor(
+    private readonly employeeService: EmployeeService,
+    private readonly employeeMapper: EmployeeMapper,
+  ) {}
 
   @Post()
   create(@Body() createEmployeeDto: CreateEmployeeDto) {
@@ -21,19 +34,21 @@ export class EmployeeController {
   }
 
   @Get()
-  findAll() {
-    return this.employeeService.findAll();
+  @ApiResponse(200, 'Employees found')
+  async findAll(
+    @Query() queryEmployeeDto: QueryEmployeeDto,
+  ): Promise<{ employees: ResponseEmployeeDto[] }> {
+    const employees = await this.employeeService.findAll(queryEmployeeDto);
+
+    const employeesDtos = this.employeeMapper.toResponseDtoList(employees);
+    return { employees: employeesDtos };
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.employeeService.findOne(+id);
+  // @ApiResponse(200, 'Employees found')
+  // @Get(':name')
+  // findByName(@Param('name') name: string) {
+  //   return this.employeeService.findByName(name);
   // }
-
-  @Get(':name')
-  findByName(@Param('name') name: string) {
-    return this.employeeService.findByName(name);
-  }
 
   @Patch(':id')
   update(
