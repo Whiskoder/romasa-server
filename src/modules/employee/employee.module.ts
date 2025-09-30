@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { EmployeeService } from './employee.service';
-import { EmployeeController } from './employee.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Employee } from './entities/employee.entity';
-import { EmployeeMapper } from './mappers/employee.mapper';
+
+import { Employee } from '@mod/employee/entities/employee.entity';
+import { EmployeeController } from '@mod/employee/employee.controller';
+import { EmployeeMapper } from '@mod/employee/mappers/employee.mapper';
+import { EmployeeService } from '@mod/employee/employee.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Employee])],

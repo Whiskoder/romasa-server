@@ -1,12 +1,12 @@
-import { Repository } from 'typeorm';
-
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { CreateEmployeeDto } from './dto/create-employee.dto';
-import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { Employee } from './entities/employee.entity';
-import { QueryEmployeeDto } from './dto/query-employee.dto';
+import { Repository } from 'typeorm';
+
+import { CreateEmployeeDto } from '@mod/employee/dto/create-employee.dto';
+import { UpdateEmployeeDto } from '@mod/employee/dto/update-employee.dto';
+import { Employee } from '@mod/employee/entities/employee.entity';
+import { QueryEmployeeDto } from '@mod/employee/dto/query-employee.dto';
 import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET,

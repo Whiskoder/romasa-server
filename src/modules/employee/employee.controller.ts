@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Controller,
   Get,
@@ -9,14 +8,14 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { EmployeeService } from './employee.service';
-import { CreateEmployeeDto } from './dto/create-employee.dto';
-import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
 import { ApiResponse } from '@shared/decorators/response.decorator';
-import { QueryEmployeeDto } from './dto/query-employee.dto';
-import { ResponseEmployeeDto } from './dto/response-employee.dto';
-import { EmployeeMapper } from './mappers/employee.mapper';
+import { CreateEmployeeDto } from '@mod/employee/dto/create-employee.dto';
+import { EmployeeMapper } from '@mod/employee/mappers/employee.mapper';
+import { EmployeeService } from '@mod/employee/employee.service';
+import { QueryEmployeeDto } from '@mod/employee/dto/query-employee.dto';
+import { ResponseEmployeeDto } from '@mod/employee/dto/response-employee.dto';
+import { UpdateEmployeeDto } from '@mod/employee/dto/update-employee.dto';
 
 @Controller({
   version: '1',

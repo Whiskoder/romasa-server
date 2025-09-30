@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { HttpStatus, applyDecorators, HttpCode } from '@nestjs/common';
 
 import { ResponseMessage } from '@shared/decorators/response-message.decorator';
