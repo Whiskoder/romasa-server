@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { Vehicle } from '@mod/vehicles/entities/vehicle.entity';
 import { QueryVehicleDto } from '@mod/vehicles/dto/query-vehicle.dto';
@@ -45,5 +45,15 @@ export class VehicleService {
     if (vehicles.length === 0) throw new NotFoundException('No vehicles found');
 
     return vehicles;
+  }
+
+  async findById(vehicleIds: number[]): Promise<Vehicle[]> {
+    const vehicleEntities = await this.vehicleRepository.findBy({
+      id: In(vehicleIds), // TODO: add validations
+    });
+
+    if (vehicleEntities.length === 0)
+      throw new NotFoundException('No vehicles found');
+    return vehicleEntities;
   }
 }

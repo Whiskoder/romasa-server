@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { CreateEmployeeDto } from '@mod/employee/dto/create-employee.dto';
 import { UpdateEmployeeDto } from '@mod/employee/dto/update-employee.dto';
@@ -22,10 +22,6 @@ export class EmployeeService {
   create(createEmployeeDto: CreateEmployeeDto) {
     return 'This action adds a new employee';
   }
-
-  // private getQueryBuilder(query: QueryEmployeeDto) {
-
-  // }
 
   async findAll(query: QueryEmployeeDto): Promise<Employee[]> {
     const {
@@ -48,9 +44,9 @@ export class EmployeeService {
     const queryBuilder = () => {
       // TODO: move to fn and add sortBy & orderBy
       const qb = this.employeeRepository.createQueryBuilder('employee').where({
-        isSuspended: 0,
-        isBlocked: 0,
-        isUser: 0,
+        isSuspended: false,
+        isBlocked: false,
+        isUser: false,
       });
 
       if (likeFullName) {
@@ -96,25 +92,23 @@ export class EmployeeService {
     return employees;
   }
 
+  async findById(employeeIds: number[]): Promise<Employee[]> {
+    const employeeEntities = await this.employeeRepository.findBy({
+      id: In(employeeIds),
+      isSuspended: false,
+      isBlocked: false,
+      isUser: false,
+    });
+
+    if (employeeEntities.length === 0)
+      throw new NotFoundException('No employees found');
+
+    return employeeEntities;
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} employee`;
   }
-
-  // async findByName(name: string) {
-  //   const [employees, total] = await this.employeeRepository
-  //     .createQueryBuilder('employee')
-  //     .where(
-  //       "CONCAT(employee.firstName, ' ', employee.middleName, ' ', employee.lastName) LIKE :name",
-  //       { name: `%${name}%` },
-  //     )
-  //     .take(50)
-  //     .getManyAndCount();
-
-  //   return {
-  //     total,
-  //     employees,
-  //   };
-  // }
 
   update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
     return `This action updates a #${id} employee`;

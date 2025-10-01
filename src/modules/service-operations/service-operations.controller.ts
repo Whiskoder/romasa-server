@@ -14,6 +14,7 @@ import { CreateDiagnosticDto } from '@mod/service-operations/dto/create-diagnost
 import { ResponseServiceOperationsDto } from '@mod/service-operations/dto/response-service-operations.dto';
 import { ServiceOperationsMapper } from '@mod/service-operations/mappers/service-operations.mapper';
 import { ServiceOperationsService } from '@mod/service-operations/service-operations.service';
+import { QueryServiceOperationsDto } from '@mod/service-operations/dto/query-service-operations.dto';
 
 @Controller({
   version: '1',
@@ -36,5 +37,19 @@ export class ServiceOperationsController {
     const serviceOperationDto =
       this.serviceOperationsMapper.toResponseDto(serviceOperation);
     return { serviceOperation: [serviceOperationDto] };
+  }
+
+  @Get()
+  @ApiResponse(200, 'Service Operations found')
+  async findAll(
+    @Query() queryServiceOperationsDto: QueryServiceOperationsDto,
+  ): Promise<{ serviceOperations: ResponseServiceOperationsDto[] }> {
+    const serviceOperations = await this.serviceOperationsService.findAll(
+      queryServiceOperationsDto,
+    );
+
+    const serviceOperationsDtos =
+      this.serviceOperationsMapper.toResponseDtoList(serviceOperations);
+    return { serviceOperations: serviceOperationsDtos };
   }
 }

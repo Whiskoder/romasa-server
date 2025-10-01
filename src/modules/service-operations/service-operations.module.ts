@@ -6,8 +6,15 @@ import { ServiceOperationsController } from '@mod/service-operations/service-ope
 import { ServiceOperationsMapper } from '@mod/service-operations/mappers/service-operations.mapper';
 import { ServiceOperationsService } from '@mod/service-operations/service-operations.service';
 
+import { EmployeeModule } from '@mod/employee/employee.module';
+import { VehiclesModule } from '@mod/vehicles/vehicles.module';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([ServiceOperations])],
+  imports: [
+    TypeOrmModule.forFeature([ServiceOperations]),
+    EmployeeModule,
+    VehiclesModule,
+  ],
   controllers: [ServiceOperationsController],
   providers: [ServiceOperationsService, ServiceOperationsMapper],
 })

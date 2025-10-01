@@ -1,4 +1,12 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+
+import { ServiceStatus } from '@mod/service-operations/enums/service-status.enum';
 
 @Entity({ name: 'service_operations' })
 export class ServiceOperations {
@@ -11,7 +19,7 @@ export class ServiceOperations {
   @Column({ type: 'varchar', length: 20, nullable: false })
   branch: string;
 
-  @Column({ type: 'datetime', nullable: false })
+  @CreateDateColumn({ type: 'datetime' })
   createdAt: number;
 
   @Column({ type: 'int', nullable: false })
@@ -31,10 +39,10 @@ export class ServiceOperations {
   @Column({ type: 'varchar', length: 10, default: 'low' })
   priority: string;
 
-  @Column({ type: 'varchar', length: 20, default: 'created' })
+  @Column({ type: 'varchar', length: 20, default: ServiceStatus.requested })
   status: string;
 
-  @Column({ type: 'datetime', nullable: false })
+  @UpdateDateColumn({ type: 'datetime' })
   updatedAt: number;
 
   @Column({ type: 'int', nullable: false })

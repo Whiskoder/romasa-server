@@ -10,5 +10,6 @@ import { EmployeeService } from '@mod/employee/employee.service';
   imports: [TypeOrmModule.forFeature([Employee])],
   controllers: [EmployeeController],
   providers: [EmployeeService, EmployeeMapper],
+  exports: [EmployeeService],
 })
 export class EmployeeModule {}

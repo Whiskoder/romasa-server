@@ -118,3 +118,9 @@ npm run migration:run
 
 # Revertir última migración
 npm run migration:revert -->
+
+<!--
+#BUGS
+#fix service-operations -> inventory to return array instead of string
+#fix vehicle inventory must be optional
+ -->
