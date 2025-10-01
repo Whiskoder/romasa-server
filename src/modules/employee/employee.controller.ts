@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 
 import { ApiResponse } from '@shared/decorators/response.decorator';
@@ -16,6 +17,7 @@ import { EmployeeService } from '@mod/employee/employee.service';
 import { QueryEmployeeDto } from '@mod/employee/dto/query-employee.dto';
 import { ResponseEmployeeDto } from '@mod/employee/dto/response-employee.dto';
 import { UpdateEmployeeDto } from '@mod/employee/dto/update-employee.dto';
+import { SearchFilterAndPaginationInterceptor } from '@shared/interceptors/builder';
 
 @Controller({
   version: '1',
@@ -43,11 +45,10 @@ export class EmployeeController {
     return { employees: employeesDtos };
   }
 
-  // @ApiResponse(200, 'Employees found')
-  // @Get(':name')
-  // findByName(@Param('name') name: string) {
-  //   return this.employeeService.findByName(name);
-  // }
+  @ApiResponse(200, 'Employees found')
+  @Get(':name')
+  @UseInterceptors(new SearchFilterAndPaginationInterceptor(['casa'], ['casa']))
+  findByName(@Param('name') name: string) {}
 
   @Patch(':id')
   update(
