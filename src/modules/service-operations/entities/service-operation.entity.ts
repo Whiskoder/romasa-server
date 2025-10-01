@@ -9,7 +9,7 @@ import {
 import { ServiceStatus } from '@mod/service-operations/enums/service-status.enum';
 
 @Entity({ name: 'service_operations' })
-export class ServiceOperations {
+export class ServiceOperation {
   @PrimaryGeneratedColumn()
   id: number;
 

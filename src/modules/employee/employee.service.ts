@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { In, Repository } from 'typeorm';
@@ -6,11 +6,7 @@ import { In, Repository } from 'typeorm';
 import { CreateEmployeeDto } from '@mod/employee/dto/create-employee.dto';
 import { UpdateEmployeeDto } from '@mod/employee/dto/update-employee.dto';
 import { Employee } from '@mod/employee/entities/employee.entity';
-import { QueryEmployeeDto } from '@mod/employee/dto/query-employee.dto';
-import {
-  DEFAULT_PAGINATION_LIMIT,
-  DEFAULT_PAGINATION_OFFSET,
-} from '@shared/constants/pagination.constant';
+import { Query } from '@shared/interfaces/query.interface';
 
 @Injectable()
 export class EmployeeService {
@@ -23,15 +19,10 @@ export class EmployeeService {
     return 'This action adds a new employee';
   }
 
-  async findAll(query: QueryEmployeeDto): Promise<Employee[]> {
-    const {
-      limit = DEFAULT_PAGINATION_LIMIT,
-      offset = DEFAULT_PAGINATION_OFFSET,
-      likeFullName,
-      likeEmployeeNumber,
-      likeMobile,
-      likeRFC,
-    } = query;
+  async findAll(query: Query<'employee'>): Promise<Employee[]> {
+    const { limit, offset, sortBy, sortOrder } = query.pagination;
+    const parameters = query.parameters;
+    let where = query.where;
 
     const fullNameConcat = `CONCAT(
         COALESCE(employee.firstName, ''),
@@ -41,50 +32,23 @@ export class EmployeeService {
         COALESCE(employee.lastName, '')
       )`;
 
-    const queryBuilder = () => {
-      // TODO: move to fn and add sortBy & orderBy
-      const qb = this.employeeRepository.createQueryBuilder('employee').where({
-        isSuspended: false,
-        isBlocked: false,
-        isUser: false,
-      });
+    if (where.match(/employee\.fullName/))
+      where = where.replace('employee.fullName', fullNameConcat);
 
-      if (likeFullName) {
-        qb.where(`UPPER(${fullNameConcat}) LIKE UPPER(:fullName)`, {
-          fullName: `${likeFullName}%`,
-        });
-        qb.orderBy(fullNameConcat, 'ASC');
-        return qb;
-      }
+    const qb = this.employeeRepository
+      .createQueryBuilder('employee')
+      .where(where, parameters)
+      .andWhere('employee.isSuspended = :isSuspended', { isSuspended: false })
+      .andWhere('employee.isBlocked = :isBlocked', { isBlocked: false })
+      .andWhere('employee.isUser = :isUser', { isUser: false });
 
-      if (likeEmployeeNumber) {
-        qb.where(`employee.employeeNumber LIKE :employeeNumber`, {
-          employeeNumber: `${likeEmployeeNumber}%`,
-        });
-        qb.orderBy('employee.employeeNumber', 'ASC');
-        return qb;
-      }
+    if (sortBy === 'fullName') {
+      qb.orderBy(fullNameConcat, sortOrder);
+    } else {
+      qb.orderBy(`employee.${sortBy}`, sortOrder);
+    }
 
-      if (likeMobile) {
-        qb.where(`employee.mobile LIKE :mobile`, {
-          mobile: `${likeMobile}%`,
-        });
-        qb.orderBy('employee.mobile', 'ASC');
-        return qb;
-      }
-
-      if (likeRFC) {
-        qb.where(`UPPER(employee.rfc) LIKE UPPER(:rfc)`, {
-          rfc: `${likeRFC}%`,
-        });
-        qb.orderBy('employee.rfc', 'ASC');
-        return qb;
-      }
-
-      return qb;
-    };
-
-    const employees = await queryBuilder().take(limit).skip(offset).getMany();
+    const employees = await qb.take(limit).skip(offset).getMany();
 
     if (employees.length === 0)
       throw new NotFoundException('No employees found');

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { plainToInstance } from 'class-transformer';
-import { ServiceOperations } from '@mod/service-operations/entities/service-operations.entity';
+import { ServiceOperation } from '@mod/service-operations/entities/service-operation.entity';
 import { ResponseServiceOperationsDto } from '@mod/service-operations/dto/response-service-operations.dto';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class ServiceOperationsMapper {
   constructor() {}
 
   toResponseDto(
-    serviceOperationsEntity: ServiceOperations,
+    serviceOperationsEntity: ServiceOperation,
   ): ResponseServiceOperationsDto {
     const dto = plainToInstance(
       ResponseServiceOperationsDto,
@@ -20,7 +20,7 @@ export class ServiceOperationsMapper {
   }
 
   toResponseDtoList(
-    serviceOperationsEntities: ServiceOperations[],
+    serviceOperationsEntities: ServiceOperation[],
   ): ResponseServiceOperationsDto[] {
     return serviceOperationsEntities.map((e) => this.toResponseDto(e));
   }

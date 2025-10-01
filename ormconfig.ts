@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
 
-import { ServiceOperations } from '@mod/service-operations/entities/service-operations.entity';
+import { ServiceOperation } from '@mod/service-operations/entities/service-operation.entity';
 
 export default new DataSource({
   type: 'mssql',
@@ -12,7 +12,7 @@ export default new DataSource({
   database: process.env.DB_NAME,
   synchronize: false,
   migrations: ['src/migrations/*.ts'],
-  entities: [ServiceOperations],
+  entities: [ServiceOperation],
   options: {
     encrypt: true,
   },

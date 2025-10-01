@@ -4,11 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 
 import { Vehicle } from '@mod/vehicles/entities/vehicle.entity';
-import { QueryVehicleDto } from '@mod/vehicles/dto/query-vehicle.dto';
-import {
-  DEFAULT_PAGINATION_LIMIT,
-  DEFAULT_PAGINATION_OFFSET,
-} from '@shared/constants/pagination.constant';
+import { Query } from '@shared/interfaces/query.interface';
 
 @Injectable()
 export class VehicleService {
@@ -17,30 +13,20 @@ export class VehicleService {
     private readonly vehicleRepository: Repository<Vehicle>,
   ) {}
 
-  async findAll(query: QueryVehicleDto): Promise<Vehicle[]> {
-    const {
-      limit = DEFAULT_PAGINATION_LIMIT,
-      offset = DEFAULT_PAGINATION_OFFSET,
-      likeLicensePlate,
-    } = query;
+  async findAll(query: Query<'vehicle'>): Promise<Vehicle[]> {
+    const { limit, offset, sortBy, sortOrder } = query.pagination;
+    const parameters = query.parameters;
+    const where = query.where;
 
-    const queryBuilder = () => {
-      // TODO: move to fn and add sortBy & orderBy
+    const qb = this.vehicleRepository
+      .createQueryBuilder('vehicle')
+      .where(where, parameters)
+      .orderBy(`vehicle.${sortBy}`, sortOrder)
+      .take(limit)
+      .skip(offset)
+      .getMany();
 
-      const qb = this.vehicleRepository.createQueryBuilder('vehicle');
-
-      if (likeLicensePlate) {
-        qb.where(`UPPER(vehicle.licensePlate) LIKE UPPER(:licensePlate)`, {
-          licensePlate: `${likeLicensePlate}%`,
-        });
-        qb.orderBy(`vehicle.licensePlate`, 'ASC');
-        return qb;
-      }
-
-      return qb;
-    };
-
-    const vehicles = await queryBuilder().take(limit).skip(offset).getMany();
+    const vehicles = await qb;
 
     if (vehicles.length === 0) throw new NotFoundException('No vehicles found');
 

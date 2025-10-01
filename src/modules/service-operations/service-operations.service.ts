@@ -5,26 +5,22 @@ import { Repository } from 'typeorm';
 
 import { CreateDiagnosticDto } from '@mod/service-operations/dto/create-diagnostic.dto';
 import { EmployeeService } from '@mod/employee/employee.service';
-import { QueryServiceOperationsDto } from '@mod/service-operations/dto/query-service-operations.dto';
-import { ServiceOperations } from '@mod/service-operations/entities/service-operations.entity';
+import { ServiceOperation } from '@mod/service-operations/entities/service-operation.entity';
 import { VehicleService } from '@mod/vehicles/vehicle.service';
-import {
-  DEFAULT_PAGINATION_LIMIT,
-  DEFAULT_PAGINATION_OFFSET,
-} from '@shared/constants/pagination.constant';
+import { Query } from '@shared/interfaces/query.interface';
 
 @Injectable()
 export class ServiceOperationsService {
   constructor(
-    @InjectRepository(ServiceOperations)
-    private readonly serviceOperationsRepository: Repository<ServiceOperations>,
+    @InjectRepository(ServiceOperation)
+    private readonly serviceOperationsRepository: Repository<ServiceOperation>,
     private readonly employeeService: EmployeeService,
     private readonly vehicleService: VehicleService,
   ) {}
 
   async create(
     createDiagnosticDto: CreateDiagnosticDto,
-  ): Promise<ServiceOperations> {
+  ): Promise<ServiceOperation> {
     const {
       createdByEmployeeId,
       vehicleDriverEmployeeId,
@@ -78,36 +74,20 @@ export class ServiceOperationsService {
     return serviceOperationsEntity;
   }
 
-  async findAll(
-    query: QueryServiceOperationsDto,
-  ): Promise<ServiceOperations[]> {
-    const {
-      limit = DEFAULT_PAGINATION_LIMIT,
-      offset = DEFAULT_PAGINATION_OFFSET,
-      equalStatus,
-    } = query;
+  async findAll(query: Query<'serviceOperation'>): Promise<ServiceOperation[]> {
+    const { limit, offset, sortBy, sortOrder } = query.pagination;
+    const parameters = query.parameters;
+    const where = query.where;
 
-    const queryBuilder = () => {
-      const qb =
-        this.serviceOperationsRepository.createQueryBuilder(
-          'serviceOperations',
-        );
-
-      if (equalStatus) {
-        qb.where(`serviceOperations.status = :status`, {
-          status: equalStatus,
-        });
-        qb.orderBy(`serviceOperations.priority`, 'ASC');
-        return qb;
-      }
-
-      return qb;
-    };
-
-    const serviceOperations = await queryBuilder()
+    const qb = this.serviceOperationsRepository
+      .createQueryBuilder('serviceOperation')
+      .where(where, parameters)
+      .orderBy(`serviceOperation.${sortBy}`, sortOrder)
       .take(limit)
       .skip(offset)
       .getMany();
+
+    const serviceOperations = await qb;
 
     if (serviceOperations.length === 0)
       throw new BadRequestException('No service operations found');

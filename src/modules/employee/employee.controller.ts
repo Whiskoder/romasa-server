@@ -6,18 +6,17 @@ import {
   Patch,
   Param,
   Delete,
-  Query,
   UseInterceptors,
+  Req,
 } from '@nestjs/common';
 
 import { ApiResponse } from '@shared/decorators/response.decorator';
 import { CreateEmployeeDto } from '@mod/employee/dto/create-employee.dto';
 import { EmployeeMapper } from '@mod/employee/mappers/employee.mapper';
 import { EmployeeService } from '@mod/employee/employee.service';
-import { QueryEmployeeDto } from '@mod/employee/dto/query-employee.dto';
 import { ResponseEmployeeDto } from '@mod/employee/dto/response-employee.dto';
 import { UpdateEmployeeDto } from '@mod/employee/dto/update-employee.dto';
-import { SearchFilterAndPaginationInterceptor } from '@shared/interceptors/builder';
+import { SearchFilterAndPaginationInterceptor } from '@shared/interceptors/search-filter-and-pagination.interceptor';
 
 @Controller({
   version: '1',
@@ -34,21 +33,22 @@ export class EmployeeController {
     return this.employeeService.create(createEmployeeDto);
   }
 
+  @UseInterceptors(
+    new SearchFilterAndPaginationInterceptor<'employee'>(
+      ['fullName', 'rfc', 'mobile', 'employeeNumber'],
+      'employee',
+    ),
+  )
   @Get()
   @ApiResponse(200, 'Employees found')
   async findAll(
-    @Query() queryEmployeeDto: QueryEmployeeDto,
+    @Req() req: Request,
   ): Promise<{ employees: ResponseEmployeeDto[] }> {
-    const employees = await this.employeeService.findAll(queryEmployeeDto);
+    const employees = await this.employeeService.findAll(req as any);
 
     const employeesDtos = this.employeeMapper.toResponseDtoList(employees);
     return { employees: employeesDtos };
   }
-
-  @ApiResponse(200, 'Employees found')
-  @Get(':name')
-  @UseInterceptors(new SearchFilterAndPaginationInterceptor(['casa'], ['casa']))
-  findByName(@Param('name') name: string) {}
 
   @Patch(':id')
   update(

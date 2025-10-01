@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  Req,
 } from '@nestjs/common';
 
 import { ApiResponse } from '@shared/decorators/response.decorator';
@@ -14,7 +16,7 @@ import { CreateDiagnosticDto } from '@mod/service-operations/dto/create-diagnost
 import { ResponseServiceOperationsDto } from '@mod/service-operations/dto/response-service-operations.dto';
 import { ServiceOperationsMapper } from '@mod/service-operations/mappers/service-operations.mapper';
 import { ServiceOperationsService } from '@mod/service-operations/service-operations.service';
-import { QueryServiceOperationsDto } from '@mod/service-operations/dto/query-service-operations.dto';
+import { SearchFilterAndPaginationInterceptor } from '@shared/interceptors/search-filter-and-pagination.interceptor';
 
 @Controller({
   version: '1',
@@ -39,13 +41,19 @@ export class ServiceOperationsController {
     return { serviceOperation: [serviceOperationDto] };
   }
 
+  @UseInterceptors(
+    new SearchFilterAndPaginationInterceptor<'serviceOperation'>(
+      ['status'],
+      'serviceOperation',
+    ),
+  )
   @Get()
   @ApiResponse(200, 'Service Operations found')
   async findAll(
-    @Query() queryServiceOperationsDto: QueryServiceOperationsDto,
+    @Req() req: Request,
   ): Promise<{ serviceOperations: ResponseServiceOperationsDto[] }> {
     const serviceOperations = await this.serviceOperationsService.findAll(
-      queryServiceOperationsDto,
+      req as any,
     );
 
     const serviceOperationsDtos =
