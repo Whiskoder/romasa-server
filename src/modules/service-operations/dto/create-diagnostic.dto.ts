@@ -11,14 +11,15 @@ import {
 
 import { ServicePriority } from '@mod/service-operations/enums/service-priority.enum';
 import { VehicleInventory } from '@mod/vehicles/enums/vehicle-inventory.enum';
+import { Branch } from '@shared/enums/branch.enum';
 
 export class CreateDiagnosticDto {
   @Type(() => Boolean)
   @IsBoolean()
   affectsOperability: boolean;
 
-  @IsString()
-  branch: string;
+  @IsEnum(Branch)
+  branch: Branch;
 
   @Type(() => Number)
   @IsInt()

@@ -8,6 +8,7 @@ import { EmployeeService } from '@mod/employee/employee.service';
 import { ServiceOperation } from '@mod/service-operations/entities/service-operation.entity';
 import { VehicleService } from '@mod/vehicles/vehicle.service';
 import { Query } from '@shared/interfaces/query.interface';
+import { Employee } from '@mod/employee/entities/employee.entity';
 
 @Injectable()
 export class ServiceOperationsService {
@@ -44,21 +45,35 @@ export class ServiceOperationsService {
 
     if (hasRepeatedIds) throw new BadRequestException('Repeated employee ids');
 
-    await this.vehicleService.findById([vehicleId]);
+    const [vehicle] = await this.vehicleService.findById([vehicleId]);
     const employeeEntities = await this.employeeService.findById([
       createdByEmployeeId,
       vehicleDriverEmployeeId,
       departmentManagerEmployeeId,
     ]);
 
-    if (employeeEntities.length !== 3)
+    const createdByEmployee = employeeEntities.find(
+      (e) => e.id === createdByEmployeeId,
+    );
+    const vehicleDriverEmployee = employeeEntities.find(
+      (e) => e.id === vehicleDriverEmployeeId,
+    );
+    const departmentManagerEmployee = employeeEntities.find(
+      (e) => e.id === departmentManagerEmployeeId,
+    );
+
+    if (
+      !createdByEmployee &&
+      !vehicleDriverEmployee &&
+      !departmentManagerEmployee
+    )
       throw new BadRequestException('Invalid employee ids');
 
     const serviceOperationsEntity = this.serviceOperationsRepository.create({
-      createdByEmployeeId,
-      vehicleDriverEmployeeId,
-      departmentManagerEmployeeId,
-      vehicleId,
+      createdByEmployee,
+      vehicleDriverEmployee,
+      departmentManagerEmployee,
+      vehicle,
       affectsOperability,
       branch,
       priority,
@@ -82,6 +97,40 @@ export class ServiceOperationsService {
     const qb = this.serviceOperationsRepository
       .createQueryBuilder('serviceOperation')
       .where(where, parameters)
+      .leftJoin('serviceOperation.createdByEmployee', 'createdByEmployee')
+      .addSelect([
+        'createdByEmployee.firstName',
+        'createdByEmployee.lastName',
+        'createdByEmployee.middleName',
+      ])
+      .leftJoin(
+        'serviceOperation.departmentManagerEmployee',
+        'departmentManagerEmployee',
+      )
+      .addSelect([
+        'departmentManagerEmployee.firstName',
+        'departmentManagerEmployee.lastName',
+        'departmentManagerEmployee.middleName',
+      ])
+      .leftJoin(
+        'serviceOperation.vehicleDriverEmployee',
+        'vehicleDriverEmployee',
+      )
+      .addSelect([
+        'vehicleDriverEmployee.firstName',
+        'vehicleDriverEmployee.lastName',
+        'vehicleDriverEmployee.middleName',
+      ])
+      .leftJoin('serviceOperation.vehicle', 'vehicle')
+      .addSelect([
+        'vehicle.transportNumber',
+        'vehicle.transportSubTypeId',
+        'vehicle.brand',
+        'vehicle.model',
+        'vehicle.manufactureYear',
+        'vehicle.verificationNumber',
+        'vehicle.licensePlate',
+      ])
       .orderBy(`serviceOperation.${sortBy}`, sortOrder)
       .take(limit)
       .skip(offset)

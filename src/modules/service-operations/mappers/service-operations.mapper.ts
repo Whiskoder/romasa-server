@@ -16,6 +16,8 @@ export class ServiceOperationsMapper {
       serviceOperationsEntity,
     );
 
+    dto.vehicleInventory = serviceOperationsEntity.vehicleInventory.split(',');
+
     return dto;
   }
 

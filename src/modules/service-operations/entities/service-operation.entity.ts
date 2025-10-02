@@ -2,12 +2,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 import { ServiceStatus } from '@mod/service-operations/enums/service-status.enum';
-
+import { Employee } from '@mod/employee/entities/employee.entity';
+import { Vehicle } from '@mod/vehicles/entities/vehicle.entity';
+// add relations
 @Entity({ name: 'service_operations' })
 export class ServiceOperation {
   @PrimaryGeneratedColumn()
@@ -22,14 +25,16 @@ export class ServiceOperation {
   @CreateDateColumn({ type: 'datetime' })
   createdAt: number;
 
-  @Column({ type: 'int', nullable: false })
-  createdByEmployeeId: number;
+  @ManyToOne(() => Employee, (employee) => employee.id, { eager: true })
+  // @Column({ type: 'int', nullable: false })
+  createdByEmployee: Employee;
 
   @Column({ type: 'datetime', nullable: true })
   estimatedDeliveryDate: Date;
 
-  @Column({ type: 'int', nullable: false })
-  departmentManagerEmployeeId: number;
+  @ManyToOne(() => Employee, (employee) => employee.id, { eager: true })
+  // @Column({ type: 'int', nullable: false })
+  departmentManagerEmployee: Employee;
 
   // - Datos del `mecanico`
 
@@ -45,8 +50,9 @@ export class ServiceOperation {
   @UpdateDateColumn({ type: 'datetime' })
   updatedAt: number;
 
-  @Column({ type: 'int', nullable: false })
-  vehicleDriverEmployeeId: number;
+  @ManyToOne(() => Employee, (employee) => employee.id, { eager: true })
+  // @Column({ type: 'int', nullable: false })
+  vehicleDriverEmployee: Employee;
 
   @Column({ type: 'nvarchar', length: 1000, nullable: false })
   vehicleFailure: string;
@@ -54,8 +60,9 @@ export class ServiceOperation {
   @Column({ type: 'int', nullable: false })
   vehicleFuelLevel: number;
 
-  @Column({ type: 'int', nullable: false })
-  vehicleId: number;
+  @ManyToOne(() => Vehicle, (vehicle) => vehicle.id, { eager: true })
+  // @Column({ type: 'int', nullable: false })
+  vehicle: Vehicle;
 
   // TODO
   @Column({ type: 'nvarchar', length: 'MAX', nullable: true })

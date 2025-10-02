@@ -15,13 +15,13 @@ export class ResponseServiceOperationsDto {
   createdAt: number;
 
   @Expose()
-  createdByEmployeeId: number;
+  createdByEmployee: number;
 
   @Expose()
   estimatedDeliveryDate: Date;
 
   @Expose()
-  departmentManagerEmployeeId: number;
+  departmentManagerEmployee: number;
 
   @Expose()
   folio: string;
@@ -36,7 +36,7 @@ export class ResponseServiceOperationsDto {
   updatedAt: number;
 
   @Expose()
-  vehicleDriverEmployeeId: number;
+  vehicleDriverEmployee: number;
 
   @Expose()
   vehicleFailure: string;
@@ -45,10 +45,10 @@ export class ResponseServiceOperationsDto {
   vehicleFuelLevel: number;
 
   @Expose()
-  vehicleId: number;
+  vehicle: number;
 
   @Expose()
-  vehicleInventory: string;
+  vehicleInventory: string[];
 
   @Expose()
   vehicleMileage: number;

@@ -5,11 +5,12 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
   VersionColumn,
+  PrimaryColumn,
 } from 'typeorm';
 
 @Entity({ name: 'TBLTRNVHC_CP' })
 export class Vehicle {
-  @PrimaryGeneratedColumn({ name: 'LNGDNTTRN' })
+  @PrimaryColumn({ name: 'LNGDNTTRN' })
   id: number;
 
   @Column({ name: 'STRNMRTRN', type: 'nvarchar', length: 5, nullable: true })
