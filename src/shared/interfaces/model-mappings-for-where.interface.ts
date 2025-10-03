@@ -9,6 +9,9 @@ export interface ModelMappingsForWhere {
   serviceOperation: {
     status: string;
   };
+  service_operation_details: {
+    vehicleLicensePlate: string;
+  };
   vehicle: {
     licensePlate: string;
   };

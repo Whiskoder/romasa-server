@@ -9,12 +9,14 @@ import { ServiceOperation } from '@mod/service-operations/entities/service-opera
 import { VehicleService } from '@mod/vehicles/vehicle.service';
 import { Query } from '@shared/interfaces/query.interface';
 import { Employee } from '@mod/employee/entities/employee.entity';
-
+import { ServiceOperationDetail } from '@mod/service-operations/entities/service-operation-detail.view';
 @Injectable()
 export class ServiceOperationsService {
   constructor(
     @InjectRepository(ServiceOperation)
     private readonly serviceOperationsRepository: Repository<ServiceOperation>,
+    @InjectRepository(ServiceOperationDetail)
+    private readonly serviceOperationDetailsRepository: Repository<ServiceOperationDetail>,
     private readonly employeeService: EmployeeService,
     private readonly vehicleService: VehicleService,
   ) {}
@@ -88,6 +90,29 @@ export class ServiceOperationsService {
 
     return serviceOperationsEntity;
   }
+
+  // async findAll(
+  //   query: Query<'service_operation_details'>,
+  // ): Promise<ServiceOperation[]> {
+  //   const { limit, offset, sortBy, sortOrder } = query.pagination;
+  //   const parameters = query.parameters;
+  //   const where = query.where; // TODO: add validations
+
+  //   const qb = this.serviceOperationDetailsRepository
+  //     .createQueryBuilder('service_operation_details') // TODO <- use snake case
+  //     .where(where, parameters)
+  //     .orderBy(`service_operation_details.${sortBy}`, sortOrder)
+  //     .take(limit)
+  //     .skip(offset)
+  //     .getMany();
+
+  //   const serviceOperations = (await qb) as any;
+
+  //   if (serviceOperations.length === 0)
+  //     throw new BadRequestException('No service operations found');
+
+  //   return serviceOperations as ServiceOperation[];
+  // }
 
   async findAll(query: Query<'serviceOperation'>): Promise<ServiceOperation[]> {
     const { limit, offset, sortBy, sortOrder } = query.pagination;

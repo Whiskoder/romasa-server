@@ -32,15 +32,21 @@ export class ServiceOperationsController {
   @ApiResponse(201, 'Service Operation created')
   async create(
     @Body() createDiagnosticDto: CreateDiagnosticDto,
-  ): Promise<{ serviceOperation: ResponseServiceOperationsDto[] }> {
+  ): Promise<{ serviceOperations: ResponseServiceOperationsDto[] }> {
     const serviceOperation =
       await this.serviceOperationsService.create(createDiagnosticDto);
 
     const serviceOperationDto =
       this.serviceOperationsMapper.toResponseDto(serviceOperation);
-    return { serviceOperation: [serviceOperationDto] };
+    return { serviceOperations: [serviceOperationDto] };
   }
 
+  // @UseInterceptors(
+  //   new SearchFilterAndPaginationInterceptor<'service_operation_details'>(
+  //     ['vehicleLicensePlate'],
+  //     'service_operation_details',
+  //   ),
+  // )
   @UseInterceptors(
     new SearchFilterAndPaginationInterceptor<'serviceOperation'>(
       ['status'],
@@ -59,5 +65,6 @@ export class ServiceOperationsController {
     const serviceOperationsDtos =
       this.serviceOperationsMapper.toResponseDtoList(serviceOperations);
     return { serviceOperations: serviceOperationsDtos };
+    // return serviceOperations as any;
   }
 }
