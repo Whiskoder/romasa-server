@@ -9,16 +9,17 @@ import { AllConfigType } from 'src/config/config.type';
 import { useContainer } from 'class-validator';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    cors: true,
-  });
+  const app = await NestFactory.create(AppModule);
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   const configService = app.get(ConfigService<AllConfigType>);
+  const frontendDomain = configService.getOrThrow('app.frontendDomain', {
+    infer: true,
+  });
 
-  // app.enableCors({
-  //   origin: [origin],
-  //   credentials: true,
-  // });
+  app.enableCors({
+    origin: [frontendDomain],
+    credentials: true,
+  });
 
   app.setGlobalPrefix(
     configService.getOrThrow('app.apiPrefix', { infer: true }),
