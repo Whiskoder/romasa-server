@@ -22,9 +22,16 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@shared/*": ["src/shared/*"],
-      "@config/*": ["src/config/*"],
-      "@mod/*": ["src/modules/*"]
+      "@auth": ["src/auth"],
+      "@config": ["src/config"],
+      "@crypto": ["src/crypto"],
+      "@db": ["src/database"],
+      "@employee": ["src/employeess"],
+      "@logger": ["src/logger"],
+      "@service-operations": ["src/service-operations"],
+      "@shared": ["src/shared"],
+      "@users": ["src/users"],
+      "@vehicles": ["src/vehicles"]
     }
   }
 }

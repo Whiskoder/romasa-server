@@ -8,8 +8,8 @@ import { Reflector } from '@nestjs/core';
 import { map, Observable } from 'rxjs';
 
 import { RESPONSE_MESSAGE_KEY } from '@shared/decorators/response-message.decorator';
-// import { DatabaseLogger } from '@mod/logger/database-logger.service';
-import { CreateHttpLogDto } from '@mod/logger/dtos/create-http-log.dto';
+// import { DatabaseLogger } from 'src/logger/database-logger.service';
+import { CreateHttpLogDto } from 'src/logger/dtos/create-http-log.dto';
 
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {

@@ -11,8 +11,8 @@ import { Request, Response } from 'express';
 import { STATUS_CODES } from 'http';
 
 import { EnvVar } from '@config/env.config';
-// import { DatabaseLogger } from '@mod/logger/database-logger.service';
-import { CreateHttpLogDto } from '@mod/logger/dtos/create-http-log.dto';
+// import { DatabaseLogger } from 'src/logger/database-logger.service';
+import { CreateHttpLogDto } from 'src/logger/dtos/create-http-log.dto';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {

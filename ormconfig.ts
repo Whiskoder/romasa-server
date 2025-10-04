@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
 
-import { ServiceOperation } from '@mod/service-operations/entities/service-operation.entity';
-import { ServiceOperationDetail } from '@mod/service-operations/entities/service-operation-detail.view';
-import { Employee } from '@mod/employee/entities/employee.entity';
-import { Vehicle } from '@mod/vehicles/entities/vehicle.entity';
+import { ServiceOperation } from 'src/service-operations/entities/service-operation.entity';
+import { ServiceOperationDetail } from 'src/service-operations/entities/service-operation-detail.view';
+import { Employee } from 'src/employee/entities/employee.entity';
+import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
 
 export default new DataSource({
   type: 'mssql',

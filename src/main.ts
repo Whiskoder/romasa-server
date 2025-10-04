@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 
 import { AppModule } from 'src/app.module';
 import { EnvVar } from '@config/env.config';
-// import { DatabaseLogger } from '@mod/logger/database-logger.service';
+// import { DatabaseLogger } from 'src/logger/database-logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

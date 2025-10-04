@@ -9,13 +9,13 @@ import { validationSchema } from '@config/env.schema';
 import { ResponseInterceptor } from '@shared/interceptors/response.interceptor';
 import { HttpExceptionFilter } from '@shared/filters/http-exception.filter';
 
-import { EmployeesModule } from '@mod/employee/employee.module';
-import { VehiclesModule } from '@mod/vehicles/vehicles.module';
-import { ServiceOperationsModule } from '@mod/service-operations/service-operations.module';
-import { UsersModule } from '@mod/users/user.module';
-import { AuthModule } from '@mod/auth/auth.module';
+import { EmployeesModule } from 'src/employee/employee.module';
+import { VehiclesModule } from 'src/vehicles/vehicles.module';
+import { ServiceOperationsModule } from 'src/service-operations/service-operations.module';
+import { UsersModule } from 'src/users/user.module';
+import { AuthModule } from 'src/auth/auth.module';
 
-@Module({
+srcule({
   imports: [
     // TODO: setup throttlerModule
     // ThrottlerModule.forRoot({
@@ -60,7 +60,7 @@ import { AuthModule } from '@mod/auth/auth.module';
     VehiclesModule,
     ServiceOperationsModule,
     UsersModule,
-    AuthModule
+    AuthModule,
   ],
   providers: [
     // {
@@ -76,5 +76,5 @@ import { AuthModule } from '@mod/auth/auth.module';
       useClass: HttpExceptionFilter,
     },
   ],
-})
+});
 export class AppModule {}
