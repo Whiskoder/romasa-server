@@ -9,9 +9,11 @@ import { validationSchema } from '@config/env.schema';
 import { ResponseInterceptor } from '@shared/interceptors/response.interceptor';
 import { HttpExceptionFilter } from '@shared/filters/http-exception.filter';
 
-import { EmployeeModule } from '@mod/employee/employee.module';
+import { EmployeesModule } from '@mod/employee/employee.module';
 import { VehiclesModule } from '@mod/vehicles/vehicles.module';
 import { ServiceOperationsModule } from '@mod/service-operations/service-operations.module';
+import { UsersModule } from '@mod/users/user.module';
+import { AuthModule } from '@mod/auth/auth.module';
 
 @Module({
   imports: [
@@ -54,9 +56,11 @@ import { ServiceOperationsModule } from '@mod/service-operations/service-operati
         },
       }),
     }),
-    EmployeeModule,
+    EmployeesModule,
     VehiclesModule,
     ServiceOperationsModule,
+    UsersModule,
+    AuthModule
   ],
   providers: [
     // {

@@ -12,4 +12,4 @@ import { EmployeeService } from '@mod/employee/employee.service';
   providers: [EmployeeService, EmployeeMapper],
   exports: [EmployeeService],
 })
-export class EmployeeModule {}
+export class EmployeesModule {}

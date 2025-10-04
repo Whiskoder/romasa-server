@@ -25,14 +25,14 @@ export class ServiceOperation {
   @CreateDateColumn({ type: 'datetime' })
   createdAt: number;
 
-  @ManyToOne(() => Employee, (employee) => employee.id, { eager: true })
+  @ManyToOne(() => Employee, (employee) => employee.id)
   // @Column({ type: 'int', nullable: false })
   createdByEmployee: Employee;
 
   @Column({ type: 'datetime', nullable: true })
   estimatedDeliveryDate: Date;
 
-  @ManyToOne(() => Employee, (employee) => employee.id, { eager: true })
+  @ManyToOne(() => Employee, (employee) => employee.id)
   // @Column({ type: 'int', nullable: false })
   departmentManagerEmployee: Employee;
 

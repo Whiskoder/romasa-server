@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { DataSource } from 'typeorm';
 
 import { ServiceOperation } from '@mod/service-operations/entities/service-operation.entity';
-import { ServiceOperationDetails } from '@mod/service-operations/entities/service-operation-detail.view';
+import { ServiceOperationDetail } from '@mod/service-operations/entities/service-operation-detail.view';
 import { Employee } from '@mod/employee/entities/employee.entity';
 import { Vehicle } from '@mod/vehicles/entities/vehicle.entity';
 
@@ -15,7 +15,7 @@ export default new DataSource({
   database: process.env.DB_NAME,
   synchronize: false,
   migrations: ['src/migrations/*.ts'],
-  entities: [ServiceOperation, ServiceOperationDetails, Employee, Vehicle],
+  entities: ['src/*.ts'],
   options: {
     encrypt: true,
   },

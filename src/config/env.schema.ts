@@ -13,4 +13,6 @@ export const validationSchema = Joi.object({
   DB_SSL: Joi.boolean().required(),
   DB_SYNC: Joi.boolean().required(),
   DB_USER: Joi.string().required(),
+  CRYPTO_SECRET: Joi.string().required(),
+  CRYPTO_HASH_SALT: Joi.string().required()
 });

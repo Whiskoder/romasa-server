@@ -1,3 +1,8 @@
+export interface CryptoEnvVar {
+  hashSalt: string,
+  secret: string,
+}
+
 export interface DatabaseEnvVar {
   host: string;
   name: string;
@@ -17,6 +22,7 @@ export interface ServerEnvVar {
 export interface EnvVar {
   database: DatabaseEnvVar;
   server: ServerEnvVar;
+  crypto: CryptoEnvVar
 }
 
 export default () => ({
@@ -34,4 +40,8 @@ export default () => ({
     mode: process.env.NODE_ENV,
     origin: process.env.SERVER_ORIGIN,
   },
+  crypto: {
+    secret: process.env.CRYPTO_SECRET,
+    hashSalt: process.env.CRYPTO_HASH_SALT
+  }
 });
