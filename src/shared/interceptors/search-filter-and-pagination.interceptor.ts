@@ -14,13 +14,10 @@ import { plainToInstance } from 'class-transformer';
 import {
   DEFAULT_PAGINATION_LIMIT,
   DEFAULT_PAGINATION_OFFSET,
-} from '@shared/constants/pagination.constant';
-import { pick } from '@shared/utils/pick.util';
-import { FilterQueryDto } from '@shared/dto/filter-query.dto';
-import { FilterOperationDto } from '@shared/dto/filter-operation.dto';
-import { formatValidationError } from '@shared/utils/format-validation-error.util';
-import { Pagination } from '@shared/interfaces/pagination.interface';
-import { ModelMappingsForWhere } from '@shared/interfaces/model-mappings-for-where.interface';
+} from 'src/shared/constants';
+import { pick, formatValidationError } from 'src/utils';
+import { FilterQueryDto, FilterOperationDto } from 'src/shared/dto';
+import { Pagination, ModelMappingsForWhere } from 'src/shared/interfaces';
 
 // TODO: implement selectable fields
 // TODO: need some validations in where builder

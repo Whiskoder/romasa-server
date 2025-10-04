@@ -1,4 +1,4 @@
-import { ModelMappingsForWhere } from '@shared/interfaces/model-mappings-for-where.interface';
+import { ModelMappingsForWhere } from 'src/shared/interfaces';
 
 export interface Pagination<T extends keyof ModelMappingsForWhere> {
   offset: number;

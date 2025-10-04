@@ -6,8 +6,8 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 
-import { Roles } from 'src/users/enums/roles.enum';
-import { Employee } from 'src/employee/entities/employee.entity';
+import { Roles } from 'src/users/enums';
+import { Employee } from 'src/employees/entities';
 
 @Entity({ name: 'users' })
 export class User {

@@ -1,3 +1,6 @@
+import { Request, Response } from 'express';
+import { STATUS_CODES } from 'http';
+
 import {
   ExceptionFilter,
   Catch,
@@ -7,22 +10,20 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { Request, Response } from 'express';
-import { STATUS_CODES } from 'http';
-
-import { EnvVar } from '@config/env.config';
-// import { DatabaseLogger } from 'src/logger/database-logger.service';
 import { CreateHttpLogDto } from 'src/logger/dtos/create-http-log.dto';
+import { AllConfigType } from 'src/config/config.type';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
-  private readonly environment: 'development' | 'production' | 'test';
+  private readonly environment: string;
 
   constructor(
-    private readonly configService: ConfigService<EnvVar, true>,
+    private readonly configService: ConfigService<AllConfigType, true>,
     // private readonly logger: DatabaseLogger,
   ) {
-    this.environment = this.configService.get('server.mode', { infer: true });
+    this.environment = this.configService.get<string>('server.mode', {
+      infer: true,
+    });
   }
 
   catch(exception: HttpException, host: ArgumentsHost) {

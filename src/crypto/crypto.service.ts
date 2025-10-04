@@ -14,8 +14,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-
-import { EnvVar } from '@config/env.config';
+import { AllConfigType } from 'src/config/config.type';
 
 @Injectable()
 export class CryptoService implements OnModuleInit {
@@ -25,14 +24,14 @@ export class CryptoService implements OnModuleInit {
   private readonly ivSize: number = 16;
 
   constructor(
-    private readonly configService: ConfigService<EnvVar, true>,
+    private readonly configService: ConfigService<AllConfigType, true>,
   ) {}
 
   async onModuleInit() {
-    const hashSalt = this.configService.get('crypto.hashSalt', {
+    const hashSalt = this.configService.get<string>('crypto.hashSalt', {
       infer: true,
     });
-    const encryptionSecret = this.configService.get('crypto.secret', {
+    const encryptionSecret = this.configService.get<string>('crypto.secret', {
       infer: true,
     });
 

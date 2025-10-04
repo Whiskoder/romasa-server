@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { map, Observable } from 'rxjs';
 
-import { RESPONSE_MESSAGE_KEY } from '@shared/decorators/response-message.decorator';
+import { RESPONSE_MESSAGE_KEY } from 'src/shared/decorators';
 // import { DatabaseLogger } from 'src/logger/database-logger.service';
 import { CreateHttpLogDto } from 'src/logger/dtos/create-http-log.dto';
 

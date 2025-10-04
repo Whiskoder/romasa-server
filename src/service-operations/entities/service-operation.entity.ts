@@ -7,9 +7,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { ServiceStatus } from 'src/service-operations/enums/service-status.enum';
-import { Employee } from 'src/employee/entities/employee.entity';
-import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
+import { ServiceStatus } from 'src/service-operations/enums';
+import { Employee } from 'src/employees/entities';
+import { Vehicle } from 'src/vehicles/entities';
 // add relations
 @Entity({ name: 'service_operations' })
 export class ServiceOperation {

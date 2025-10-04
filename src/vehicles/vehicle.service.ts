@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { In, Repository } from 'typeorm';
 
-import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
-import { Query } from '@shared/interfaces/query.interface';
+import { Query } from 'src/shared/interfaces';
+import { Vehicle } from 'src/vehicles/entities';
 
 @Injectable()
 export class VehicleService {

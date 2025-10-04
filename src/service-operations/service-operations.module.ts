@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { ServiceOperation } from 'src/service-operations/entities/service-operation.entity';
-import { ServiceOperationDetail } from 'src/service-operations/entities/service-operation-detail.view';
+import {
+  ServiceOperationDetail,
+  ServiceOperation,
+} from 'src/service-operations/entities';
 import { ServiceOperationsController } from 'src/service-operations/service-operations.controller';
-import { ServiceOperationsMapper } from 'src/service-operations/mappers/service-operations.mapper';
+import { ServiceOperationsMapper } from 'src/service-operations/mappers';
 import { ServiceOperationsService } from 'src/service-operations/service-operations.service';
 
-import { EmployeesModule } from 'src/employee/employee.module';
-import { VehiclesModule } from 'src/vehicles/vehicles.module';
+import { EmployeesModule } from 'src/employees/employee.module';
+import { VehiclesModule } from 'src/vehicles/vehicle.module';
 
-srcule({
+Module({
   imports: [
     TypeOrmModule.forFeature([ServiceOperation, ServiceOperationDetail]),
     EmployeesModule,

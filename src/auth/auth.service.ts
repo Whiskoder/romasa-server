@@ -1,21 +1,21 @@
+import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { LoginUserDto } from './dtos/login-user.dto';
-import { User } from 'src/users/entities/user.entity';
-import { uuidPlugin } from '@config/plugins/uuid.plugin';
+
 import { JwtService } from '@nestjs/jwt';
 
-import { Response } from 'express';
-import { UserService } from 'src/users/user.service';
+import { AllConfigType } from 'src/config/config.type';
+import { bcryptPlugin, uuidPlugin } from 'src/plugins';
 import { CryptoService } from 'src/crypto/crypto.service';
-import { bcryptPlugin } from '@config/plugins/bcrypt.plugin';
-import { EnvVar } from '@config/env.config';
-import { ConfigService } from '@nestjs/config';
-import { TokenType } from './enum/token-type.enum';
+import { LoginUserDto } from 'src/auth/dtos';
+import { TokenType } from 'src/auth/enum';
+import { User } from 'src/users/entities/user.entity';
+import { UserService } from 'src/users/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly configService: ConfigService<EnvVar, true>,
+    private readonly configService: ConfigService<AllConfigType, true>,
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
     private readonly cryptoService: CryptoService,

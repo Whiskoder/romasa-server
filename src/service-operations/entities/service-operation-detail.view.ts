@@ -1,7 +1,8 @@
 import { DataSource, ViewEntity, ViewColumn } from 'typeorm';
-import { ServiceOperation } from './service-operation.entity';
-import { Employee } from 'src/employee/entities/employee.entity';
-import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
+
+import { ServiceOperation } from 'src/service-operations/entities';
+import { Employee } from 'src/employees/entities';
+import { Vehicle } from 'src/vehicles/entities';
 
 @ViewEntity({
   // name: 'service_operation_view',

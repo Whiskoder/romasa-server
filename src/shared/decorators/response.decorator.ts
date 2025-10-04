@@ -1,6 +1,6 @@
 import { HttpStatus, applyDecorators, HttpCode } from '@nestjs/common';
 
-import { ResponseMessage } from '@shared/decorators/response-message.decorator';
+import { ResponseMessage } from 'src/shared/decorators';
 
 export function ApiResponse(httpStatus: HttpStatus, message: string) {
   return applyDecorators(

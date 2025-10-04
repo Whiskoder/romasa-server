@@ -3,13 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
 
-import { CreateDiagnosticDto } from 'src/service-operations/dto/create-diagnostic.dto';
-import { EmployeeService } from 'src/employee/employee.service';
-import { ServiceOperation } from 'src/service-operations/entities/service-operation.entity';
+import { CreateDiagnosticDto } from 'src/service-operations/dto';
+// import { Employee } from 'src/employees/entities';
+import { EmployeeService } from 'src/employees/employee.service';
+import { Query } from 'src/shared/interfaces';
+import {
+  ServiceOperationDetail,
+  ServiceOperation,
+} from 'src/service-operations/entities';
 import { VehicleService } from 'src/vehicles/vehicle.service';
-import { Query } from '@shared/interfaces/query.interface';
-import { Employee } from 'src/employee/entities/employee.entity';
-import { ServiceOperationDetail } from 'src/service-operations/entities/service-operation-detail.view';
 @Injectable()
 export class ServiceOperationsService {
   constructor(

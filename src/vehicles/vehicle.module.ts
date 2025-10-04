@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
+import { Vehicle } from 'src/vehicles/entities';
 import { VehicleController } from 'src/vehicles/vehicle.controller';
-import { VehicleMapper } from 'src/vehicles/mappers/vehicle.mapper';
+import { VehicleMapper } from 'src/vehicles/mappers';
 import { VehicleService } from 'src/vehicles/vehicle.service';
 
-srcule({
+Module({
   imports: [TypeOrmModule.forFeature([Vehicle])],
   controllers: [VehicleController],
   providers: [VehicleService, VehicleMapper],

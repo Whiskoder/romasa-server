@@ -1,12 +1,15 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+
 import { UsersModule } from 'src/users/user.module';
-import { AuthService } from './auth.service';
-import { AccessTokenStrategy } from './strategies/access-token.strategy';
-import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
-import { OneTimeTokenStrategy } from './strategies/one-time-token.strategy';
-import { AuthController } from './auth.controller';
+import { AuthService } from 'src/auth/auth.service';
+import {
+  AccessTokenStrategy,
+  RefreshTokenStrategy,
+  OneTimeTokenStrategy,
+} from 'src/auth/strategies';
+import { AuthController } from 'src/auth/auth.controller';
 import { CryptoModule } from 'src/crypto/crypto.module';
 
 // import { AuthService } from 'src/auth/auth.service';
@@ -23,7 +26,7 @@ import { CryptoModule } from 'src/crypto/crypto.module';
 // import { SchedulesModule } from 'src/schedule/schedules.module';
 // import { InvitationTokenModule } from 'src/invitation-token/invitation-token.module';
 
-srcule({
+Module({
   imports: [
     JwtModule.register({}),
     CryptoModule,

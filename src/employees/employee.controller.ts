@@ -10,13 +10,11 @@ import {
   Req,
 } from '@nestjs/common';
 
-import { ApiResponse } from '@shared/decorators/response.decorator';
-import { CreateEmployeeDto } from 'src/employee/dto/create-employee.dto';
-import { EmployeeMapper } from 'src/employee/mappers/employee.mapper';
-import { EmployeeService } from 'src/employee/employee.service';
-import { ResponseEmployeeDto } from 'src/employee/dto/response-employee.dto';
-import { UpdateEmployeeDto } from 'src/employee/dto/update-employee.dto';
-import { SearchFilterAndPaginationInterceptor } from '@shared/interceptors/search-filter-and-pagination.interceptor';
+import { ApiResponse } from 'src/shared/decorators';
+import { EmployeeMapper } from 'src/employees/mappers';
+import { EmployeeService } from 'src/employees/employee.service';
+import { ResponseEmployeeDto, CreateEmployeeDto } from 'src/employees/dto';
+import { SearchFilterAndPaginationInterceptor } from 'src/shared/interceptors';
 
 @Controller({
   version: '1',
@@ -48,18 +46,5 @@ export class EmployeeController {
 
     const employeesDtos = this.employeeMapper.toResponseDtoList(employees);
     return { employees: employeesDtos };
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateEmployeeDto: UpdateEmployeeDto,
-  ) {
-    return this.employeeService.update(+id, updateEmployeeDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.employeeService.remove(+id);
   }
 }

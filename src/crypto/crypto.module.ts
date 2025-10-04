@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { CryptoService } from 'src/crypto/crypto.service';
 
-srcule({
+Module({
   providers: [CryptoService],
   imports: [ConfigModule],
   exports: [CryptoService],

@@ -9,9 +9,9 @@ import {
   Max,
 } from 'class-validator';
 
-import { ServicePriority } from 'src/service-operations/enums/service-priority.enum';
-import { VehicleInventory } from 'src/vehicles/enums/vehicle-inventory.enum';
-import { Branch } from '@shared/enums/branch.enum';
+import { Branch } from 'src/shared/enums';
+import { ServicePriority } from 'src/service-operations/enums';
+import { VehicleInventory } from 'src/vehicles/enums';
 
 export class CreateDiagnosticDto {
   @Type(() => Boolean)

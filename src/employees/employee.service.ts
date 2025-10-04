@@ -3,10 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { In, Repository } from 'typeorm';
 
-import { CreateEmployeeDto } from 'src/employee/dto/create-employee.dto';
-import { UpdateEmployeeDto } from 'src/employee/dto/update-employee.dto';
-import { Employee } from 'src/employee/entities/employee.entity';
-import { Query } from '@shared/interfaces/query.interface';
+import { CreateEmployeeDto } from 'src/employees/dto';
+import { Employee } from 'src/employees/entities';
+import { Query } from 'src/shared/interfaces';
 
 @Injectable()
 export class EmployeeService {
@@ -68,17 +67,5 @@ export class EmployeeService {
       throw new NotFoundException('No employees found');
 
     return employeeEntities;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} employee`;
-  }
-
-  update(id: number, updateEmployeeDto: UpdateEmployeeDto) {
-    return `This action updates a #${id} employee`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} employee`;
   }
 }

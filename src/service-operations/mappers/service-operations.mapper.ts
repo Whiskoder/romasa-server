@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
 import { plainToInstance } from 'class-transformer';
-import { ServiceOperation } from 'src/service-operations/entities/service-operation.entity';
-import { ResponseServiceOperationsDto } from 'src/service-operations/dto/response-service-operations.dto';
+
+import { ServiceOperation } from 'src/service-operations/entities';
+import { ResponseServiceOperationsDto } from 'src/service-operations/dto';
 
 @Injectable()
 export class ServiceOperationsMapper {

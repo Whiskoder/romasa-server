@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+
 import {
   Body,
   Controller,
@@ -8,14 +9,14 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
+
 import { ApiResponse } from 'src/shared/decorators/response.decorator';
-import { AuthService } from './auth.service';
-import { GetUser } from './decorators/get-user.decorator';
-import { User } from 'src/users/entities/user.entity';
-import { AuthAccess } from './decorators/auth.decorator';
+import { AuthService } from 'src/auth/auth.service';
+import { GetUser, AuthAccess } from 'src/auth/decorators';
+import { User } from 'src/users/entities';
 import { UserMapper } from 'src/users/mappers/user.mapper';
-import { ResponseUserDto } from 'src/users/dtos/response-user.dto';
-import { LoginUserDto } from './dtos/login-user.dto';
+import { ResponseUserDto } from 'src/users/dtos';
+import { LoginUserDto } from 'src/auth/dtos';
 
 @Controller({
   version: '1',

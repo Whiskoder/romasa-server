@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Employee } from 'src/employee/entities/employee.entity';
-import { EmployeeController } from 'src/employee/employee.controller';
-import { EmployeeMapper } from 'src/employee/mappers/employee.mapper';
-import { EmployeeService } from 'src/employee/employee.service';
+import { Employee } from 'src/employees/entities';
+import { EmployeeMapper } from 'src/employees/mappers';
 
-srcule({
+import { EmployeeController } from 'src/employees/employee.controller';
+import { EmployeeService } from 'src/employees/employee.service';
+
+Module({
   imports: [TypeOrmModule.forFeature([Employee])],
   controllers: [EmployeeController],
   providers: [EmployeeService, EmployeeMapper],

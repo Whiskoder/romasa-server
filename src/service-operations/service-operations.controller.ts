@@ -11,12 +11,14 @@ import {
   Req,
 } from '@nestjs/common';
 
-import { ApiResponse } from '@shared/decorators/response.decorator';
-import { CreateDiagnosticDto } from 'src/service-operations/dto/create-diagnostic.dto';
-import { ResponseServiceOperationsDto } from 'src/service-operations/dto/response-service-operations.dto';
-import { ServiceOperationsMapper } from 'src/service-operations/mappers/service-operations.mapper';
+import { ApiResponse } from 'src/shared/decorators';
+import {
+  CreateDiagnosticDto,
+  ResponseServiceOperationsDto,
+} from 'src/service-operations/dto';
+import { ServiceOperationsMapper } from 'src/service-operations/mappers';
 import { ServiceOperationsService } from 'src/service-operations/service-operations.service';
-import { SearchFilterAndPaginationInterceptor } from '@shared/interceptors/search-filter-and-pagination.interceptor';
+import { SearchFilterAndPaginationInterceptor } from 'src/shared/interceptors';
 
 @Controller({
   version: '1',

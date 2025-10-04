@@ -5,27 +5,27 @@ import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 
 import { AppModule } from 'src/app.module';
-import { EnvVar } from '@config/env.config';
-// import { DatabaseLogger } from 'src/logger/database-logger.service';
+import { AllConfigType } from 'src/config/config.type';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    // bufferLogs: true,
+    cors: true,
   });
-
-  // const logger = app.get(DatabaseLogger);
-  const configService: ConfigService<EnvVar, true> = app.get(ConfigService);
-
-  const port = configService.get('server.port', { infer: true });
-  const origin = configService.get('server.origin', { infer: true });
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
+  const configService = app.get(ConfigService<AllConfigType>);
 
   app.enableCors({
     origin: [origin],
     credentials: true,
   });
 
-  // app.useLogger(logger)
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix(
+    configService.getOrThrow('app.apiPrefix', { infer: true }),
+    {
+      exclude: ['/'],
+    },
+  );
   app.enableVersioning({
     type: VersioningType.URI,
   });
@@ -37,6 +37,6 @@ async function bootstrap() {
   );
   app.use(cookieParser());
 
-  await app.listen(port);
+  await app.listen(configService.getOrThrow('app.port', { infer: true }));
 }
 bootstrap();

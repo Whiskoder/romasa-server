@@ -1,10 +1,10 @@
-import { Controller, Get, Query, Req, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Req, UseInterceptors } from '@nestjs/common';
 
-import { ApiResponse } from '@shared/decorators/response.decorator';
-import { ResponseVehicleDto } from 'src/vehicles/dto/response-vehicle.dto';
-import { VehicleMapper } from 'src/vehicles/mappers/vehicle.mapper';
+import { ApiResponse } from 'src/shared/decorators';
+import { ResponseVehicleDto } from 'src/vehicles/dto';
+import { SearchFilterAndPaginationInterceptor } from 'src/shared/interceptors';
+import { VehicleMapper } from 'src/vehicles/mappers';
 import { VehicleService } from 'src/vehicles/vehicle.service';
-import { SearchFilterAndPaginationInterceptor } from '@shared/interceptors/search-filter-and-pagination.interceptor';
 
 @Controller({
   version: '1',

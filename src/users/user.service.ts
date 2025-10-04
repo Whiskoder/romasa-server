@@ -10,8 +10,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { CryptoService } from 'src/crypto/crypto.service';
-import { User } from 'src/users/entities/user.entity';
-import { bcryptPlugin } from '@config/plugins/bcrypt.plugin';
+import { User } from 'src/users/entities';
+import { bcryptPlugin } from 'src/plugins';
 
 @Injectable()
 export class UserService {

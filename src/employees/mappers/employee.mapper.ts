@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { plainToInstance } from 'class-transformer';
 
-import { ResponseEmployeeDto } from 'src/employee/dto/response-employee.dto';
-import { Employee } from 'src/employee/entities/employee.entity';
+import { ResponseEmployeeDto } from 'src/employees/dto';
+import { Employee } from 'src/employees/entities';
 
 @Injectable()
 export class EmployeeMapper {
