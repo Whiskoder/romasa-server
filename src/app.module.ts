@@ -26,7 +26,7 @@ const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
   },
 });
 
-Module({
+@Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -55,5 +55,5 @@ Module({
       useClass: HttpExceptionFilter,
     },
   ],
-});
+})
 export class AppModule {}

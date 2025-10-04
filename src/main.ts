@@ -15,10 +15,10 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   const configService = app.get(ConfigService<AllConfigType>);
 
-  app.enableCors({
-    origin: [origin],
-    credentials: true,
-  });
+  // app.enableCors({
+  //   origin: [origin],
+  //   credentials: true,
+  // });
 
   app.setGlobalPrefix(
     configService.getOrThrow('app.apiPrefix', { infer: true }),

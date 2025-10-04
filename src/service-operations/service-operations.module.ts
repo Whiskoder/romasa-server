@@ -12,7 +12,7 @@ import { ServiceOperationsService } from 'src/service-operations/service-operati
 import { EmployeesModule } from 'src/employees/employee.module';
 import { VehiclesModule } from 'src/vehicles/vehicle.module';
 
-Module({
+@Module({
   imports: [
     TypeOrmModule.forFeature([ServiceOperation, ServiceOperationDetail]),
     EmployeesModule,
@@ -20,5 +20,5 @@ Module({
   ],
   controllers: [ServiceOperationsController],
   providers: [ServiceOperationsService, ServiceOperationsMapper],
-});
+})
 export class ServiceOperationsModule {}

@@ -7,7 +7,7 @@ import { RefreshToken, OneTimeToken, User } from 'src/users/entities';
 import { UserMapper } from 'src/users/mappers/user.mapper';
 import { UserService } from 'src/users/user.service';
 
-Module({
+@Module({
   imports: [
     JwtModule.register({}),
     TypeOrmModule.forFeature([User, RefreshToken, OneTimeToken]),
@@ -15,5 +15,5 @@ Module({
   ],
   providers: [UserService, UserMapper],
   exports: [UserService, UserMapper],
-});
+})
 export class UsersModule {}

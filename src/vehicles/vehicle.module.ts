@@ -6,10 +6,10 @@ import { VehicleController } from 'src/vehicles/vehicle.controller';
 import { VehicleMapper } from 'src/vehicles/mappers';
 import { VehicleService } from 'src/vehicles/vehicle.service';
 
-Module({
+@Module({
   imports: [TypeOrmModule.forFeature([Vehicle])],
   controllers: [VehicleController],
   providers: [VehicleService, VehicleMapper],
   exports: [VehicleService],
-});
+})
 export class VehiclesModule {}

@@ -7,10 +7,10 @@ import { EmployeeMapper } from 'src/employees/mappers';
 import { EmployeeController } from 'src/employees/employee.controller';
 import { EmployeeService } from 'src/employees/employee.service';
 
-Module({
+@Module({
   imports: [TypeOrmModule.forFeature([Employee])],
   controllers: [EmployeeController],
   providers: [EmployeeService, EmployeeMapper],
   exports: [EmployeeService],
-});
+})
 export class EmployeesModule {}
