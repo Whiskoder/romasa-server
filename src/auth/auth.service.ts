@@ -1,6 +1,10 @@
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import { JwtService } from '@nestjs/jwt';
 
@@ -24,33 +28,11 @@ export class AuthService {
     // private readonly invitationTokenService: InvitationTokenService,
   ) {}
 
-  // TODO: this is temporal
-  // async register(registerUserDto: RegisterUserDto, res: Response): Promise<User> {
-  //   const { email, password } = registerUserDto;
-
-  //   const userEntity = await this.userService.findByEmail(email);
-  //   if (userEntity) throw new BadRequestException('email_already_registered');
-
-  //   const hashedPassword = bcryptPlugin.hash(password);
-  //   const encryptedTokenSecret = this.cryptoService.generateSecret();
-
-  //   const newUserEntity = this.userService.create({
-  //     hashedPassword,
-  //     encryptedTokenSecret,
-  //     email,
-  //   });
-
-  //   await this.userService.save(newUserEntity);
-
-  //   return newUserEntity;
-
-  // })
-
   async login(loginUserDto: LoginUserDto, res: Response): Promise<User> {
     const { email, password } = loginUserDto;
 
     const userEntity = await this.userService.findByEmail(email);
-    if(!userEntity) throw new UnauthorizedException('user_not_found');
+    if (!userEntity) throw new UnauthorizedException('user_not_found');
 
     const validPassword = bcryptPlugin.compare(
       password,
@@ -69,7 +51,11 @@ export class AuthService {
   async refresh(userEntity: User, res: Response): Promise<void> {
     await this.setAuthCookies(res, userEntity);
   }
-
+  /**
+   * TODO: revolke old token
+   * Move token fn to tokenService
+   * create fn in tokenService to revoke used RefreshToken
+   */
   async logout(res: Response, rawRefreshToken?: string | null): Promise<void> {
     this.clearAuthCookies(res);
 
@@ -119,10 +105,16 @@ export class AuthService {
   }
 
   private async generateAccessToken(userEntity: User) {
-    const payload = { sub: userEntity.id, type: TokenType.access_token };
+    const payload = {
+      sub: userEntity.id,
+      type: TokenType.access_token,
+      role: userEntity.role,
+    };
 
     const jwtid = uuidPlugin.v7();
-    const secret = this.cryptoService.decipher(userEntity.encryptedTokenSecret);
+    const secret = this.configService.get<string>('auth.accessTokenSecret', {
+      infer: true,
+    });
 
     const expiresIn = this.configService.get('auth.accessTokenExpiresIn', {
       infer: true,
@@ -159,53 +151,4 @@ export class AuthService {
       maxAge: calculateExpiration(),
     });
   }
-
-  // private async generateRefreshToken(userEntity: User): Promise<string> {
-  //   const payload: Partial<RefreshTokenPayload> = {
-  //     type: TokenType.REFRESH_TOKEN,
-  //     userId: userEntity.id,
-  //   };
-
-  //   const token = await this.generateToken({ payload, userEntity });
-  //   await this.userRefreshTokenService.createUserRefreshToken({
-  //     token,
-  //     userEntity,
-  //   });
-  //   return token;
-  // }
-
-  // private async generateToken(opts: {
-  //   payload: Record<string, any>;
-  //   userEntity?: User;
-  //   expiresIn?: number;
-  // }) {
-  //   const { payload, userEntity, expiresIn } = opts;
-  //   const jwtid = uuidPlugin.v7();
-  //   let secret = this.configService.get('jwt.secret', { infer: true });
-  //   if (userEntity) {
-  //     secret = this.cryptoService.decipher(userEntity.cipheredTokenSecret);
-  //   }
-
-  //   const type = payload.type;
-
-  //   return this.jwtService.signAsync(payload, {
-  //     jwtid,
-  //     secret,
-  //     expiresIn: expiresIn ? expiresIn : this.getTokenExpiration(type),
-  //   });
-  // }
-
-  // private getTokenExpiration(type: TokenType): string {
-  //   const expirationMap: any = {
-  //     [TokenType.ACCESS_TOKEN]: 'jwt.accessTokenExpiration',
-  //     [TokenType.REFRESH_TOKEN]: 'jwt.refreshTokenExpiration',
-  //     [TokenType.REGISTER_TOKEN]: 'jwt.inviteTokenExpiration',
-  //     [TokenType.RESET_PASSWORD_TOKEN]: 'jwt.resetPasswordTokenExpiration',
-  //   };
-
-  //   const exp = this.configService.get(expirationMap[type], {
-  //     infer: true,
-  //   });
-  //   return exp;
-  // }
 }

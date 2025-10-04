@@ -11,7 +11,8 @@ import { Repository } from 'typeorm';
 
 import { CryptoService } from 'src/crypto/crypto.service';
 import { User } from 'src/users/entities';
-import { bcryptPlugin } from 'src/plugins';
+import { bcryptPlugin, uuidPlugin } from 'src/plugins';
+import { Roles } from 'src/users/enums';
 
 @Injectable()
 export class UserService {
@@ -19,6 +20,25 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly cryptoService: CryptoService,
   ) {}
+
+  // async create() {
+  //   const email = 'pruebas@gmail.com';
+  //   const password = 'Default123?';
+
+  //   const hashedPassword = bcryptPlugin.hash(password);
+  //   const encryptedTokenSecret = this.cryptoService.generateSecret();
+
+  //   const newUserEntity = this.userRepository.create({
+  //     id: uuidPlugin.v7(),
+  //     hashedPassword,
+  //     encryptedTokenSecret,
+  //     email,
+  //     role: Roles.ADMIN,
+  //   });
+
+  //   await this.userRepository.save(newUserEntity);
+  //   return newUserEntity;
+  // }
 
   // async create(createUserDto: CreateUserDto): Promise<User> {
   //   const {

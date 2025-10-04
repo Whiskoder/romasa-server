@@ -19,7 +19,10 @@ import {
 import { ServiceOperationsMapper } from 'src/service-operations/mappers';
 import { ServiceOperationsService } from 'src/service-operations/service-operations.service';
 import { SearchFilterAndPaginationInterceptor } from 'src/shared/interceptors';
+import { AuthAccess } from 'src/auth/decorators';
+import { Roles } from 'src/users/enums';
 
+@AuthAccess(Roles.admin)
 @Controller({
   version: '1',
   path: 'service-operations',

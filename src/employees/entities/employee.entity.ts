@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryColumn, VersionColumn } from 'typeorm';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity({ name: 'TBLCATEMP' })
 export class Employee {
@@ -53,7 +53,6 @@ export class Employee {
   @Column({ name: 'STRCDPEMP', type: 'nvarchar', length: 5, nullable: true })
   postalCode: string;
 
-  // TODO: review photo location
   @Column({ name: 'STRFOTEMP', type: 'nvarchar', length: 250, nullable: true })
   photo: string;
 
@@ -61,7 +60,7 @@ export class Employee {
   birthDate: string;
 
   @Column({ name: 'INTSEXEMP', type: 'int', nullable: true })
-  gender: number; // 2 - female  1 - male
+  gender: number;
 
   @Column({ name: 'STRGRPSNG', type: 'nvarchar', length: 6, nullable: true })
   bloodType: string;
@@ -100,7 +99,7 @@ export class Employee {
   password: string;
 
   @Column({ name: 'DBLPRCDST', type: 'float', nullable: true })
-  statusCode: number; // Código de estado (activo/suspendido)
+  statusCode: number;
 
   @Column({ name: 'Suspendido', type: 'bit', nullable: true })
   isSuspended: boolean;
@@ -129,6 +128,6 @@ export class Employee {
   @Column({ name: 'LNGCLVQPM_PDT', type: 'int', nullable: true })
   updatedFromDeviceId: number;
 
-  @VersionColumn({ name: 'SSMA_TimeStamp', type: 'rowversion' })
-  version: Buffer;
+  @Column({ name: 'SSMA_TimeStamp', type: 'int' })
+  version: number;
 }

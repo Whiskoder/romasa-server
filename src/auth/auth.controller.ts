@@ -1,4 +1,4 @@
-import type { Response } from 'express';
+import type { Response, Request } from 'express';
 
 import {
   Body,
@@ -12,11 +12,19 @@ import {
 
 import { ApiResponse } from 'src/shared/decorators/response.decorator';
 import { AuthService } from 'src/auth/auth.service';
-import { GetUser, AuthAccess } from 'src/auth/decorators';
+import {
+  GetUser,
+  AuthAccess,
+  GetUserId,
+  AuthRefreshToken,
+} from 'src/auth/decorators';
 import { User } from 'src/users/entities';
 import { UserMapper } from 'src/users/mappers/user.mapper';
 import { ResponseUserDto } from 'src/users/dtos';
 import { LoginUserDto } from 'src/auth/dtos';
+import { UserService } from 'src/users/user.service';
+import { extractTokenFromCookie } from 'src/utils';
+import { TokenType } from 'src/auth/enum';
 
 @Controller({
   version: '1',
@@ -26,18 +34,18 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userMapper: UserMapper,
-  ) { }
+    private readonly userService: UserService,
+  ) {}
 
-  // @Throttle({ default: { limit: 3, ttl: 1_000, blockDuration: 60_000 } })
   @AuthAccess()
   @Get('me')
   @ApiResponse(200, 'User found')
   async meUser(
-    @GetUser() userEntity: User,
+    @GetUserId() userId: string,
   ): Promise<{ user: ResponseUserDto }> {
-    throw new InternalServerErrorException('not implemented');
-    // const userDto = this.userMapper.toResponseDto(userEntity);
-    // return { user: userDto };
+    const userEntity = await this.userService.findById(userId);
+    if (!userEntity) throw new InternalServerErrorException('User not found');
+    return { user: this.userMapper.toResponseDto(userEntity) };
   }
 
   @Post('email/login')
@@ -55,25 +63,24 @@ export class AuthController {
   // @Post('email/register')
   // @ApiResponse(201, 'User registered')
   // async register(
-  //   @Body() registerUserDto: RegisterUserDto,
+  //   // @Body() registerUserDto: RegisterUserDto,
   //   @Res({ passthrough: true }) res: Response,
   // ): Promise<{ user: ResponseUserDto }> {
-  //   const userEntity = await this.authService.register(registerUserDto, res);
+  //   const userEntity = await this.authService.register();
   //   const userDto = this.userMapper.toResponseDto(userEntity);
   //   return { user: userDto };
   // }
 
+  @AuthRefreshToken()
   @Post('refresh')
-  @AuthAccess()
   @ApiResponse(200, 'User token refreshed')
   async refresh(
     @GetUser() userEntity: User,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ user: ResponseUserDto }> {
-    throw new InternalServerErrorException('not implemented');
-    // await this.authService.refresh(userEntity, res);
-    // const userDto = this.userMapper.toResponseDto(userEntity);
-    // return { user: userDto };
+    await this.authService.refresh(userEntity, res);
+    const userDto = this.userMapper.toResponseDto(userEntity);
+    return { user: userDto };
   }
 
   // TODO: review
@@ -83,8 +90,7 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
-    throw new InternalServerErrorException('not implemented');
-    // const refreshToken = extractTokenFromCookie(req, TokenType.REFRESH_TOKEN);
-    // // await this.authService.logout(res, refreshToken);
+    const refreshToken = extractTokenFromCookie(req, TokenType.refresh_token);
+    await this.authService.logout(res, refreshToken);
   }
 }

@@ -5,7 +5,10 @@ import { ResponseVehicleDto } from 'src/vehicles/dto';
 import { SearchFilterAndPaginationInterceptor } from 'src/shared/interceptors';
 import { VehicleMapper } from 'src/vehicles/mappers';
 import { VehicleService } from 'src/vehicles/vehicle.service';
+import { AuthAccess } from 'src/auth/decorators';
+import { Roles } from 'src/users/enums';
 
+@AuthAccess(Roles.admin)
 @Controller({
   version: '1',
   path: 'vehicles',

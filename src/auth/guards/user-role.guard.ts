@@ -11,6 +11,7 @@ import { Observable } from 'rxjs';
 
 import { META_ROLES } from 'src/auth/decorators';
 import { User } from 'src/users/entities';
+import { Roles } from 'src/users/enums';
 
 @Injectable()
 export class UserRoleGuard implements CanActivate {
@@ -28,12 +29,13 @@ export class UserRoleGuard implements CanActivate {
     if (validRoles.length === 0) return true;
 
     const req = context.switchToHttp().getRequest();
-    const user = req.user as User;
+    const userRole = req.role as Roles;
 
-    if (!user) throw new InternalServerErrorException('User not found');
+    if (!userRole)
+      throw new InternalServerErrorException('User role not found');
 
     for (let role of validRoles) {
-      if (user.role === role) return true;
+      if (userRole === role) return true;
     }
 
     throw new ForbiddenException('User does not have the required roles');

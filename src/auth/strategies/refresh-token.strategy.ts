@@ -1,27 +1,66 @@
 import { Request } from 'express';
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { PassportStrategy } from '@nestjs/passport';
 
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
 
-import { extractTokenFromCookie } from 'src/utils';
+import { CryptoService } from 'src/crypto/crypto.service';
+import { extractTokenFromCookie, validatePayload } from 'src/utils';
+import { JwtPayload } from 'src/shared/interfaces';
 import { TokenType } from 'src/auth/enum';
+import { User } from 'src/users/entities';
+import { UserService } from 'src/users/user.service';
 
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(
   Strategy,
   TokenType.refresh_token,
 ) {
-  constructor() {
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly cryptoService: CryptoService,
+  ) {
     super({
       passReqToCallback: true,
       jwtFromRequest: ExtractJwt.fromExtractors([
         (req: Request) => extractTokenFromCookie(req, TokenType.refresh_token),
       ]),
-      secretOrKeyProvider: async (req, rawJwtToken, done) => {},
+      secretOrKeyProvider: async (req, rawJwtToken, done) => {
+        const payload: any = this.jwtService.decode(rawJwtToken);
+
+        const isValidPayload = await validatePayload(payload);
+        if (!isValidPayload)
+          done(new UnauthorizedException('Invalid token payload'));
+
+        const userId = payload.sub;
+
+        const userEntity = await this.userService.findById(userId);
+        if (!userEntity)
+          return done(new UnauthorizedException('Token user not found'));
+
+        req.user = userEntity;
+
+        const tokenSecretKey = this.cryptoService.decipher(
+          userEntity.encryptedTokenSecret,
+        );
+        done(null, tokenSecretKey);
+      },
     });
   }
 
-  validate(...args: any[]): any {}
+  async validate(req: Request, payload: JwtPayload, done: VerifiedCallback) {
+    const { type, sub } = payload;
+    if (type !== TokenType.refresh_token)
+      return done(new UnauthorizedException('Token is not a refresh token'));
+
+    const user = req.user as User;
+    if (!user) return done(new UnauthorizedException('Token user not found'));
+    if (user.id !== sub)
+      return done(new UnauthorizedException('User id mismatch'));
+
+    done(null, user);
+  }
 }

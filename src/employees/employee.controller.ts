@@ -15,7 +15,10 @@ import { EmployeeMapper } from 'src/employees/mappers';
 import { EmployeeService } from 'src/employees/employee.service';
 import { ResponseEmployeeDto, CreateEmployeeDto } from 'src/employees/dto';
 import { SearchFilterAndPaginationInterceptor } from 'src/shared/interceptors';
+import { AuthAccess } from 'src/auth/decorators';
+import { Roles } from 'src/users/enums';
 
+@AuthAccess(Roles.admin)
 @Controller({
   version: '1',
   path: 'employees',

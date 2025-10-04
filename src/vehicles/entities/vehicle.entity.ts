@@ -1,16 +1,8 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  UpdateDateColumn,
-  CreateDateColumn,
-  VersionColumn,
-  PrimaryColumn,
-} from 'typeorm';
+import { Entity, PrimaryColumn, Column } from 'typeorm';
 
 @Entity({ name: 'TBLTRNVHC_CP' })
 export class Vehicle {
-  @PrimaryColumn({ name: 'LNGDNTTRN' })
+  @PrimaryColumn({ name: 'LNGDNTTRN', type: 'int' })
   id: number;
 
   @Column({ name: 'STRNMRTRN', type: 'nvarchar', length: 5, nullable: true })
@@ -100,7 +92,13 @@ export class Vehicle {
   @Column({ name: 'STRNPLCTRN', type: 'nvarchar', length: 30, nullable: true })
   cargoPolicyNumber?: string;
 
-  @CreateDateColumn({ name: 'DTFCHRGS', type: 'datetime2', precision: 0 })
+  @Column({
+    name: 'DTFCHRGS',
+    type: 'datetime2',
+    precision: 0,
+    nullable: false,
+    default: () => 'getdate()',
+  })
   createdAt: Date;
 
   @Column({ name: 'LNGCLVMPL_RGS', type: 'int', nullable: true })
@@ -109,7 +107,13 @@ export class Vehicle {
   @Column({ name: 'LNGCLVQPM_RGS', type: 'int', nullable: true })
   createdFromDeviceId?: number;
 
-  @UpdateDateColumn({ name: 'DTFCHPDT', type: 'datetime2', precision: 0 })
+  @Column({
+    name: 'DTFCHPDT',
+    type: 'datetime2',
+    precision: 0,
+    nullable: false,
+    default: () => 'getdate()',
+  })
   updatedAt: Date;
 
   @Column({ name: 'LNGCLVMPL_PDT', type: 'int', nullable: true })
@@ -118,6 +122,6 @@ export class Vehicle {
   @Column({ name: 'LNGCLVQPM_PDT', type: 'int', nullable: true })
   updatedFromDeviceId?: number;
 
-  @VersionColumn({ name: 'SSMA_TimeStamp', type: 'rowversion' })
-  version: Buffer;
+  @Column({ name: 'SSMA_TimeStamp', type: 'int' })
+  version: number;
 }
