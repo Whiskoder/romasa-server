@@ -6,10 +6,12 @@ import { PassportStrategy } from '@nestjs/passport';
 
 import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
 
-import { extractTokenFromCookie } from 'src/utils';
+import { CryptoService } from 'src/crypto/crypto.service';
+import { extractTokenFromCookie, validatePayload } from 'src/utils';
+import { JwtPayload } from 'src/shared/interfaces';
+import { TokenType } from 'src/auth/enum';
 import { User } from 'src/users/entities';
 import { UserService } from 'src/users/user.service';
-import { TokenType } from 'src/auth/enum';
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(
@@ -19,6 +21,7 @@ export class AccessTokenStrategy extends PassportStrategy(
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
+    private readonly cryptoService: CryptoService,
   ) {
     super({
       passReqToCallback: true,
@@ -26,57 +29,38 @@ export class AccessTokenStrategy extends PassportStrategy(
         (req: Request) => extractTokenFromCookie(req, TokenType.access_token),
       ]),
       secretOrKeyProvider: async (req, rawJwtToken, done) => {
-        // try {
-        //   const payload: AccessTokenPayload | unknown =
-        //     this.jwtService.decode(rawJwtToken);
+        const payload: any = this.jwtService.decode(rawJwtToken);
 
-        //   if (
-        //     typeof payload !== 'object' ||
-        //     payload === null ||
-        //     !('userId' in payload) ||
-        //     typeof payload.userId !== 'string'
-        //   )
-        //     throw new UnauthorizedException('Invalid token payload');
+        const isValidPayload = await validatePayload(payload);
+        if (!isValidPayload)
+          done(new UnauthorizedException('Invalid token payload'));
 
-        //   const userId = payload.userId;
+        const userId = payload.sub;
 
-        //   if (!userId)
-        //     return done(new UnauthorizedException('Token user not found'));
+        const userEntity = await this.userService.findById(userId);
+        if (!userEntity)
+          return done(new UnauthorizedException('Token user not found'));
 
-        //   let user: User | undefined;
-        //   try {
-        //     user = await this.userService.findById(userId, [
-        //       'userRefreshTokens',
-        //     ]);
-        //   } catch (e) {
-        //     return done(new UnauthorizedException('Token user not found'));
-        //   }
+        req.user = userEntity;
 
-        //   req.user = user;
-
-        //   const tokenSecretKey = this.cryptoService.decipher(
-        //     user.cipheredTokenSecret,
-        //   );
-        done(null);
-        //   done(null, tokenSecretKey);
-        // } catch (e) {
-        //   done(new UnauthorizedException('Invalid or expired token'));
-        // }
+        const tokenSecretKey = this.cryptoService.decipher(
+          userEntity.encryptedTokenSecret,
+        );
+        done(null, tokenSecretKey);
       },
     });
   }
 
-  async validate(req: Request, payload: any, done: VerifiedCallback) {
-    done(null, { user: 'mundo' });
-    // const { type, userId } = payload;
-    // if (type !== TokenType.ACCESS_TOKEN)
-    //   return done(new UnauthorizedException('Token is not an access token'));
+  async validate(req: Request, payload: JwtPayload, done: VerifiedCallback) {
+    const { type, sub } = payload;
+    if (type !== TokenType.access_token)
+      return done(new UnauthorizedException('Token is not an access token'));
 
-    // const user = req.user as User;
-    // if (!user) return done(new UnauthorizedException('Token user not found'));
-    // if (user.id !== userId)
-    //   return done(new UnauthorizedException('User id mismatch'));
+    const user = req.user as User;
+    if (!user) return done(new UnauthorizedException('Token user not found'));
+    if (user.id !== sub)
+      return done(new UnauthorizedException('User id mismatch'));
 
-    // done(null, user);
+    done(null, user);
   }
 }

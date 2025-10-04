@@ -1,6 +1,13 @@
-import { Column, ManyToOne, PrimaryColumn, CreateDateColumn } from 'typeorm';
+import {
+  Column,
+  ManyToOne,
+  PrimaryColumn,
+  CreateDateColumn,
+  Entity,
+} from 'typeorm';
 import { User } from './user.entity';
 
+@Entity({ name: 'refresh_tokens' })
 export class RefreshToken {
   @PrimaryColumn({ type: 'uuid' })
   id: number;

@@ -52,12 +52,12 @@ export class UserService {
   //   return userEntity;
   // }
 
-  async findById(id: string): Promise<User> {
+  async findById(id: string): Promise<User | null> {
     const userEntity = await this.userRepository.findOne({
       where: { id, isActive: true },
     });
 
-    if (!userEntity) throw new NotFoundException('User not found');
+    // if (!userEntity) throw new NotFoundException('User not found');
 
     return userEntity;
   }

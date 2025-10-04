@@ -29,6 +29,9 @@ export class User {
   @Column({ type: 'bit', nullable: false, default: 1 })
   isActive: boolean;
 
+  @Column({ type: 'varbinary', length: 255, nullable: false })
+  encryptedTokenSecret: Buffer;
+
   @CreateDateColumn({ type: 'datetime' })
   createdAt: Date;
 

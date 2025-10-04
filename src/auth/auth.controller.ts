@@ -26,11 +26,11 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userMapper: UserMapper,
-  ) {}
+  ) { }
 
   // @Throttle({ default: { limit: 3, ttl: 1_000, blockDuration: 60_000 } })
-  @Get('me')
   @AuthAccess()
+  @Get('me')
   @ApiResponse(200, 'User found')
   async meUser(
     @GetUser() userEntity: User,
@@ -47,10 +47,21 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ user: ResponseUserDto }> {
     const userEntity = await this.authService.login(loginUserDto, res);
-    // const userEntity = await this.authService.login(loginUserDto, res);
     const userDto = this.userMapper.toResponseDto(userEntity);
     return { user: userDto };
   }
+
+  // TODO: add onetimetokenvalidation
+  // @Post('email/register')
+  // @ApiResponse(201, 'User registered')
+  // async register(
+  //   @Body() registerUserDto: RegisterUserDto,
+  //   @Res({ passthrough: true }) res: Response,
+  // ): Promise<{ user: ResponseUserDto }> {
+  //   const userEntity = await this.authService.register(registerUserDto, res);
+  //   const userDto = this.userMapper.toResponseDto(userEntity);
+  //   return { user: userDto };
+  // }
 
   @Post('refresh')
   @AuthAccess()

@@ -1,13 +1,13 @@
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { JwtService } from '@nestjs/jwt';
 
 import { AllConfigType } from 'src/config/config.type';
 import { bcryptPlugin, uuidPlugin } from 'src/plugins';
 import { CryptoService } from 'src/crypto/crypto.service';
-import { LoginUserDto } from 'src/auth/dtos';
+import { LoginUserDto, RegisterUserDto } from 'src/auth/dtos';
 import { TokenType } from 'src/auth/enum';
 import { User } from 'src/users/entities/user.entity';
 import { UserService } from 'src/users/user.service';
@@ -24,15 +24,33 @@ export class AuthService {
     // private readonly invitationTokenService: InvitationTokenService,
   ) {}
 
+  // TODO: this is temporal
+  // async register(registerUserDto: RegisterUserDto, res: Response): Promise<User> {
+  //   const { email, password } = registerUserDto;
+
+  //   const userEntity = await this.userService.findByEmail(email);
+  //   if (userEntity) throw new BadRequestException('email_already_registered');
+
+  //   const hashedPassword = bcryptPlugin.hash(password);
+  //   const encryptedTokenSecret = this.cryptoService.generateSecret();
+
+  //   const newUserEntity = this.userService.create({
+  //     hashedPassword,
+  //     encryptedTokenSecret,
+  //     email,
+  //   });
+
+  //   await this.userService.save(newUserEntity);
+
+  //   return newUserEntity;
+
+  // })
+
   async login(loginUserDto: LoginUserDto, res: Response): Promise<User> {
     const { email, password } = loginUserDto;
 
-    let userEntity: User | undefined;
-    try {
-      userEntity = await this.userService.findByEmail(email);
-    } catch (e) {
-      throw new UnauthorizedException('user_not_found');
-    }
+    const userEntity = await this.userService.findByEmail(email);
+    if(!userEntity) throw new UnauthorizedException('user_not_found');
 
     const validPassword = bcryptPlugin.compare(
       password,
@@ -48,68 +66,80 @@ export class AuthService {
 
   // TODO: user can't have multiple sessions
 
-  // async refresh(userEntity: User, res: Response): Promise<void> {
-  //   await this.setAuthCookies(res, userEntity);
-  // }
+  async refresh(userEntity: User, res: Response): Promise<void> {
+    await this.setAuthCookies(res, userEntity);
+  }
 
-  // async logout(res: Response, rawRefreshToken?: string | null): Promise<void> {
-  //   this.clearAuthCookies(res);
+  async logout(res: Response, rawRefreshToken?: string | null): Promise<void> {
+    this.clearAuthCookies(res);
 
-  //   if (!rawRefreshToken?.trim()) return;
+    // revoke old token
+    // if (!rawRefreshToken?.trim()) return;
 
-  //   try {
-  //     const payload = await this.decodeAndValidatePayload(rawRefreshToken);
-  //     if (!payload) return;
+    // try {
+    //   const payload = await this.decodeAndValidatePayload(rawRefreshToken);
+    //   if (!payload) return;
 
-  //     const { userId, jti } = payload;
+    //   const { userId, jti } = payload;
 
-  //     const user = await this.userService.findById(userId, [
-  //       'userRefreshTokens',
-  //     ]);
+    //   const user = await this.userService.findById(userId, [
+    //     'userRefreshTokens',
+    //   ]);
 
-  //     if (!user) return;
+    //   if (!user) return;
 
-  //     const tokenRecord = user.userRefreshTokens.find(
-  //       (token) => token.jwtid === jti,
-  //     );
-  //     if (!tokenRecord) return;
+    //   const tokenRecord = user.userRefreshTokens.find(
+    //     (token) => token.jwtid === jti,
+    //   );
+    //   if (!tokenRecord) return;
 
-  //     const isValidToken = await this.verifyTokenSignature(
-  //       rawRefreshToken,
-  //       user.cipheredTokenSecret,
-  //       userId,
-  //     );
-  //     if (!isValidToken) return;
+    //   const isValidToken = await this.verifyTokenSignature(
+    //     rawRefreshToken,
+    //     user.cipheredTokenSecret,
+    //     userId,
+    //   );
+    //   if (!isValidToken) return;
 
-  //     await this.userRefreshTokenService.disableUserRefreshToken({
-  //       jwtid: jti,
-  //     });
-  //   } catch (e) {}
-  // }
+    //   await this.userRefreshTokenService.disableUserRefreshToken({
+    //     jwtid: jti,
+    //   });
+    // } catch (e) {}
+  }
 
-  // private async clearAuthCookies(res: Response) {
-  //   res.clearCookie(TokenType.ACCESS_TOKEN);
-  //   res.clearCookie(TokenType.REFRESH_TOKEN);
-  //   res.clearCookie(TokenType.FORM_TOKEN);
-  //   res.clearCookie(TokenType.REGISTER_TOKEN);
-  // }
+  private async clearAuthCookies(res: Response) {
+    res.clearCookie(TokenType.access_token);
+    res.clearCookie(TokenType.refresh_token);
+  }
 
   private async setAuthCookies(res: Response, userEntity: User) {
     const accessToken = await this.generateAccessToken(userEntity);
-    //   const refreshToken = await this.generateRefreshToken(userEntity);
+    const refreshToken = await this.generateRefreshToken(userEntity);
     await this.setTokenCookie(res, accessToken);
-    // await this.setTokenCookie(res, refreshToken);
+    await this.setTokenCookie(res, refreshToken);
   }
 
   private async generateAccessToken(userEntity: User) {
-    const payload = { userId: userEntity.id, type: TokenType.access_token };
+    const payload = { sub: userEntity.id, type: TokenType.access_token };
 
     const jwtid = uuidPlugin.v7();
-    // const secret = this.cryptoService.decipher(userEntity.encryptedTokenSecret);
-    const secret = 'abc';
+    const secret = this.cryptoService.decipher(userEntity.encryptedTokenSecret);
 
-    // const expiresIn = this.configService.get('jwt.accessTokenExpiration', { infer: true })
-    const expiresIn = 3600;
+    const expiresIn = this.configService.get('auth.accessTokenExpiresIn', {
+      infer: true,
+    });
+
+    return this.jwtService.signAsync(payload, { jwtid, secret, expiresIn });
+  }
+
+  private async generateRefreshToken(userEntity: User) {
+    const payload = { sub: userEntity.id, type: TokenType.refresh_token };
+
+    const jwtid = uuidPlugin.v7();
+    const secret = this.cryptoService.decipher(userEntity.encryptedTokenSecret);
+
+    const expiresIn = this.configService.get('auth.refreshTokenExpiresIn', {
+      infer: true,
+    });
 
     return this.jwtService.signAsync(payload, { jwtid, secret, expiresIn });
   }
