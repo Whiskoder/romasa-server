@@ -14,6 +14,6 @@ export const AppDataSource = new DataSource({
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
   options: {
-    encrypt: true,
+    encrypt: process.env.DATABASE_ENCRYPT === 'true',
   },
 } as DataSourceOptions);

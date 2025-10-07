@@ -7,4 +7,5 @@ export type DatabaseConfig = {
   ssl?: boolean;
   sync?: boolean;
   user?: string;
+  encrypt?: boolean;
 };

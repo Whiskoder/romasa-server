@@ -27,6 +27,9 @@ class EnvironmentVariablesValidator {
   @IsBoolean()
   DATABASE_SYNC: boolean;
 
+  @IsBoolean()
+  DATABASE_ENCRYPT: boolean;
+
   @IsString()
   DATABASE_USER: string;
 }
@@ -43,5 +46,6 @@ export default registerAs<DatabaseConfig>('database', () => {
     ssl: process.env.DATABASE_SSL === 'true',
     sync: process.env.DATABASE_SYNC === 'true',
     user: process.env.DATABASE_USER,
+    encrypt: process.env.DATABASE_ENCRYPT === 'true',
   };
 });
