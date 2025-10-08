@@ -22,7 +22,12 @@ import { SearchFilterAndPaginationInterceptor } from 'src/shared/interceptors';
 import { AuthAccess } from 'src/auth/decorators';
 import { Roles } from 'src/users/enums';
 
-@AuthAccess(Roles.admin)
+@AuthAccess(
+  Roles.driver,
+  Roles.warehouseManager,
+  Roles.storeManager,
+  Roles.workshopStaff,
+)
 @Controller({
   version: '1',
   path: 'service-operations',
