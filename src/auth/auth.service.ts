@@ -146,7 +146,7 @@ export class AuthService {
 
     res.cookie(type, token, {
       httpOnly: true,
-      secure: true,
+      secure: false, // <- TODO: add config to enable secure cookies
       sameSite: 'strict',
       maxAge: calculateExpiration(),
     });
