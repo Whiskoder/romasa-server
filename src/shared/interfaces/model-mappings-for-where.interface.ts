@@ -8,6 +8,8 @@ export interface ModelMappingsForWhere {
   };
   serviceOperation: {
     status: string;
+    createdByEmployee: string;
+    branch: string;
   };
   service_operation_details: {
     vehicleLicensePlate: string;

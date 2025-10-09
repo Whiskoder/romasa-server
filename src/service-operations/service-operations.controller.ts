@@ -24,6 +24,7 @@ import { ServiceOperationsService } from 'src/service-operations/service-operati
 import { SearchFilterAndPaginationInterceptor } from 'src/shared/interceptors';
 import { AuthAccess, GetUserId } from 'src/auth/decorators';
 import { Roles } from 'src/users/enums';
+import { ScheduleAppointmentDto } from './dto/schedule-appointment.dto';
 
 @Controller({
   version: '1',
@@ -35,6 +36,7 @@ export class ServiceOperationsController {
     private readonly serviceOperationsMapper: ServiceOperationsMapper,
   ) {}
 
+  // Solo encargados de bodega pueden crear una solicitud
   @AuthAccess(Roles.warehouseManager)
   @Post()
   @ApiResponse(201, 'Service Operation created')
@@ -42,28 +44,61 @@ export class ServiceOperationsController {
     @GetUserId() userId: string,
     @Body() createDiagnosticDto: CreateDiagnosticDto,
   ): Promise<{ serviceOperations: ResponseServiceOperationsDto[] }> {
-    const serviceOperation =
-      await this.serviceOperationsService.create(userId, createDiagnosticDto);
+    const serviceOperation = await this.serviceOperationsService.create(
+      userId,
+      createDiagnosticDto,
+    );
 
     const serviceOperationDto =
       this.serviceOperationsMapper.toResponseDto(serviceOperation);
     return { serviceOperations: [serviceOperationDto] };
   }
 
-  @AuthAccess(Roles.storeManager, Roles.workshopStaff)
+  // Solo el conductor y gerente de tienda pueden aprobar
+  @AuthAccess(Roles.storeManager, Roles.driver)
   @Post(':operationId/approve')
   @ApiResponse(201, 'Service Operation approved')
   async approve(
     @Query('operationId', new ParseIntPipe()) operationId: number,
     @GetUserId() userId: string,
-  ): Promise<any> {
-    const serviceOperation = await this.serviceOperationsService.approve(operationId, userId)
-    // const serviceOperation = await this.serviceOperationsService.approve(
-    //   approveServiceOperationDto,
-    // );
-    // const serviceOperationDto =
-    //   this.serviceOperationsMapper.toResponseDto(serviceOperation);
-    // return { serviceOperations: [serviceOperationDto] };
+  ): Promise<{ serviceOperations: ResponseServiceOperationsDto[] }> {
+    const serviceOperation = await this.serviceOperationsService.approve(
+      operationId,
+      userId,
+    );
+
+    const serviceOperationDto =
+      this.serviceOperationsMapper.toResponseDto(serviceOperation);
+    return { serviceOperations: [serviceOperationDto] };
+  }
+
+  @AuthAccess(Roles.storeManager, Roles.driver)
+  @Post(':operationId/reject')
+  @ApiResponse(201, 'Service Operation rejected')
+  async reject(
+    @Query('operationId', new ParseIntPipe()) operationId: number,
+    @GetUserId() userId: string,
+  ): Promise<any> {}
+
+  // Solo el personal de taller puede agendar una cita
+  @AuthAccess(Roles.workshopStaff)
+  @Post(':operationId/scheduleAppointment')
+  @ApiResponse(201, 'Service Operation scheduled appointment')
+  async scheduleAppointment(
+    @Body() scheduleAppointmentDto: ScheduleAppointmentDto,
+    @Query('operationId', new ParseIntPipe()) operationId: number,
+    @GetUserId() userId: string,
+  ): Promise<{ serviceOperations: ResponseServiceOperationsDto[] }> {
+    const serviceOperation =
+      await this.serviceOperationsService.scheduleAppointment(
+        operationId,
+        userId,
+        scheduleAppointmentDto,
+      );
+
+    const serviceOperationDto =
+      this.serviceOperationsMapper.toResponseDto(serviceOperation);
+    return { serviceOperations: [serviceOperationDto] };
   }
 
   @AuthAccess(
@@ -74,7 +109,7 @@ export class ServiceOperationsController {
   )
   @UseInterceptors(
     new SearchFilterAndPaginationInterceptor<'serviceOperation'>(
-      ['status'],
+      ['status', 'createdByEmployee', 'branch'],
       'serviceOperation',
     ),
   )

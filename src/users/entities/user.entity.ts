@@ -8,6 +8,7 @@ import {
 
 import { Roles } from 'src/users/enums';
 import { Employee } from 'src/employees/entities';
+import { Branch } from 'src/shared/enums';
 
 @Entity({ name: 'users' })
 export class User {
@@ -16,6 +17,9 @@ export class User {
 
   @Column({ type: 'nvarchar', length: 50, nullable: false })
   role: Roles;
+
+  @Column({ type: 'nvarchar', length: 50, default: 'romasa', nullable: false })
+  branch: Branch;
 
   @Column({ type: 'nvarchar', length: 60, nullable: true }) // bcrypt length is always 60
   hashedPassword: string;

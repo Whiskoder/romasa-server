@@ -1,23 +1,28 @@
-import { Exclude, Expose } from "class-transformer";
-import { ResponseEmployeeDto } from "src/employees/dto";
+import { Exclude, Expose } from 'class-transformer';
+import { ResponseEmployeeDto } from 'src/employees/dto';
+import { Branch } from 'src/shared/enums';
+import { Roles } from 'src/users/enums';
 
 @Exclude()
 export class ResponseUserDto {
-	@Expose()
-	id: string
+  @Expose()
+  id: string;
 
-	@Expose()
-	role: string
+  @Expose()
+  role: Roles;
 
-	@Expose()
-	email: string
+  @Expose()
+  branch: Branch;
 
-	@Expose()
-	createdAt: Date
+  @Expose()
+  email: string;
 
-	@Expose()
-	updatedAt: Date
+  @Expose()
+  createdAt: Date;
 
-	@Expose()
-	employee: ResponseEmployeeDto
+  @Expose()
+  updatedAt: Date;
+
+  @Expose()
+  employee: ResponseEmployeeDto;
 }

@@ -15,7 +15,6 @@ import { LoginUserDto, RegisterUserDto } from 'src/auth/dtos';
 import { TokenType } from 'src/auth/enum';
 import { User } from 'src/users/entities/user.entity';
 import { UserService } from 'src/users/user.service';
-import { truncate } from 'node:fs/promises';
 
 @Injectable()
 export class AuthService {
