@@ -21,10 +21,11 @@ import {
 import { User } from 'src/users/entities';
 import { UserMapper } from 'src/users/mappers/user.mapper';
 import { ResponseUserDto } from 'src/users/dtos';
-import { LoginUserDto } from 'src/auth/dtos';
+import { LoginUserDto, RegisterUserDto } from 'src/auth/dtos';
 import { UserService } from 'src/users/user.service';
 import { extractTokenFromCookie } from 'src/utils';
 import { TokenType } from 'src/auth/enum';
+import { Roles } from 'src/users/enums';
 
 @Controller({
   version: '1',
@@ -43,7 +44,7 @@ export class AuthController {
   async meUser(
     @GetUserId() userId: string,
   ): Promise<{ user: ResponseUserDto }> {
-    const userEntity = await this.userService.findById(userId);
+    const userEntity = await this.userService.findById(userId, ['employee']);
     if (!userEntity) throw new InternalServerErrorException('User not found');
     return { user: this.userMapper.toResponseDto(userEntity) };
   }
@@ -60,16 +61,17 @@ export class AuthController {
   }
 
   // TODO: add onetimetokenvalidation
-  // @Post('email/register')
-  // @ApiResponse(201, 'User registered')
-  // async register(
-  //   // @Body() registerUserDto: RegisterUserDto,
-  //   @Res({ passthrough: true }) res: Response,
-  // ): Promise<{ user: ResponseUserDto }> {
-  //   const userEntity = await this.authService.register();
-  //   const userDto = this.userMapper.toResponseDto(userEntity);
-  //   return { user: userDto };
-  // }
+  @Post('email/register')
+  @AuthAccess(Roles.admin)
+  @ApiResponse(201, 'User registered')
+  async register(
+    @Body() registerUserDto: RegisterUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ user: ResponseUserDto }> {
+    const userEntity = await this.authService.register(registerUserDto);
+    const userDto = this.userMapper.toResponseDto(userEntity);
+    return { user: userDto };
+  }
 
   @AuthRefreshToken()
   @Post('refresh')

@@ -9,6 +9,9 @@ import {
   Query,
   UseInterceptors,
   Req,
+  ValidationPipe,
+  ParseUUIDPipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 
 import { ApiResponse } from 'src/shared/decorators';
@@ -19,15 +22,9 @@ import {
 import { ServiceOperationsMapper } from 'src/service-operations/mappers';
 import { ServiceOperationsService } from 'src/service-operations/service-operations.service';
 import { SearchFilterAndPaginationInterceptor } from 'src/shared/interceptors';
-import { AuthAccess } from 'src/auth/decorators';
+import { AuthAccess, GetUserId } from 'src/auth/decorators';
 import { Roles } from 'src/users/enums';
 
-@AuthAccess(
-  Roles.driver,
-  Roles.warehouseManager,
-  Roles.storeManager,
-  Roles.workshopStaff,
-)
 @Controller({
   version: '1',
   path: 'service-operations',
@@ -38,25 +35,43 @@ export class ServiceOperationsController {
     private readonly serviceOperationsMapper: ServiceOperationsMapper,
   ) {}
 
+  @AuthAccess(Roles.warehouseManager)
   @Post()
   @ApiResponse(201, 'Service Operation created')
   async create(
+    @GetUserId() userId: string,
     @Body() createDiagnosticDto: CreateDiagnosticDto,
   ): Promise<{ serviceOperations: ResponseServiceOperationsDto[] }> {
     const serviceOperation =
-      await this.serviceOperationsService.create(createDiagnosticDto);
+      await this.serviceOperationsService.create(userId, createDiagnosticDto);
 
     const serviceOperationDto =
       this.serviceOperationsMapper.toResponseDto(serviceOperation);
     return { serviceOperations: [serviceOperationDto] };
   }
 
-  // @UseInterceptors(
-  //   new SearchFilterAndPaginationInterceptor<'service_operation_details'>(
-  //     ['vehicleLicensePlate'],
-  //     'service_operation_details',
-  //   ),
-  // )
+  @AuthAccess(Roles.storeManager, Roles.workshopStaff)
+  @Post(':operationId/approve')
+  @ApiResponse(201, 'Service Operation approved')
+  async approve(
+    @Query('operationId', new ParseIntPipe()) operationId: number,
+    @GetUserId() userId: string,
+  ): Promise<any> {
+    const serviceOperation = await this.serviceOperationsService.approve(operationId, userId)
+    // const serviceOperation = await this.serviceOperationsService.approve(
+    //   approveServiceOperationDto,
+    // );
+    // const serviceOperationDto =
+    //   this.serviceOperationsMapper.toResponseDto(serviceOperation);
+    // return { serviceOperations: [serviceOperationDto] };
+  }
+
+  @AuthAccess(
+    Roles.driver,
+    Roles.warehouseManager,
+    Roles.storeManager,
+    Roles.workshopStaff,
+  )
   @UseInterceptors(
     new SearchFilterAndPaginationInterceptor<'serviceOperation'>(
       ['status'],

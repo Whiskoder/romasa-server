@@ -23,10 +23,6 @@ export class CreateDiagnosticDto {
 
   @Type(() => Number)
   @IsInt()
-  createdByEmployeeId: number;
-
-  @Type(() => Number)
-  @IsInt()
   departmentManagerEmployeeId: number;
 
   @IsEnum(ServicePriority)

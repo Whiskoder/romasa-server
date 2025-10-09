@@ -15,6 +15,7 @@ import { LoginUserDto, RegisterUserDto } from 'src/auth/dtos';
 import { TokenType } from 'src/auth/enum';
 import { User } from 'src/users/entities/user.entity';
 import { UserService } from 'src/users/user.service';
+import { truncate } from 'node:fs/promises';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +28,17 @@ export class AuthService {
     // private readonly userRefreshTokenService: UserRefreshTokenService,
     // private readonly invitationTokenService: InvitationTokenService,
   ) {}
+
+  async register(registerUserDto: RegisterUserDto): Promise<User> {
+    const email = registerUserDto.email;
+
+    const userExists = await this.userService.findByEmail(email);
+    if (userExists) throw new BadRequestException('user_exists');
+
+    const userEntity = await this.userService.create(registerUserDto);
+
+    return userEntity;
+  }
 
   async login(loginUserDto: LoginUserDto, res: Response): Promise<User> {
     const { email, password } = loginUserDto;
@@ -146,7 +158,7 @@ export class AuthService {
 
     res.cookie(type, token, {
       httpOnly: true,
-      secure: false, // <- TODO: add config to enable secure cookies
+      secure: true, // <- TODO: add config to enable secure cookies
       sameSite: 'strict',
       maxAge: calculateExpiration(),
     });

@@ -32,9 +32,15 @@ export class ServiceOperation {
   @Column({ type: 'datetime', nullable: true })
   estimatedDeliveryDate: Date;
 
+  @Column({ type: 'datetime', nullable: true })
+  diagnosticAppoinmentDate: Date;
+
   @ManyToOne(() => Employee, (employee) => employee.id)
   // @Column({ type: 'int', nullable: false })
   departmentManagerEmployee: Employee;
+
+  @Column({ type: 'bit', default: false })
+  approvedByDepartmentManager: boolean;
 
   // - Datos del `mecanico`
 
@@ -53,6 +59,9 @@ export class ServiceOperation {
   @ManyToOne(() => Employee, (employee) => employee.id, { eager: true })
   // @Column({ type: 'int', nullable: false })
   vehicleDriverEmployee: Employee;
+
+  @Column({ type: 'bit', default: false })
+  approvedByDriver: boolean;
 
   @Column({ type: 'nvarchar', length: 1000, nullable: false })
   vehicleFailure: string;

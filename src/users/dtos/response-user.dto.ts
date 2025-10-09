@@ -1,4 +1,5 @@
 import { Exclude, Expose } from "class-transformer";
+import { ResponseEmployeeDto } from "src/employees/dto";
 
 @Exclude()
 export class ResponseUserDto {
@@ -16,4 +17,7 @@ export class ResponseUserDto {
 
 	@Expose()
 	updatedAt: Date
+
+	@Expose()
+	employee: ResponseEmployeeDto
 }

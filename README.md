@@ -124,3 +124,29 @@ npm run migration:revert -->
 #fix service-operations -> inventory to return array instead of string
 #fix vehicle inventory must be optional
  -->
+
+### Usuarios
+
+{
+"email": "encargado_bodega@gmail.com",
+"password": "Default123?",
+"role": "warehouseManager"
+}
+
+{
+"email": "encargado_tienda@gmail.com",
+"password": "Default123?",
+"role": "storeManager"
+}
+
+{
+"email": "personal_taller@gmail.com",
+"password": "Default123?",
+"role": "workshopStaff"
+}
+
+{
+"email": "chofer@gmail.com",
+"password": "Default123?",
+"role": "driver"
+}

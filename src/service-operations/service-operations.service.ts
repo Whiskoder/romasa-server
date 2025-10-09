@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
@@ -12,6 +16,9 @@ import {
   ServiceOperation,
 } from 'src/service-operations/entities';
 import { VehicleService } from 'src/vehicles/vehicle.service';
+import { UserService } from 'src/users/user.service';
+import { ServiceStatus } from './enums';
+import { Roles } from 'src/users/enums';
 @Injectable()
 export class ServiceOperationsService {
   constructor(
@@ -21,13 +28,14 @@ export class ServiceOperationsService {
     private readonly serviceOperationDetailsRepository: Repository<ServiceOperationDetail>,
     private readonly employeeService: EmployeeService,
     private readonly vehicleService: VehicleService,
+    private readonly userService: UserService,
   ) {}
 
   async create(
+    userId: string,
     createDiagnosticDto: CreateDiagnosticDto,
   ): Promise<ServiceOperation> {
     const {
-      createdByEmployeeId,
       vehicleDriverEmployeeId,
       departmentManagerEmployeeId,
       vehicleId,
@@ -40,25 +48,16 @@ export class ServiceOperationsService {
       vehicleMileage,
     } = createDiagnosticDto;
 
-    const hasRepeatedIds =
-      new Set([
-        createdByEmployeeId,
-        vehicleDriverEmployeeId,
-        departmentManagerEmployeeId,
-      ]).size !== 3;
+    const userEntity = await this.userService.findById(userId, ['employee']);
 
-    if (hasRepeatedIds) throw new BadRequestException('Repeated employee ids');
+    if (!userEntity) throw new InternalServerErrorException('User not found');
 
     const [vehicle] = await this.vehicleService.findById([vehicleId]);
     const employeeEntities = await this.employeeService.findById([
-      createdByEmployeeId,
       vehicleDriverEmployeeId,
       departmentManagerEmployeeId,
     ]);
 
-    const createdByEmployee = employeeEntities.find(
-      (e) => e.id === createdByEmployeeId,
-    );
     const vehicleDriverEmployee = employeeEntities.find(
       (e) => e.id === vehicleDriverEmployeeId,
     );
@@ -66,15 +65,11 @@ export class ServiceOperationsService {
       (e) => e.id === departmentManagerEmployeeId,
     );
 
-    if (
-      !createdByEmployee &&
-      !vehicleDriverEmployee &&
-      !departmentManagerEmployee
-    )
+    if (!vehicleDriverEmployee && !departmentManagerEmployee)
       throw new BadRequestException('Invalid employee ids');
 
     const serviceOperationsEntity = this.serviceOperationsRepository.create({
-      createdByEmployee,
+      createdByEmployee: userEntity.employee,
       vehicleDriverEmployee,
       departmentManagerEmployee,
       vehicle,
@@ -91,6 +86,46 @@ export class ServiceOperationsService {
     await this.serviceOperationsRepository.save(serviceOperationsEntity);
 
     return serviceOperationsEntity;
+  }
+
+  async approve(
+    operationId: number,
+    userId: string,
+  ): Promise<ServiceOperation> {
+    const userEntity = await this.userService.findById(userId);
+
+    if (!userEntity) throw new InternalServerErrorException('User not found');
+
+    const serviceOperation = await this.serviceOperationsRepository.findOne({
+      where: { id: operationId },
+      relations: ['driverEmployee', 'departmentManagerEmployee'],
+    });
+
+    if (!serviceOperation)
+      throw new BadRequestException('Service operation not found');
+
+    if (serviceOperation.status !== ServiceStatus.requested)
+      throw new BadRequestException(
+        'Service operation not in requested status',
+      );
+
+    const userRole = userEntity.role;
+    const userEmployeeId = userEntity.employee.id;
+
+    if (userRole === Roles.driver) {
+      if (serviceOperation.vehicleDriverEmployee.id !== userEmployeeId)
+        throw new BadRequestException('User is driver');
+    
+      serviceOperation.approvedByDriver = true;
+    } else {
+      if (serviceOperation.departmentManagerEmployee.id !== userEmployeeId)
+        throw new BadRequestException('User is warehouse manager');
+
+      serviceOperation.approvedByDepartmentManager = true;
+    }
+
+    await this.serviceOperationsRepository.save(serviceOperation);
+    return serviceOperation;
   }
 
   // async findAll(
