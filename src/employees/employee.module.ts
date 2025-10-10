@@ -11,6 +11,6 @@ import { EmployeeService } from 'src/employees/employee.service';
   imports: [TypeOrmModule.forFeature([Employee])],
   controllers: [EmployeeController],
   providers: [EmployeeService, EmployeeMapper],
-  exports: [EmployeeService],
+  exports: [EmployeeService, EmployeeMapper],
 })
 export class EmployeesModule {}

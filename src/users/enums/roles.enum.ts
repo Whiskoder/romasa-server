@@ -1,4 +1,7 @@
 export enum Roles {
   admin = 'admin',
-  user = 'user',
+  driver = 'driver',
+  warehouseManager = 'warehouseManager',
+  storeManager = 'storeManager',
+  workshopStaff = 'workshopStaff',
 }

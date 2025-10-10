@@ -6,6 +6,18 @@ export class ResponseServiceOperationsDto {
   id: number;
 
   @Expose()
+  diagnosticAppoinmentDate: Date;
+
+  @Expose()
+  scheduledByEmployee: number;
+
+  @Expose()
+  approvedByDepartmentManager: boolean;
+
+  @Expose()
+  approvedByDriver: boolean;
+
+  @Expose()
   affectsOperability: boolean;
 
   @Expose()

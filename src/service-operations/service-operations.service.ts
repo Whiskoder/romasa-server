@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
@@ -12,6 +18,11 @@ import {
   ServiceOperation,
 } from 'src/service-operations/entities';
 import { VehicleService } from 'src/vehicles/vehicle.service';
+import { UserService } from 'src/users/user.service';
+import { ServiceStatus } from './enums';
+import { Roles } from 'src/users/enums';
+import { User } from 'src/users/entities';
+import { ScheduleAppointmentDto } from 'src/service-operations/dto/schedule-appointment.dto';
 @Injectable()
 export class ServiceOperationsService {
   constructor(
@@ -21,13 +32,14 @@ export class ServiceOperationsService {
     private readonly serviceOperationDetailsRepository: Repository<ServiceOperationDetail>,
     private readonly employeeService: EmployeeService,
     private readonly vehicleService: VehicleService,
+    private readonly userService: UserService,
   ) {}
 
   async create(
+    userId: string,
     createDiagnosticDto: CreateDiagnosticDto,
   ): Promise<ServiceOperation> {
     const {
-      createdByEmployeeId,
       vehicleDriverEmployeeId,
       departmentManagerEmployeeId,
       vehicleId,
@@ -40,25 +52,16 @@ export class ServiceOperationsService {
       vehicleMileage,
     } = createDiagnosticDto;
 
-    const hasRepeatedIds =
-      new Set([
-        createdByEmployeeId,
-        vehicleDriverEmployeeId,
-        departmentManagerEmployeeId,
-      ]).size !== 3;
+    const userEntity = await this.userService.findById(userId, ['employee']);
 
-    if (hasRepeatedIds) throw new BadRequestException('Repeated employee ids');
+    if (!userEntity) throw new InternalServerErrorException('User not found');
 
     const [vehicle] = await this.vehicleService.findById([vehicleId]);
     const employeeEntities = await this.employeeService.findById([
-      createdByEmployeeId,
       vehicleDriverEmployeeId,
       departmentManagerEmployeeId,
     ]);
 
-    const createdByEmployee = employeeEntities.find(
-      (e) => e.id === createdByEmployeeId,
-    );
     const vehicleDriverEmployee = employeeEntities.find(
       (e) => e.id === vehicleDriverEmployeeId,
     );
@@ -66,15 +69,11 @@ export class ServiceOperationsService {
       (e) => e.id === departmentManagerEmployeeId,
     );
 
-    if (
-      !createdByEmployee &&
-      !vehicleDriverEmployee &&
-      !departmentManagerEmployee
-    )
+    if (!vehicleDriverEmployee && !departmentManagerEmployee)
       throw new BadRequestException('Invalid employee ids');
 
     const serviceOperationsEntity = this.serviceOperationsRepository.create({
-      createdByEmployee,
+      createdByEmployee: userEntity.employee,
       vehicleDriverEmployee,
       departmentManagerEmployee,
       vehicle,
@@ -91,6 +90,187 @@ export class ServiceOperationsService {
     await this.serviceOperationsRepository.save(serviceOperationsEntity);
 
     return serviceOperationsEntity;
+  }
+
+  async approve(
+    operationId: number,
+    userId: string,
+  ): Promise<ServiceOperation> {
+    const serviceOperation = await this.getServiceOperation(operationId, [
+      'vehicleDriverEmployee',
+      'departmentManagerEmployee',
+    ]);
+    const user = await this.getUserWithEmployee(userId);
+
+    this.validateOperationStatus(
+      serviceOperation,
+      ServiceStatus.pending_review,
+    );
+    this.processApproval(user, serviceOperation);
+
+    if (
+      serviceOperation.approvedByDepartmentManager &&
+      serviceOperation.approvedByDriver
+    ) {
+      serviceOperation.status = ServiceStatus.requested;
+    }
+
+    return await this.serviceOperationsRepository.save(serviceOperation);
+  }
+
+  async scheduleAppointment(
+    operationId: number,
+    userId: string,
+    scheduleAppointmentDto: ScheduleAppointmentDto,
+  ): Promise<ServiceOperation> {
+    const date = this.validateScheduleAppointmentDate(
+      scheduleAppointmentDto.date,
+    );
+
+    const serviceOperation = await this.getServiceOperation(operationId);
+    const user = await this.getUserWithEmployee(userId);
+
+    this.validateOperationStatus(serviceOperation, ServiceStatus.requested);
+
+    this.processAppointment(user, serviceOperation, date);
+
+    return await this.serviceOperationsRepository.save(serviceOperation);
+  }
+
+  private validateScheduleAppointmentDate(date: string): Date {
+    const appointmentDate = new Date(date);
+
+    const now = new Date();
+    if (appointmentDate < now) {
+      throw new BadRequestException(
+        'La fecha de cita no puede ser anterior a la fecha actual',
+      );
+    }
+
+    const differenceInMs = appointmentDate.getTime() - now.getTime();
+    const differenceInHours = differenceInMs / (1000 * 60 * 60);
+
+    // Validar intervalo mínimo de 2 horas
+    if (differenceInHours < 2) {
+      throw new BadRequestException(
+        'La fecha de cita debe tener al menos 2 horas de anticipación desde la hora actual',
+      );
+    }
+
+    return appointmentDate;
+  }
+
+  private async getUserWithEmployee(userId: string): Promise<User> {
+    const user = await this.userService.findById(userId, ['employee']);
+
+    if (!user) {
+      throw new InternalServerErrorException(
+        'Usuario autenticado no encontrado en la base de datos',
+      );
+    }
+
+    if (!user.employee) {
+      throw new BadRequestException('El usuario no tiene un empleado asociado');
+    }
+
+    return user;
+  }
+
+  private async getServiceOperation(
+    operationId: number,
+    relations?: string[],
+  ): Promise<ServiceOperation> {
+    const serviceOperation = await this.serviceOperationsRepository.findOne({
+      where: { id: operationId },
+      relations,
+    });
+
+    if (!serviceOperation) {
+      throw new NotFoundException('Operación de servicio no encontrada');
+    }
+
+    return serviceOperation;
+  }
+
+  private validateOperationStatus(
+    serviceOperation: ServiceOperation,
+    status: ServiceStatus,
+  ): void {
+    if (serviceOperation.status !== status) {
+      throw new BadRequestException(
+        `La operación debe estar en estado "${status}". Estado actual: ${serviceOperation.status}`,
+      );
+    }
+  }
+
+  private processAppointment(
+    user: User,
+    serviceOperation: ServiceOperation,
+    date: Date,
+  ): void {
+    const { employee } = user;
+    serviceOperation.scheduledByEmployee = employee;
+    serviceOperation.diagnosticAppoinmentDate = date;
+    serviceOperation.status = ServiceStatus.scheduled_diagnosis;
+  }
+
+  private processApproval(
+    user: User,
+    serviceOperation: ServiceOperation,
+  ): void {
+    const { role, employee } = user;
+
+    if (role === Roles.driver) {
+      this.approveAsDriver(employee.id, serviceOperation);
+    } else {
+      this.approveAsManager(employee.id, serviceOperation);
+    }
+  }
+
+  private approveAsDriver(
+    employeeId: number,
+    serviceOperation: ServiceOperation,
+  ): void {
+    if (!serviceOperation.vehicleDriverEmployee) {
+      throw new InternalServerErrorException(
+        'La operación no tiene un conductor asignado',
+      );
+    }
+
+    if (serviceOperation.vehicleDriverEmployee.id !== employeeId) {
+      throw new ForbiddenException(
+        'No eres el conductor asignado a esta operación',
+      );
+    }
+
+    if (serviceOperation.approvedByDriver) {
+      throw new BadRequestException('Ya aprobaste esta operación previamente');
+    }
+
+    serviceOperation.approvedByDriver = true;
+  }
+
+  private approveAsManager(
+    employeeId: number,
+    serviceOperation: ServiceOperation,
+  ): void {
+    if (!serviceOperation.departmentManagerEmployee) {
+      throw new InternalServerErrorException(
+        'La operación no tiene un encargado asignado',
+      );
+    }
+
+    if (serviceOperation.departmentManagerEmployee.id !== employeeId) {
+      throw new ForbiddenException(
+        'No eres el encargado asignado a esta operación',
+      );
+    }
+
+    if (serviceOperation.approvedByDepartmentManager) {
+      throw new BadRequestException('Ya aprobaste esta operación previamente');
+    }
+
+    serviceOperation.approvedByDepartmentManager = true;
   }
 
   // async findAll(
@@ -129,6 +309,7 @@ export class ServiceOperationsService {
         'createdByEmployee.firstName',
         'createdByEmployee.lastName',
         'createdByEmployee.middleName',
+        'createdByEmployee.id',
       ])
       .leftJoin(
         'serviceOperation.departmentManagerEmployee',
@@ -138,6 +319,7 @@ export class ServiceOperationsService {
         'departmentManagerEmployee.firstName',
         'departmentManagerEmployee.lastName',
         'departmentManagerEmployee.middleName',
+        'departmentManagerEmployee.id',
       ])
       .leftJoin(
         'serviceOperation.vehicleDriverEmployee',
@@ -147,6 +329,7 @@ export class ServiceOperationsService {
         'vehicleDriverEmployee.firstName',
         'vehicleDriverEmployee.lastName',
         'vehicleDriverEmployee.middleName',
+        'vehicleDriverEmployee.id',
       ])
       .leftJoin('serviceOperation.vehicle', 'vehicle')
       .addSelect([

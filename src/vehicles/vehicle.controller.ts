@@ -8,7 +8,12 @@ import { VehicleService } from 'src/vehicles/vehicle.service';
 import { AuthAccess } from 'src/auth/decorators';
 import { Roles } from 'src/users/enums';
 
-@AuthAccess(Roles.admin)
+@AuthAccess(
+  Roles.driver,
+  Roles.warehouseManager,
+  Roles.storeManager,
+  Roles.workshopStaff,
+)
 @Controller({
   version: '1',
   path: 'vehicles',

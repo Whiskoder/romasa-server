@@ -1,4 +1,5 @@
 export enum ServiceStatus {
+  pending_review = 'pending_review',
   requested = 'requested',
   scheduled_diagnosis = 'scheduled_diagnosis',
   in_diagnosis = 'in_diagnosis',

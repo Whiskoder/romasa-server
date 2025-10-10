@@ -21,7 +21,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     private readonly configService: ConfigService<AllConfigType, true>,
     // private readonly logger: DatabaseLogger,
   ) {
-    this.environment = this.configService.get<string>('server.mode', {
+    this.environment = this.configService.get<string>('app.nodeEnv', {
       infer: true,
     });
   }

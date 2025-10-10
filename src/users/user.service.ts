@@ -14,6 +14,12 @@ import { User } from 'src/users/entities';
 import { bcryptPlugin, uuidPlugin } from 'src/plugins';
 import { Roles } from 'src/users/enums';
 
+interface CreateUserOpts {
+  email: string;
+  password: string;
+  role: Roles;
+}
+
 @Injectable()
 export class UserService {
   constructor(
@@ -21,20 +27,25 @@ export class UserService {
     private readonly cryptoService: CryptoService,
   ) {}
 
-  // async create() {
-  //   const email = 'pruebas@gmail.com';
-  //   const password = 'Default123?';
+  async create(opts: CreateUserOpts): Promise<User> {
+    const { email, password, role } = opts;
+    const $email = email.toLowerCase().trim();
+    const $password = password.trim();
 
-  //   const hashedPassword = bcryptPlugin.hash(password);
-  //   const encryptedTokenSecret = this.cryptoService.generateSecret();
+    const hashedPassword = bcryptPlugin.hash($password);
+    const encryptedTokenSecret = this.cryptoService.generateSecret();
 
-  //   const newUserEntity = this.userRepository.create({
-  //     id: uuidPlugin.v7(),
-  //     hashedPassword,
-  //     encryptedTokenSecret,
-  //     email,
-  //     role: Roles.ADMIN,
-  //   });
+    const newUserEntity = this.userRepository.create({
+      id: uuidPlugin.v7(),
+      hashedPassword,
+      encryptedTokenSecret,
+      email: $email,
+      role,
+    });
+
+    await this.userRepository.save(newUserEntity);
+    return newUserEntity;
+  }
 
   //   await this.userRepository.save(newUserEntity);
   //   return newUserEntity;
@@ -72,9 +83,10 @@ export class UserService {
   //   return userEntity;
   // }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string, relations?: string[]): Promise<User | null> {
     const userEntity = await this.userRepository.findOne({
       where: { id, isActive: true },
+      relations,
     });
 
     // if (!userEntity) throw new NotFoundException('User not found');
@@ -82,12 +94,12 @@ export class UserService {
     return userEntity;
   }
 
-  async findByEmail(email: string): Promise<User> {
+  async findByEmail(email: string): Promise<User | null> {
     const userEntity = await this.userRepository.findOne({
       where: { email, isActive: true },
     });
 
-    if (!userEntity) throw new NotFoundException('User not found');
+    // if (!userEntity) throw new NotFoundException('User not found');
 
     return userEntity;
   }
