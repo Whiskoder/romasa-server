@@ -156,9 +156,15 @@ export class AuthService {
     };
 
     res.cookie(type, token, {
-      httpOnly: true,
-      secure: true, // <- TODO: add config to enable secure cookies
-      sameSite: 'strict',
+      httpOnly: this.configService.get<boolean>('auth.cookiesHttpOnly', {
+        infer: true,
+      }),
+      secure: this.configService.get<boolean>('auth.cookiesSecure', {
+        infer: true,
+      }),
+      sameSite: this.configService.get<any>('auth.cookiesSameSite', {
+        infer: true,
+      }),
       maxAge: calculateExpiration(),
     });
   }
