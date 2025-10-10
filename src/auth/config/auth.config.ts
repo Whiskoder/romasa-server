@@ -1,6 +1,12 @@
 import { registerAs } from '@nestjs/config';
 
-import { IsInt, IsPositive, IsString } from 'class-validator';
+import {
+  IsInt,
+  IsPositive,
+  IsString,
+  IsBoolean,
+  IsEnum,
+} from 'class-validator';
 
 import { AuthConfig } from 'src/auth/config/auth-config.type';
 import { validateConfig } from 'src/utils';
@@ -19,6 +25,15 @@ class EnvironmentVariablesValidator {
   @IsInt()
   @IsPositive()
   AUTH_REFRESH_TOKEN_EXPIRES_IN: number;
+
+  @IsBoolean()
+  AUTH_COOKIES_HTTP_ONLY: boolean;
+
+  @IsBoolean()
+  AUTH_COOKIES_SECURE: boolean;
+
+  @IsEnum(['strict', 'lax', 'none'])
+  AUTH_COOKIES_SAME_SITE: string;
 }
 
 export default registerAs<AuthConfig>('auth', () => {
@@ -35,5 +50,11 @@ export default registerAs<AuthConfig>('auth', () => {
       10,
     ),
     accessTokenSecret: process.env.AUTH_ACCESS_TOKEN_SECRET,
+    cookiesHttpOnly: process.env.AUTH_COOKIES_HTTP_ONLY === 'true',
+    cookiesSecure: process.env.AUTH_COOKIES_SECURE === 'true',
+    cookiesSameSite: process.env.AUTH_COOKIES_SAME_SITE as
+      | 'lax'
+      | 'strict'
+      | 'none',
   };
 });
