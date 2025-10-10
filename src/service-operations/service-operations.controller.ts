@@ -59,9 +59,10 @@ export class ServiceOperationsController {
   @Post(':operationId/approve')
   @ApiResponse(201, 'Service Operation approved')
   async approve(
-    @Query('operationId', new ParseIntPipe()) operationId: number,
+    @Param('operationId', new ParseIntPipe()) operationId: number,
     @GetUserId() userId: string,
-  ): Promise<{ serviceOperations: ResponseServiceOperationsDto[] }> {
+  ): Promise<{ serviceOperations: any[] }> {
+    console.log(operationId);
     const serviceOperation = await this.serviceOperationsService.approve(
       operationId,
       userId,
@@ -76,7 +77,7 @@ export class ServiceOperationsController {
   @Post(':operationId/reject')
   @ApiResponse(201, 'Service Operation rejected')
   async reject(
-    @Query('operationId', new ParseIntPipe()) operationId: number,
+    @Param('operationId', new ParseIntPipe()) operationId: number,
     @GetUserId() userId: string,
   ): Promise<any> {}
 
@@ -86,7 +87,7 @@ export class ServiceOperationsController {
   @ApiResponse(201, 'Service Operation scheduled appointment')
   async scheduleAppointment(
     @Body() scheduleAppointmentDto: ScheduleAppointmentDto,
-    @Query('operationId', new ParseIntPipe()) operationId: number,
+    @Param('operationId', new ParseIntPipe()) operationId: number,
     @GetUserId() userId: string,
   ): Promise<{ serviceOperations: ResponseServiceOperationsDto[] }> {
     const serviceOperation =

@@ -17,6 +17,7 @@ import { Vehicle } from 'src/vehicles/entities';
       .addSelect('createdByEmployee.firstName', 'createdByEmployeeFirstName')
       .addSelect('createdByEmployee.lastName', 'createdByEmployeeLastName')
       .addSelect('createdByEmployee.middleName', 'createdByEmployeeMiddleName')
+      // .addSelect('createdByEmployee.id', )
 
       // Campos del jefe de departamento
       .addSelect(

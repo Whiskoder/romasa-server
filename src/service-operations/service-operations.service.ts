@@ -108,7 +108,12 @@ export class ServiceOperationsService {
     );
     this.processApproval(user, serviceOperation);
 
-    //this.notify
+    if (
+      serviceOperation.approvedByDepartmentManager &&
+      serviceOperation.approvedByDriver
+    ) {
+      serviceOperation.status = ServiceStatus.requested;
+    }
 
     return await this.serviceOperationsRepository.save(serviceOperation);
   }
@@ -206,6 +211,7 @@ export class ServiceOperationsService {
     const { employee } = user;
     serviceOperation.scheduledByEmployee = employee;
     serviceOperation.diagnosticAppoinmentDate = date;
+    serviceOperation.status = ServiceStatus.scheduled_diagnosis;
   }
 
   private processApproval(
@@ -303,6 +309,7 @@ export class ServiceOperationsService {
         'createdByEmployee.firstName',
         'createdByEmployee.lastName',
         'createdByEmployee.middleName',
+        'createdByEmployee.id',
       ])
       .leftJoin(
         'serviceOperation.departmentManagerEmployee',
@@ -312,6 +319,7 @@ export class ServiceOperationsService {
         'departmentManagerEmployee.firstName',
         'departmentManagerEmployee.lastName',
         'departmentManagerEmployee.middleName',
+        'departmentManagerEmployee.id',
       ])
       .leftJoin(
         'serviceOperation.vehicleDriverEmployee',
@@ -321,6 +329,7 @@ export class ServiceOperationsService {
         'vehicleDriverEmployee.firstName',
         'vehicleDriverEmployee.lastName',
         'vehicleDriverEmployee.middleName',
+        'vehicleDriverEmployee.id',
       ])
       .leftJoin('serviceOperation.vehicle', 'vehicle')
       .addSelect([
