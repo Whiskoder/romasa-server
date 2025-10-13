@@ -3,13 +3,15 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { User } from 'src/users/entities';
 
-@Entity({ name: 'groups' })
+import { UserEntity } from 'src/users/infraestructure/persistence/relational/entities';
+
+@Entity()
 export class Group {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn({ type: 'uuid' })
   id: string;
 
   @Column({ type: 'nvarchar', length: 100, nullable: false, unique: true })
@@ -18,8 +20,8 @@ export class Group {
   @Column({ type: 'bit', default: true })
   isActive: boolean;
 
-  @OneToMany(() => User, (user) => user.id)
-  users: User[];
+  @OneToMany(() => UserEntity, (userEntity) => userEntity.id)
+  userEntities: UserEntity[];
 
   @Column({ type: 'text', nullable: true })
   permissions: string;
@@ -27,6 +29,6 @@ export class Group {
   @CreateDateColumn({ type: 'datetime' })
   createdAt: Date;
 
-  @CreateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ type: 'datetime' })
   updatedAt: Date;
 }
