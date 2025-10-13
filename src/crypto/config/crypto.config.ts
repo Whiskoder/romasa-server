@@ -3,7 +3,7 @@ import { registerAs } from '@nestjs/config';
 import { IsString } from 'class-validator';
 
 import { CryptoConfig } from 'src/crypto/config/crypto-config.type';
-import { validateConfig } from 'src/utils';
+import { validateConfig } from 'src/core/utils';
 
 class EnvironmentVariablesValidator {
   @IsString()

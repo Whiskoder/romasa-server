@@ -1,5 +1,5 @@
-import { JwtPayload } from 'src/shared/interfaces';
+// import { JwtPayload } from 'src/core/interfaces';
 
-export interface AccessTokenPayload extends JwtPayload {
-  userId: string;
-}
+// export interface AccessTokenPayload extends JwtPayload {
+//   userId: string;
+// }

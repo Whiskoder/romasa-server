@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import cookieParser from 'cookie-parser';
 
 import { AppModule } from 'src/app.module';
-import { AllConfigType } from 'src/config/config.type';
+import { AllConfigType } from 'src/core/config';
 import { useContainer } from 'class-validator';
 
 async function bootstrap() {

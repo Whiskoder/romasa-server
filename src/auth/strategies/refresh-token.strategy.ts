@@ -7,11 +7,10 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
 
 import { CryptoService } from 'src/crypto/crypto.service';
-import { extractTokenFromCookie, validatePayload } from 'src/utils';
-import { JwtPayload } from 'src/shared/interfaces';
+import { extractTokenFromCookie, validatePayload } from 'src/core/utils';
+import { JwtPayload } from 'src/core/interfaces';
 import { TokenType } from 'src/auth/enum';
-import { User } from 'src/users/entities';
-import { UserService } from 'src/users/user.service';
+import { User } from 'src/users/domain';
 
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(
@@ -20,7 +19,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly userService: UserService,
+    // private readonly userService: UserService,
     private readonly cryptoService: CryptoService,
   ) {
     super({
@@ -37,7 +36,8 @@ export class RefreshTokenStrategy extends PassportStrategy(
 
         const userId = payload.sub;
 
-        const userEntity = await this.userService.findById(userId);
+        // const userEntity = await this.userService.findById(userId);
+        const userEntity = null as any;
         if (!userEntity)
           return done(new UnauthorizedException('Token user not found'));
 

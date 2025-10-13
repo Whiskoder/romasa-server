@@ -29,7 +29,7 @@
       "@employee": ["src/employeess"],
       "@logger": ["src/logger"],
       "@service-operations": ["src/service-operations"],
-      "@shared": ["src/shared"],
+      "@shared": ["src/core"],
       "@users": ["src/users"],
       "@vehicles": ["src/vehicles"]
     }

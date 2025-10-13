@@ -8,54 +8,53 @@ import {
 
 import { JwtService } from '@nestjs/jwt';
 
-import { AllConfigType } from 'src/config/config.type';
-import { bcryptPlugin, uuidPlugin } from 'src/plugins';
+import { AllConfigType } from 'src/core/config';
+import { bcryptPlugin, uuidPlugin } from 'src/core/plugins';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { LoginUserDto, RegisterUserDto } from 'src/auth/dtos';
 import { TokenType } from 'src/auth/enum';
-import { User } from 'src/users/entities/user.entity';
-import { UserService } from 'src/users/user.service';
+import { User } from 'src/users/domain';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly configService: ConfigService<AllConfigType, true>,
     private readonly jwtService: JwtService,
-    private readonly userService: UserService,
+    // private readonly userService: UserService,
     private readonly cryptoService: CryptoService,
     // private readonly notificationsService: NotificationsService,
     // private readonly userRefreshTokenService: UserRefreshTokenService,
     // private readonly invitationTokenService: InvitationTokenService,
   ) {}
 
-  async register(registerUserDto: RegisterUserDto): Promise<User> {
-    const email = registerUserDto.email;
+  // async register(registerUserDto: RegisterUserDto): Promise<User> {
+  //   const email = registerUserDto.email;
 
-    const userExists = await this.userService.findByEmail(email);
-    if (userExists) throw new BadRequestException('user_exists');
+  //   const userExists = await this.userService.findByEmail(email);
+  //   if (userExists) throw new BadRequestException('user_exists');
 
-    const userEntity = await this.userService.create(registerUserDto);
+  //   const userEntity = await this.userService.create(registerUserDto);
 
-    return userEntity;
-  }
+  //   return userEntity;
+  // }
 
-  async login(loginUserDto: LoginUserDto, res: Response): Promise<User> {
-    const { email, password } = loginUserDto;
+  // async login(loginUserDto: LoginUserDto, res: Response): Promise<User> {
+  //   const { email, password } = loginUserDto;
 
-    const userEntity = await this.userService.findByEmail(email);
-    if (!userEntity) throw new UnauthorizedException('user_not_found');
+  //   const userEntity = await this.userService.findByEmail(email);
+  //   if (!userEntity) throw new UnauthorizedException('user_not_found');
 
-    const validPassword = bcryptPlugin.compare(
-      password,
-      userEntity.hashedPassword,
-    );
+  //   const validPassword = bcryptPlugin.compare(
+  //     password,
+  //     userEntity.hashedPassword,
+  //   );
 
-    if (!validPassword) throw new UnauthorizedException('invalid_password');
+  //   if (!validPassword) throw new UnauthorizedException('invalid_password');
 
-    await this.setAuthCookies(res, userEntity);
+  //   await this.setAuthCookies(res, userEntity);
 
-    return userEntity;
-  }
+  //   return userEntity;
+  // }
 
   // TODO: user can't have multiple sessions
 
@@ -119,7 +118,6 @@ export class AuthService {
     const payload = {
       sub: userEntity.id,
       type: TokenType.access_token,
-      role: userEntity.role,
     };
 
     const jwtid = uuidPlugin.v7();

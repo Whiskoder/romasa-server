@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 
 import { AuthConfig } from 'src/auth/config/auth-config.type';
-import { validateConfig } from 'src/utils';
+import { validateConfig } from 'src/core/utils';
 
 class EnvironmentVariablesValidator {
   @IsString()
