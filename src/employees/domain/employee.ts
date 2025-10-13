@@ -1,6 +1,4 @@
-export type Gender = 'male' | 'female';
-
-export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+';
+import { Gender, BloodGroup } from 'src/employees/types';
 
 export class Employee {
   id: number;
@@ -20,6 +18,4 @@ export class Employee {
   fatherName: string;
 
   gender: Gender;
-
-  bloodGroup: BloodGroup;
 }

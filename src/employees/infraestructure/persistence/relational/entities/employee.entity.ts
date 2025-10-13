@@ -18,10 +18,10 @@ export class EmployeeEntity {
   firstName: string;
 
   @Column({ name: 'STRAPPEMP', type: 'nvarchar', length: 255, nullable: true })
-  lastName: string;
+  fatherName: string;
 
   @Column({ name: 'STRAPMEMP', type: 'nvarchar', length: 255, nullable: true })
-  middleName: string;
+  motherName: string;
 
   @Column({ name: 'STRCALEMP', type: 'nvarchar', length: 255, nullable: true })
   street: string;
@@ -63,7 +63,7 @@ export class EmployeeEntity {
   gender: number;
 
   @Column({ name: 'STRGRPSNG', type: 'nvarchar', length: 6, nullable: true })
-  bloodType: string;
+  bloodGroup: string;
 
   @Column({ name: 'INTSTDCVL', type: 'smallint', nullable: true })
   maritalStatus: number;
