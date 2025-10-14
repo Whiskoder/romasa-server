@@ -10,7 +10,7 @@ import {
 import { UserEntity } from 'src/users/infraestructure/persistence/relational/entities';
 
 @Entity()
-export class Group {
+export class GroupEntity {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
 
