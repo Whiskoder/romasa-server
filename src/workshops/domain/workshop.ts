@@ -9,5 +9,9 @@ export class Workshop {
 
   capacity: number;
 
+  createdAt: Date;
+
+  updatedAt: Date;
+
   // TODO: Horario de atencion
 }

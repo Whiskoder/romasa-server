@@ -13,3 +13,7 @@ export enum ServiceDiagnosisPermissions {
   'service_diagnosis:create:without_approval' = 'service_diagnosis:create:without_approval',
   'service_diagnosis:create:with_required_approval' = 'service_diagnosis:create:with_required_approval',
 }
+
+// recurso: service_requests
+// action: view, create, approve, reject, schedule
+// condition: own, all, branch

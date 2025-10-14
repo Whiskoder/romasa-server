@@ -8,7 +8,9 @@ export class UserMapper {
     domainEntity.id = raw.id;
     domainEntity.hashedPassword = raw.hashedPassword;
     domainEntity.email = raw.email;
-    domainEntity.employee = EmployeeMapper.toDomain(raw.employeeEntity);
+    if (raw.employeeEntity) {
+      domainEntity.employee = EmployeeMapper.toDomain(raw.employeeEntity);
+    }
     domainEntity.isActive = raw.isActive;
     domainEntity.encryptedTokenSecret = raw.encryptedTokenSecret;
     domainEntity.createdAt = raw.createdAt;
@@ -21,9 +23,11 @@ export class UserMapper {
     persistenceEntity.id = domainEntity.id;
     persistenceEntity.hashedPassword = domainEntity.hashedPassword;
     persistenceEntity.email = domainEntity.email;
-    persistenceEntity.employeeEntity = EmployeeMapper.toPersistence(
-      domainEntity.employee,
-    );
+    if (domainEntity.employee) {
+      persistenceEntity.employeeEntity = EmployeeMapper.toPersistence(
+        domainEntity.employee,
+      );
+    }
     persistenceEntity.isActive = domainEntity.isActive;
     persistenceEntity.encryptedTokenSecret = domainEntity.encryptedTokenSecret;
     persistenceEntity.createdAt = domainEntity.createdAt;

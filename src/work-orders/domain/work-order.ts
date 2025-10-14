@@ -4,6 +4,7 @@ import { ServiceRequest } from 'src/service-requests/domain';
 import { User } from 'src/users/domain';
 import { Workshop } from 'src/workshops/domain';
 
+// TODO: should createdAt?
 /**
  * Representa cualquier solicitud de servicio vehicular (diagnóstico,
  * reparación, pintura, hojalatería, etc)

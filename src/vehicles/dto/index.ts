@@ -1,1 +1,1 @@
-// Export DTOs here when created
+export * from './response-vehicle.dto';

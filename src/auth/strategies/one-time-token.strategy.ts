@@ -6,7 +6,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { extractTokenFromCookie } from 'src/core/utils';
-
 import { TokenType } from 'src/auth/enum';
 
 @Injectable()

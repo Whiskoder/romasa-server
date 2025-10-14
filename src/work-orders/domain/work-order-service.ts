@@ -9,29 +9,29 @@ export class WorkOrderService {
 
   /* --- Condiciones generales --- */
   // Cantidad de combustible al recibir el vehiculo
-  fuelLevelAtReception: number;
+  fuelLevelAtReception?: number;
 
   // Kilómetros recorridos al recibir el vehiculo
-  mileageAtReception: number;
+  mileageAtReception?: number;
 
   // Lista de elementos presentes (Gato, Llanta de refacción, etc) al recibir el vehiculo
-  receivedInventoryItems: string[];
+  receivedInventoryItems?: string[];
 
   /* --- Inspection visual de daños --- */
   // Lista de observaciones del techo
-  roofObservations: string[];
+  roofObservations?: string[];
 
   // Lista de observaciones del frente
-  frontObservations: string[];
+  frontObservations?: string[];
 
   // Lista de observaciones del lado izquierdo
-  leftSideObservations: string[];
+  leftSideObservations?: string[];
 
   // Lista de observaciones del lado derecho
-  rightSideObservations: string[];
+  rightSideObservations?: string[];
 
   // Lista de observaciones del trasero
-  rearObservations: string[];
+  rearObservations?: string[];
 
   /* --- Trabajo realizado --- */
   // Detalle completo de todo el trabajo realizado

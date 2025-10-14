@@ -25,5 +25,7 @@ export abstract class ServiceRequestRepository {
 
   abstract findAllByCreatedBy(count?: boolean): Promise<ServiceRequest[]>;
 
-  abstract findOneById(): Promise<NullableType<ServiceRequest>>;
+  abstract findById(
+    serviceRequestId: string,
+  ): Promise<NullableType<ServiceRequest>>;
 }

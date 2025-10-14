@@ -1,65 +1,52 @@
 import { Response } from 'express';
-import { ConfigService } from '@nestjs/config';
-import {
-  BadRequestException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
-import { JwtService } from '@nestjs/jwt';
-
-import { AllConfigType } from 'src/core/config';
-import { bcryptPlugin, uuidPlugin } from 'src/core/plugins';
-import { CryptoService } from 'src/crypto/crypto.service';
-import { LoginUserDto, RegisterUserDto } from 'src/auth/dtos';
-import { TokenType } from 'src/auth/enum';
+import { bcryptPlugin } from 'src/core/plugins';
+import { LoginUserDto } from 'src/auth/dtos';
 import { User } from 'src/users/domain';
+import { CookieService, TokenService } from 'src/auth/services';
+import { UsersService } from 'src/users/users.service';
+import {
+  InvalidCredentialsException,
+  UserNoLongerActiveException,
+} from 'src/auth/exceptions';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly configService: ConfigService<AllConfigType, true>,
-    private readonly jwtService: JwtService,
-    // private readonly userService: UserService,
-    private readonly cryptoService: CryptoService,
-    // private readonly notificationsService: NotificationsService,
-    // private readonly userRefreshTokenService: UserRefreshTokenService,
-    // private readonly invitationTokenService: InvitationTokenService,
+    private readonly cookieService: CookieService,
+    private readonly tokenService: TokenService,
+    private readonly usersService: UsersService,
   ) {}
 
-  // async register(registerUserDto: RegisterUserDto): Promise<User> {
-  //   const email = registerUserDto.email;
+  async me(userId: string): Promise<User> {
+    const user = await this.usersService.findById(userId);
+    if (!user) throw new UserNoLongerActiveException();
+    return user;
+  }
 
-  //   const userExists = await this.userService.findByEmail(email);
-  //   if (userExists) throw new BadRequestException('user_exists');
+  async login(loginUserDto: LoginUserDto, res: Response): Promise<User> {
+    const { email, password } = loginUserDto;
 
-  //   const userEntity = await this.userService.create(registerUserDto);
+    const user = await this.usersService.findByEmail(email);
+    if (!user)
+      throw new InvalidCredentialsException(
+        'El usuario con ese email no existe',
+      );
 
-  //   return userEntity;
-  // }
+    const validPassword = bcryptPlugin.compare(password, user.hashedPassword);
 
-  // async login(loginUserDto: LoginUserDto, res: Response): Promise<User> {
-  //   const { email, password } = loginUserDto;
+    if (!validPassword)
+      throw new InvalidCredentialsException('Contraseña incorrecta');
 
-  //   const userEntity = await this.userService.findByEmail(email);
-  //   if (!userEntity) throw new UnauthorizedException('user_not_found');
+    await this.setAuthCookies(res, user);
 
-  //   const validPassword = bcryptPlugin.compare(
-  //     password,
-  //     userEntity.hashedPassword,
-  //   );
-
-  //   if (!validPassword) throw new UnauthorizedException('invalid_password');
-
-  //   await this.setAuthCookies(res, userEntity);
-
-  //   return userEntity;
-  // }
+    return user;
+  }
 
   // TODO: user can't have multiple sessions
-
-  async refresh(userEntity: User, res: Response): Promise<void> {
-    await this.setAuthCookies(res, userEntity);
+  async refresh(user: User, res: Response): Promise<void> {
+    await this.setAuthCookies(res, user);
   }
   /**
    * TODO: revolke old token
@@ -67,7 +54,7 @@ export class AuthService {
    * create fn in tokenService to revoke used RefreshToken
    */
   async logout(res: Response, rawRefreshToken?: string | null): Promise<void> {
-    this.clearAuthCookies(res);
+    this.cookieService.clearAuthCookies(res);
 
     // revoke old token
     // if (!rawRefreshToken?.trim()) return;
@@ -102,68 +89,12 @@ export class AuthService {
     // } catch (e) {}
   }
 
-  private async clearAuthCookies(res: Response) {
-    res.clearCookie(TokenType.access_token);
-    res.clearCookie(TokenType.refresh_token);
-  }
-
   private async setAuthCookies(res: Response, userEntity: User) {
-    const accessToken = await this.generateAccessToken(userEntity);
-    const refreshToken = await this.generateRefreshToken(userEntity);
-    await this.setTokenCookie(res, accessToken);
-    await this.setTokenCookie(res, refreshToken);
-  }
+    const accessToken = await this.tokenService.generateAccessToken(userEntity);
+    const refreshToken =
+      await this.tokenService.generateRefreshToken(userEntity);
 
-  private async generateAccessToken(userEntity: User) {
-    const payload = {
-      sub: userEntity.id,
-      type: TokenType.access_token,
-    };
-
-    const jwtid = uuidPlugin.v7();
-    const secret = this.configService.get<string>('auth.accessTokenSecret', {
-      infer: true,
-    });
-
-    const expiresIn = this.configService.get('auth.accessTokenExpiresIn', {
-      infer: true,
-    });
-
-    return this.jwtService.signAsync(payload, { jwtid, secret, expiresIn });
-  }
-
-  private async generateRefreshToken(userEntity: User) {
-    const payload = { sub: userEntity.id, type: TokenType.refresh_token };
-
-    const jwtid = uuidPlugin.v7();
-    const secret = this.cryptoService.decipher(userEntity.encryptedTokenSecret);
-
-    const expiresIn = this.configService.get('auth.refreshTokenExpiresIn', {
-      infer: true,
-    });
-
-    return this.jwtService.signAsync(payload, { jwtid, secret, expiresIn });
-  }
-
-  private async setTokenCookie(res: Response, token: string) {
-    const { exp, type } = this.jwtService.decode(token);
-
-    const calculateExpiration = () => {
-      const now = Math.floor(Date.now() / 1000);
-      return (exp - now) * 1000;
-    };
-
-    res.cookie(type, token, {
-      httpOnly: this.configService.get<boolean>('auth.cookiesHttpOnly', {
-        infer: true,
-      }),
-      secure: this.configService.get<boolean>('auth.cookiesSecure', {
-        infer: true,
-      }),
-      sameSite: this.configService.get<any>('auth.cookiesSameSite', {
-        infer: true,
-      }),
-      maxAge: calculateExpiration(),
-    });
+    await this.cookieService.setTokenCookie(res, accessToken);
+    await this.cookieService.setTokenCookie(res, refreshToken);
   }
 }

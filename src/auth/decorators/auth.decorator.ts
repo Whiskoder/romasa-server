@@ -6,7 +6,7 @@ import {
   OneTimeTokenGuard,
 } from 'src/auth/guards';
 
-export function AuthAccess() {
+export function AuthGuard() {
   return applyDecorators(UseGuards(AccessTokenGuard));
 }
 

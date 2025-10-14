@@ -5,4 +5,9 @@ import { EmployeeRepository } from 'src/employees/infraestructure/persistence/em
 @Injectable()
 export class EmployeesService {
   constructor(private readonly employeeRepository: EmployeeRepository) {}
+
+  async findById(id: number): Promise<any> {
+    // TODO: add employee validations
+    return this.employeeRepository.findById(id);
+  }
 }

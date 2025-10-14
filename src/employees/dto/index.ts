@@ -1,1 +1,1 @@
-// Export DTOs here when created
+export * from './response-employee.dto';

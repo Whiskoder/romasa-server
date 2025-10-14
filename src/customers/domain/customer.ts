@@ -8,4 +8,8 @@ export class Customer {
   name: string;
 
   type: 'external' | 'internal';
+
+  createdAt: Date;
+
+  updatedAt: Date;
 }

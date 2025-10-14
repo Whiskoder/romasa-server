@@ -7,6 +7,8 @@ export class CustomersMapper {
     domainEntity.id = raw.id;
     domainEntity.name = raw.name;
     domainEntity.type = raw.type;
+    domainEntity.createdAt = raw.createdAt;
+    domainEntity.updatedAt = raw.updatedAt;
     return domainEntity;
   }
 
@@ -15,6 +17,8 @@ export class CustomersMapper {
     rawEntity.id = domain.id;
     rawEntity.name = domain.name;
     rawEntity.type = domain.type;
+    rawEntity.createdAt = domain.createdAt;
+    rawEntity.updatedAt = domain.updatedAt;
     return rawEntity;
   }
 }

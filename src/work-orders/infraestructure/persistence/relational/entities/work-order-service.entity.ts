@@ -11,29 +11,29 @@ export class WorkOrderServiceEntity {
   })
   workOrderEntity: WorkOrderEntity;
 
-  @Column({ type: 'int', nullable: false })
-  fuelLevelAtReception: number;
+  @Column({ type: 'int', nullable: true })
+  fuelLevelAtReception?: number;
 
-  @Column({ type: 'int', nullable: false })
-  mileageAtReception: number;
-
-  @Column({ type: 'nvarchar', length: 255, nullable: true }) // TODO: review length
-  receivedInventoryItems: string;
+  @Column({ type: 'int', nullable: true })
+  mileageAtReception?: number;
 
   @Column({ type: 'nvarchar', length: 255, nullable: true }) // TODO: review length
-  roofObservations: string;
+  receivedInventoryItems?: string;
 
   @Column({ type: 'nvarchar', length: 255, nullable: true }) // TODO: review length
-  frontObservations: string;
+  roofObservations?: string;
 
   @Column({ type: 'nvarchar', length: 255, nullable: true }) // TODO: review length
-  leftSideObservations: string;
+  frontObservations?: string;
 
   @Column({ type: 'nvarchar', length: 255, nullable: true }) // TODO: review length
-  rightSideObservations: string;
+  leftSideObservations?: string;
 
   @Column({ type: 'nvarchar', length: 255, nullable: true }) // TODO: review length
-  rearObservations: string;
+  rightSideObservations?: string;
+
+  @Column({ type: 'nvarchar', length: 255, nullable: true }) // TODO: review length
+  rearObservations?: string;
 
   @Column({ type: 'nvarchar', length: 255, nullable: true }) // TODO: review length
   performedServices?: string;

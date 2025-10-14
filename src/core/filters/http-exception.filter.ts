@@ -33,6 +33,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const exceptionRes = exception.getResponse();
     const message = exceptionRes['message'] ?? null;
+    const errorCode = exceptionRes['errorCode'] ?? null;
     const statusCode =
       exception instanceof HttpException
         ? exception.getStatus()
@@ -51,13 +52,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const responseBody: Record<string, unknown> = {
       message: STATUS_CODES[statusCode],
       path: createHttpLogDto.requestPath,
-      result: null,
+      result: errorCode,
       status,
       statusCode,
       timestamp: new Date(),
     };
 
-    if (this.environment === 'development') responseBody.result = message;
+    if (this.environment === 'development') responseBody.message = message;
 
     response.status(statusCode).json(responseBody);
   }

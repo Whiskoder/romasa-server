@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PassportStrategy } from '@nestjs/passport';
 
@@ -8,9 +8,11 @@ import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
 
 import { CryptoService } from 'src/crypto/crypto.service';
 import { extractTokenFromCookie, validatePayload } from 'src/core/utils';
+import { InvalidTokenException } from 'src/auth/exceptions';
 import { JwtPayload } from 'src/core/interfaces';
 import { TokenType } from 'src/auth/enum';
 import { User } from 'src/users/domain';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class RefreshTokenStrategy extends PassportStrategy(
@@ -19,7 +21,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly jwtService: JwtService,
-    // private readonly userService: UserService,
+    private readonly usersService: UsersService,
     private readonly cryptoService: CryptoService,
   ) {
     super({
@@ -32,19 +34,16 @@ export class RefreshTokenStrategy extends PassportStrategy(
 
         const isValidPayload = await validatePayload(payload);
         if (!isValidPayload)
-          done(new UnauthorizedException('Invalid token payload'));
+          done(new InvalidTokenException('Payload no válido'));
 
-        const userId = payload.sub;
+        const user = await this.usersService.findById(payload.sub);
+        if (!user)
+          return done(new InvalidTokenException('Usuario no encontrado'));
 
-        // const userEntity = await this.userService.findById(userId);
-        const userEntity = null as any;
-        if (!userEntity)
-          return done(new UnauthorizedException('Token user not found'));
-
-        req.user = userEntity;
+        req.user = user;
 
         const tokenSecretKey = this.cryptoService.decipher(
-          userEntity.encryptedTokenSecret,
+          user.encryptedTokenSecret,
         );
         done(null, tokenSecretKey);
       },
@@ -52,14 +51,12 @@ export class RefreshTokenStrategy extends PassportStrategy(
   }
 
   async validate(req: Request, payload: JwtPayload, done: VerifiedCallback) {
-    const { type, sub } = payload;
-    if (type !== TokenType.refresh_token)
-      return done(new UnauthorizedException('Token is not a refresh token'));
-
+    if (payload.type !== TokenType.refresh_token) {
+      return done(
+        new InvalidTokenException('El token no es de tipo refresh_token'),
+      );
+    }
     const user = req.user as User;
-    if (!user) return done(new UnauthorizedException('Token user not found'));
-    if (user.id !== sub)
-      return done(new UnauthorizedException('User id mismatch'));
 
     done(null, user);
   }

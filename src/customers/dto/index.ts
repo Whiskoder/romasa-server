@@ -1,1 +1,2 @@
-// Export DTOs here when created
+export * from './response-customer.dto';
+export * from './create-customer.dto';
