@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 
-import { User } from 'src/users/entities';
+import { User } from 'src/users/domain';
 
 type UserProperties =
   | {

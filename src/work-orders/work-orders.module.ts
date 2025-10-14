@@ -10,4 +10,4 @@ import { WorkOrdersService } from 'src/work-orders/work-orders.service';
   providers: [WorkOrdersService],
   exports: [WorkOrdersService, RelationalWorkOrderPersistenceModule],
 })
-export class WorkOrderModule {}
+export class WorkOrdersModule {}

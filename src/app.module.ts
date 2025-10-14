@@ -15,9 +15,14 @@ import cryptoConfig from 'src/crypto/config/crypto.config';
 import databaseConfig from 'src/database/config/database.config';
 
 import { AuthModule } from 'src/auth/auth.module';
-// import { EmployeesModule } from 'src/employees/employee.module';
-// import { UsersModule } from 'src/users/user.module';
-// import { VehiclesModule } from 'src/vehicles/vehicle.module';
+import { CustomersModule } from 'src/customers/customers.module';
+import { EmployeesModule } from 'src/employees/employees.module';
+import { GroupsModule } from 'src/groups/groups.module';
+import { UsersModule } from 'src/users/users.module';
+import { VehiclesModule } from 'src/vehicles/vehicles.module';
+import { WorkOrdersModule } from 'src/work-orders/work-orders.module';
+import { ServiceRequestsModule } from 'src/service-requests/service-requests.module';
+import { WorkshopsModule } from 'src/workshops/workshops.module';
 
 const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
   useClass: TypeOrmConfigService,
@@ -36,10 +41,14 @@ const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
     }),
     infrastructureDatabaseModule,
     AuthModule,
-    // EmployeesModule,
-    // ServiceOperationsModule,
-    // UsersModule,
-    // VehiclesModule,
+    CustomersModule,
+    EmployeesModule,
+    GroupsModule,
+    UsersModule,
+    VehiclesModule,
+    WorkOrdersModule,
+    ServiceRequestsModule,
+    WorkshopsModule,
   ],
   providers: [
     // {

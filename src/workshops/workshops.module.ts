@@ -10,4 +10,4 @@ import { WorkshopsService } from 'src/workshops/workshops.service';
   providers: [WorkshopsService],
   exports: [WorkshopsService, RelationalWorkshopPersistenceModule],
 })
-export class WorkshopModule {}
+export class WorkshopsModule {}

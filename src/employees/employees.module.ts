@@ -10,4 +10,4 @@ import { EmployeesService } from 'src/employees/employees.service';
   providers: [EmployeesService],
   exports: [EmployeesService, RelationalEmployeePersistenceModule],
 })
-export class EmployeeModule {}
+export class EmployeesModule {}

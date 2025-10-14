@@ -10,4 +10,4 @@ import { VehiclesService } from 'src/vehicles/vehicles.service';
   providers: [VehiclesService],
   exports: [VehiclesService, RelationalVehiclePersistenceModule],
 })
-export class VehicleModule {}
+export class VehiclesModule {}

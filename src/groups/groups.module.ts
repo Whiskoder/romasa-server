@@ -10,4 +10,4 @@ import { GroupsService } from 'src/groups/groups.service';
   providers: [GroupsService],
   exports: [GroupsService, RelationalGroupPersistenceModule],
 })
-export class GroupModule {}
+export class GroupsModule {}

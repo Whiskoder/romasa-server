@@ -10,4 +10,4 @@ import { ServiceRequestsService } from 'src/service-requests/service-requests.se
   providers: [ServiceRequestsService],
   exports: [ServiceRequestsService, RelationalServiceRequestPersistenceModule],
 })
-export class ServiceRequestModule {}
+export class ServiceRequestsModule {}

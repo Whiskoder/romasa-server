@@ -1,6 +1,7 @@
-import { ServiceRequestEntity } from 'src/service-requests/infraestructure/persistence/relational/entities';
 import { ServiceRequest } from 'src/service-requests/domain/service-request';
+import { ServiceRequestEntity } from 'src/service-requests/infraestructure/persistence/relational/entities';
 import { ServiceRequestPriority } from 'src/service-requests/enums';
+import { VehicleMapper } from 'src/vehicles/infraestructure/persistence/relational/mappers';
 
 export class ServiceRequestMapper {
   static toDomain(raw: ServiceRequestEntity): ServiceRequest {
@@ -11,10 +12,8 @@ export class ServiceRequestMapper {
     domainEntity.priority = raw.priority as ServiceRequestPriority;
     domainEntity.createdAt = raw.createdAt;
     domainEntity.updatedAt = raw.updatedAt;
-    domainEntity.createdBy = raw.createdBy;
-    domainEntity.updatedBy = raw.updatedBy;
     domainEntity.requester = raw.requester;
-    domainEntity.vehicle = raw.vehicleEntity;
+    domainEntity.vehicle = VehicleMapper.toDomain(raw.vehicleEntity);
 
     return domainEntity;
   }
@@ -27,10 +26,10 @@ export class ServiceRequestMapper {
     persistenceEntity.priority = domain.priority;
     persistenceEntity.createdAt = domain.createdAt;
     persistenceEntity.updatedAt = domain.updatedAt;
-    persistenceEntity.createdBy = domain.createdBy;
-    persistenceEntity.updatedBy = domain.updatedBy;
     persistenceEntity.requester = domain.requester;
-    persistenceEntity.vehicleEntity = domain.vehicle;
+    persistenceEntity.vehicleEntity = VehicleMapper.toPersistence(
+      domain.vehicle,
+    );
 
     return persistenceEntity;
   }
