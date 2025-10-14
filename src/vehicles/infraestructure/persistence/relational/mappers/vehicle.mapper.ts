@@ -4,15 +4,17 @@ import { VehicleEntity } from 'src/vehicles/infraestructure/persistence/relation
 export class VehicleMapper {
   static toDomain(raw: VehicleEntity): Vehicle {
     const domainEntity = new Vehicle();
-    // Map properties from VehicleEntity to Vehicle domain entity
-    // This will need to be updated when the Vehicle domain entity is properly defined
+
+    domainEntity.id = raw.id;
+
     return domainEntity;
   }
 
   static toPersistence(domain: Vehicle): VehicleEntity {
     const rawEntity = new VehicleEntity();
-    // Map properties from Vehicle domain entity to VehicleEntity
-    // This will need to be updated when the Vehicle domain entity is properly defined
+
+    rawEntity.id = domain.id;
+
     return rawEntity;
   }
 }

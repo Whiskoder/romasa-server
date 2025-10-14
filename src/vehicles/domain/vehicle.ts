@@ -1,1 +1,3 @@
-export class Vehicle {}
+export class Vehicle {
+  id: number;
+}

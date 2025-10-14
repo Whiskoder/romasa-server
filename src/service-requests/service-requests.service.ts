@@ -39,6 +39,7 @@ export class ServiceRequestsService {
     const user = await this.usersService.findById(userId);
     if (!user) throw new UserNotFoundException();
 
+    // TODO: Implement tracking code
     const trackingCode = uuidPlugin.short();
 
     return this.serviceRequestRepository.create({

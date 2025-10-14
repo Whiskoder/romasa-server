@@ -4,6 +4,7 @@ import { AuthGuard, GetUserId } from 'src/auth/decorators';
 import { ServiceRequestsService } from 'src/service-requests/service-requests.service';
 import { CreateServiceRequestDto } from 'src/service-requests/dtos';
 import { ServiceRequestMapper } from 'src/service-requests/mappers';
+import { ApiResponse } from 'src/core/decorators';
 
 @Controller({
   version: '1',
@@ -16,6 +17,7 @@ export class ServiceRequestsController {
   ) {}
 
   @Post()
+  @ApiResponse(201, 'ServiceRequest created')
   async create(
     @Body()
     createServiceRequest: CreateServiceRequestDto,
@@ -31,8 +33,10 @@ export class ServiceRequestsController {
   }
 
   @Get(':serviceRequestId')
+  @ApiResponse(200, 'ServiceRequest found')
   async findOneById() {}
 
   @Get()
+  @ApiResponse(200, 'ServiceRequests found')
   async findAll() {}
 }

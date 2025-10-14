@@ -1,4 +1,7 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 
 @Exclude()
-export class ResponseVehicleDto {}
+export class ResponseVehicleDto {
+  @Expose()
+  id: number;
+}
