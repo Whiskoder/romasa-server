@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  NotImplementedException,
   Param,
   ParseUUIDPipe,
   Post,
@@ -42,9 +43,8 @@ export class ServiceRequestWorkOrdersController {
       createDiagnosticWorkOrderDto,
       true, // TODO <- requires approval must be calculated by user permissions
     );
-    console.log({ workOrder });
     return {
-      workOrder: WorkOrderMapper.toResponseDto(workOrder),
+      workOrder: WorkOrderMapper.diagnosticToResponseDto(workOrder),
     };
   }
 
@@ -60,7 +60,7 @@ export class ServiceRequestWorkOrdersController {
       createServiceWorkOrderDto,
       true,
     );
-    return { workOrder: WorkOrderMapper.toResponseDto(workOrder) };
+    return { workOrder: WorkOrderMapper.serviceToResponseDto(workOrder) };
   }
 
   // @Get()

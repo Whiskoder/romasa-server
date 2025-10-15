@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { RelationalEmployeePersistenceModule } from 'src/employees/infraestructure/persistence/relational/relational-persistence.module';
 import { EmployeesController } from 'src/employees/employees.controller';
 import { EmployeesService } from 'src/employees/employees.service';
+import { Employee } from 'src/employees/entities';
 
 @Module({
-  imports: [RelationalEmployeePersistenceModule],
+  imports: [TypeOrmModule.forFeature([Employee])],
   controllers: [EmployeesController],
   providers: [EmployeesService],
-  exports: [EmployeesService, RelationalEmployeePersistenceModule],
+  exports: [EmployeesService],
 })
 export class EmployeesModule {}

@@ -1,24 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
 
-import { ServiceRequestRepository } from './infraestructure/persistence/service-request.repository';
-import { NullableType } from 'src/core/types';
-import { ServiceRequest } from 'src/service-requests/domain';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { CreateServiceRequestDto } from 'src/service-requests/dtos';
 import { CustomersService } from 'src/customers/customers.service';
+import { NullableType } from 'src/core/types';
+import { ServiceRequest } from 'src/service-requests/entities';
+import { UsersService } from 'src/users/users.service';
+import { uuidPlugin } from 'src/core/plugins';
 import { VehiclesService } from 'src/vehicles/vehicles.service';
 import {
   CustomerNotFoundException,
   UserNotFoundException,
   VehicleNotFoundException,
 } from 'src/service-requests/exceptions';
-import { CreateServiceRequestDto } from 'src/service-requests/dtos';
-import { uuidPlugin } from 'src/core/plugins';
-import { User } from 'src/users/domain';
-import { UsersService } from 'src/users/users.service';
+import { WorkOrder } from 'src/work-orders/entities';
 
 @Injectable()
 export class ServiceRequestsService {
   constructor(
-    private readonly serviceRequestRepository: ServiceRequestRepository,
+    @InjectRepository(ServiceRequest)
+    private readonly serviceRequestsRepository: Repository<ServiceRequest>,
     private readonly customersService: CustomersService,
     private readonly vehiclesService: VehiclesService,
     private readonly usersService: UsersService,
@@ -42,17 +45,31 @@ export class ServiceRequestsService {
     // TODO: Implement tracking code
     const trackingCode = uuidPlugin.short();
 
-    return this.serviceRequestRepository.create({
+    const serviceRequest = {
+      id: uuidPlugin.v7(),
       requester: customer,
       vehicle,
       priority,
       trackingCode,
       createdBy: user,
       updatedBy: user,
-    });
+    };
+
+    const entity = this.serviceRequestsRepository.create(serviceRequest);
+
+    await this.serviceRequestsRepository.save(entity);
+
+    return entity;
   }
 
-  findById(serviceRequestId: string): Promise<NullableType<ServiceRequest>> {
-    return this.serviceRequestRepository.findById(serviceRequestId);
+  async findById(
+    id: string,
+    relations?: string[],
+  ): Promise<NullableType<ServiceRequest>> {
+    const entity = await this.serviceRequestsRepository.findOne({
+      where: { id },
+      relations,
+    });
+    return entity ? entity : null;
   }
 }

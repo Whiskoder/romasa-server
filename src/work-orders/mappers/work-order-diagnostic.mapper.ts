@@ -1,37 +1,33 @@
 import { plainToInstance } from 'class-transformer';
-import { ResponseEmployeeDto } from 'src/employees/dto';
 
-import { WorkOrderDiagnostic } from 'src/work-orders/domain';
+import { WorkOrderDiagnostic } from 'src/work-orders/entities';
 import { ResponseWorkOrderDiagnosticDto } from 'src/work-orders/dto';
+import { EmployeeMapper } from 'src/employees/mappers';
 
 export class WorkOrderDiagnosticMapper {
   static toResponseDto(
-    workOrderDiagnostic: WorkOrderDiagnostic,
+    entity: WorkOrderDiagnostic,
   ): ResponseWorkOrderDiagnosticDto {
     const dto = plainToInstance(ResponseWorkOrderDiagnosticDto, {
-      id: workOrderDiagnostic.id,
-      reportedSymptoms: workOrderDiagnostic.reportedSymptoms,
-      impactsOperability: workOrderDiagnostic.impactsOperability,
-      issueFrequency: workOrderDiagnostic.issueFrequency,
-      technicalDescription: workOrderDiagnostic.technicalDescription,
-      affectedSystems: workOrderDiagnostic.affectedSystems,
-      requiredMaterials: workOrderDiagnostic.requiredMaterials,
+      id: entity.id,
+      reportedSymptoms: entity.reportedSymptoms,
+      impactsOperability: entity.impactsOperability,
+      issueFrequency: entity.issueFrequency,
+      technicalDescription: entity.technicalDescription,
+      affectedSystems: entity.affectedSystems,
+      requiredMaterials: entity.requiredMaterials,
+      reportedByDriver: entity.reportedByDriver
+        ? EmployeeMapper.toResponseDto(entity.reportedByDriver)
+        : undefined,
     });
-
-    if (workOrderDiagnostic.reportedByDriver) {
-      dto.reportedByDriver = plainToInstance(
-        ResponseEmployeeDto,
-        workOrderDiagnostic.reportedByDriver,
-      );
-    }
 
     return dto;
   }
 
   static toResponseDtoList(
-    workOrders: WorkOrderDiagnostic[],
+    entities: WorkOrderDiagnostic[],
   ): ResponseWorkOrderDiagnosticDto[] {
-    return workOrders.map((workOrder) =>
+    return entities.map((workOrder) =>
       WorkOrderDiagnosticMapper.toResponseDto(workOrder),
     );
   }

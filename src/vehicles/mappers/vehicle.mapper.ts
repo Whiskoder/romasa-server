@@ -1,15 +1,15 @@
 import { plainToInstance } from 'class-transformer';
-import { Vehicle } from 'src/vehicles/domain';
+
 import { ResponseVehicleDto } from 'src/vehicles/dto';
+import { Vehicle } from 'src/vehicles/entities';
 
 export class VehicleMapper {
-  static toResponseDto(vehicle: Vehicle): ResponseVehicleDto {
-    const dto = plainToInstance(ResponseVehicleDto, vehicle);
-
+  static toResponseDto(entity: Vehicle): ResponseVehicleDto {
+    const dto = plainToInstance(ResponseVehicleDto, entity);
     return dto;
   }
 
-  static toResponseDtoList(vehicles: Vehicle[]): ResponseVehicleDto[] {
-    return vehicles.map((vehicle) => VehicleMapper.toResponseDto(vehicle));
+  static toResponseDtoList(entities: Vehicle[]): ResponseVehicleDto[] {
+    return entities.map((vehicle) => VehicleMapper.toResponseDto(vehicle));
   }
 }

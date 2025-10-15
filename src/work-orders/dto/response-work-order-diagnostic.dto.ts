@@ -1,7 +1,7 @@
 import { ResponseEmployeeDto } from 'src/employees/dto';
+import { ResponseWorkOrderDto } from './response-work-order.dto';
 
-export class ResponseWorkOrderDiagnosticDto {
-  id: string;
+export class ResponseWorkOrderDiagnosticDto extends ResponseWorkOrderDto {
   reportedByDriver: ResponseEmployeeDto;
   reportedSymptoms: string[];
   impactsOperability: boolean;

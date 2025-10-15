@@ -6,7 +6,7 @@ import {
 
 import { UserNotInRequestException } from 'src/auth/exceptions';
 
-import { User } from 'src/users/domain';
+import { User } from 'src/users/entities';
 
 type UserProperties =
   | {

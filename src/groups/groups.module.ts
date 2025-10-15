@@ -1,13 +1,14 @@
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
 
-import { RelationalGroupPersistenceModule } from 'src/groups/infraestructure/persistence/relational/relational-persistence.module';
 import { GroupsController } from 'src/groups/groups.controller';
 import { GroupsService } from 'src/groups/groups.service';
+import { Group } from 'src/groups/entities';
 
 @Module({
-  imports: [RelationalGroupPersistenceModule],
+  imports: [TypeOrmModule.forFeature([Group])],
   controllers: [GroupsController],
   providers: [GroupsService],
-  exports: [GroupsService, RelationalGroupPersistenceModule],
+  exports: [GroupsService],
 })
 export class GroupsModule {}

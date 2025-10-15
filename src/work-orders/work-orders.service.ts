@@ -1,18 +1,14 @@
+import { Repository } from 'typeorm';
+
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 
 import {
   CreateWorkOrderDiagnosticDto,
   CreateWorkOrderServiceDto,
   CreateWorkOrderDto,
 } from 'src/work-orders/dto';
-import {
-  WorkOrder,
-  WorkOrderDiagnostic,
-  WorkOrderService,
-} from 'src/work-orders/domain';
-import { WorkOrderRepository } from './infraestructure/work-order.repository';
-import { WorkOrderDiagnosticRepository } from './infraestructure/work-order-diagnostic.repository';
-import { WorkOrderServiceRepository } from './infraestructure/work-order-service.repository';
+
 import { WorkshopsService } from 'src/workshops/workshops.service';
 import {
   WorkshopNotFoundException,
@@ -23,24 +19,30 @@ import { ServiceRequestsService } from 'src/service-requests/service-requests.se
 import { EmployeesService } from 'src/employees/employees.service';
 import { OrderStatus } from 'src/work-orders/enums';
 import { WorkOrderType } from 'src/work-orders/types';
-import { WorkOrderDiagnosticMapper } from './infraestructure/persistence/relational/mappers';
-import { WorkOrderServiceMapper } from './infraestructure/persistence/relational/mappers';
+import {
+  WorkOrder,
+  WorkOrderDiagnostic,
+  WorkOrderService,
+} from 'src/work-orders/entities';
+import { uuidPlugin } from 'src/core/plugins';
 
 @Injectable()
 export class WorkOrdersService {
   constructor(
-    private readonly workOrderRepository: WorkOrderRepository,
-    private readonly workOrderDiagnosticRepository: WorkOrderDiagnosticRepository,
-    private readonly workOrderServiceRepository: WorkOrderServiceRepository,
+    // @InjectRepository(WorkOrder)
+    // private readonly workOrdersRepository: Repository<WorkOrder>,
+    @InjectRepository(WorkOrderDiagnostic)
+    private readonly workOrderDiagnosticsRepository: Repository<WorkOrderDiagnostic>,
+    @InjectRepository(WorkOrderService)
+    private readonly workOrderServicesRepository: Repository<WorkOrderService>,
     private readonly workshopService: WorkshopsService,
     private readonly serviceRequestService: ServiceRequestsService,
     private readonly employeesService: EmployeesService,
   ) {}
 
+  // TODO: CHECK BEFORE INSERT NEW
   private async createWorkOrder(
     createWorkOrderDto: CreateWorkOrderDto,
-    type: WorkOrderType,
-    child: WorkOrderDiagnostic | WorkOrderService,
   ): Promise<WorkOrder> {
     const { workshopId, serviceRequestId, requiresApproval } =
       createWorkOrderDto;
@@ -56,75 +58,72 @@ export class WorkOrdersService {
       ? OrderStatus.pending_approval
       : OrderStatus.scheduled;
 
-    const workOrder: any = {
+    const workOrder = {
+      id: uuidPlugin.v7(),
+      serviceRequest,
       workshop,
       requiresApproval,
       status,
-      type,
     };
 
-    if (type === 'diagnostic') {
-      workOrder.diagnostic = WorkOrderDiagnosticMapper.toPersistence(
-        child as WorkOrderDiagnostic,
-      );
-    }
+    // const entity = this.workOrdersRepository.create(workOrder);
+    // await this.workOrdersRepository.save(entity);
 
-    if (type === 'service') {
-      workOrder.service = WorkOrderServiceMapper.toPersistence(
-        child as WorkOrderService,
-      );
-    }
-
-    return this.workOrderRepository.create(workOrder);
+    return workOrder;
   }
 
   async createDiagnosticWorkOrder(
     serviceRequestId: string,
     createDiagnosticWorkOrderDto: CreateWorkOrderDiagnosticDto,
     requiresApproval: boolean,
-  ): Promise<WorkOrder> {
-    const { workshopId, reportedByDriverId, ...rest } =
+  ): Promise<WorkOrderDiagnostic> {
+    const { workshopId, reportedByDriverId, reportedSymptoms, ...rest } =
       createDiagnosticWorkOrderDto;
 
-    // Must go before createWorkOrder
     const employee = await this.employeesService.findById(reportedByDriverId);
     if (!employee) throw new EmployeeNotFoundException();
 
-    const child = await this.workOrderDiagnosticRepository.create({
-      reportedByDriver: employee,
-      ...rest,
+    const workOrderBase = await this.createWorkOrder({
+      workshopId,
+      serviceRequestId,
+      requiresApproval,
     });
 
-    console.log({ child });
+    const workOrderDiagnostic = {
+      ...rest,
+      reportedSymptoms: reportedSymptoms.join(','),
+      reportedByDriver: employee,
+      ...workOrderBase,
+    };
 
-    return this.createWorkOrder(
-      {
-        workshopId,
-        serviceRequestId,
-        requiresApproval,
-      },
-      'diagnostic',
-      child,
-    );
+    const entity =
+      this.workOrderDiagnosticsRepository.create(workOrderDiagnostic);
+
+    await this.workOrderDiagnosticsRepository.save(entity);
+
+    return entity;
   }
 
   async createServiceWorkOrder(
     serviceRequestId: string,
     createServiceWorkOrderDto: CreateWorkOrderServiceDto,
     requiresApproval: boolean,
-  ): Promise<WorkOrder> {
+  ): Promise<WorkOrderService> {
     const { workshopId } = createServiceWorkOrderDto;
 
-    const child = await this.workOrderServiceRepository.create({});
+    const workOrderBase = await this.createWorkOrder({
+      workshopId,
+      serviceRequestId,
+      requiresApproval,
+    });
 
-    return this.createWorkOrder(
-      {
-        workshopId,
-        serviceRequestId,
-        requiresApproval,
-      },
-      'service',
-      child,
-    );
+    const workOrderService = {
+      ...workOrderBase,
+    };
+    const entity = this.workOrderServicesRepository.create(workOrderService);
+
+    await this.workOrderServicesRepository.save(entity);
+
+    return entity;
   }
 }

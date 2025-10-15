@@ -1,15 +1,15 @@
 import { plainToInstance } from 'class-transformer';
 
-import { Workshop } from 'src/workshops/domain';
 import { ResponseWorkshopDto } from 'src/workshops/dto';
+import { Workshop } from 'src/workshops/entities';
 
 export class WorkshopMapper {
-  static toResponseDto(workshop: Workshop): ResponseWorkshopDto {
-    const dto = plainToInstance(ResponseWorkshopDto, workshop);
+  static toResponseDto(entity: Workshop): ResponseWorkshopDto {
+    const dto = plainToInstance(ResponseWorkshopDto, entity);
     return dto;
   }
 
-  static toResponseDtoList(workshops: Workshop[]): ResponseWorkshopDto[] {
-    return workshops.map((workshop) => WorkshopMapper.toResponseDto(workshop));
+  static toResponseDtoList(entities: Workshop[]): ResponseWorkshopDto[] {
+    return entities.map((workshop) => WorkshopMapper.toResponseDto(workshop));
   }
 }

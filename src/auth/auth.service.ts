@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 
 import { bcryptPlugin } from 'src/core/plugins';
 import { LoginUserDto } from 'src/auth/dtos';
-import { User } from 'src/users/domain';
+import { User } from 'src/users/entities';
 import { CookieService, TokenService } from 'src/auth/services';
 import { UsersService } from 'src/users/users.service';
 import {

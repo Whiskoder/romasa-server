@@ -1,15 +1,23 @@
 import { plainToInstance } from 'class-transformer';
+import { EmployeeMapper } from 'src/employees/mappers';
 
 import { ResponseUserDto } from 'src/users/dto';
-import { User } from 'src/users/domain';
+import { User } from 'src/users/entities';
 
 export class UserMapper {
-  static toResponseDto(user: User): ResponseUserDto {
-    const dto = plainToInstance(ResponseUserDto, user);
+  static toResponseDto(entity: User): ResponseUserDto {
+    const dto = plainToInstance(ResponseUserDto, {
+      id: entity.id,
+      email: entity.email,
+      isActive: entity.isActive,
+      employee: EmployeeMapper.toResponseDto(entity.employee),
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    });
     return dto;
   }
 
-  static toResponseDtoList(users: User[]): ResponseUserDto[] {
-    return users.map((user) => this.toResponseDto(user));
+  static toResponseDtoList(entities: User[]): ResponseUserDto[] {
+    return entities.map((user) => this.toResponseDto(user));
   }
 }

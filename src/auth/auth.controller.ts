@@ -16,7 +16,7 @@ import {
   GetUser,
   GetUserId,
 } from 'src/auth/decorators';
-import { User } from 'src/users/domain';
+import { User } from 'src/users/entities';
 
 @Controller({
   version: '1',

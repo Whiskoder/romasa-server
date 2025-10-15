@@ -1,13 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
 
-import { EmployeeRepository } from 'src/employees/infraestructure/persistence/employee.repository';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { Employee } from 'src/employees/entities';
+import { NullableType } from 'src/core/types';
 
 @Injectable()
 export class EmployeesService {
-  constructor(private readonly employeeRepository: EmployeeRepository) {}
+  constructor(
+    @InjectRepository(Employee)
+    private readonly employeesRepository: Repository<Employee>,
+  ) {}
 
-  async findById(id: number): Promise<any> {
-    // TODO: add employee validations
-    return this.employeeRepository.findById(id);
+  async findById(id: number): Promise<NullableType<Employee>> {
+    const entity = await this.employeesRepository.findOne({ where: { id } });
+    return entity ? entity : null;
   }
 }

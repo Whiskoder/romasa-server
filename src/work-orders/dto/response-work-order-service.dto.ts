@@ -1,9 +1,8 @@
 import { Exclude, Expose } from 'class-transformer';
+import { ResponseWorkOrderDto } from './response-work-order.dto';
 
 @Exclude()
-export class ResponseWorkOrderServiceDto {
-  @Expose()
-  id: string;
+export class ResponseWorkOrderServiceDto extends ResponseWorkOrderDto {
   @Expose()
   fuelLevelAtReception: number;
   @Expose()

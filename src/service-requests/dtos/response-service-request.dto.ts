@@ -3,6 +3,11 @@ import { ResponseUserDto } from 'src/users/dto';
 import { ServiceRequestPriority } from 'src/service-requests/enums';
 import { ResponseCustomerDto } from 'src/customers/dto';
 import { ResponseVehicleDto } from 'src/vehicles/dto';
+import {
+  ResponseWorkOrderDiagnosticDto,
+  ResponseWorkOrderDto,
+  ResponseWorkOrderServiceDto,
+} from 'src/work-orders/dto';
 
 @Exclude()
 export class ResponseServiceRequestDto {
@@ -22,14 +27,20 @@ export class ResponseServiceRequestDto {
   updatedAt: Date;
 
   @Expose()
-  createdBy: ResponseUserDto;
+  createdBy?: ResponseUserDto | null;
 
   @Expose()
-  updatedBy: ResponseUserDto;
+  updatedBy?: ResponseUserDto | null;
 
   @Expose()
-  requester: ResponseCustomerDto;
+  requester?: ResponseCustomerDto | null;
 
   @Expose()
-  vehicle: ResponseVehicleDto;
+  vehicle?: ResponseVehicleDto | null;
+
+  @Expose()
+  diagnostic?: ResponseWorkOrderDiagnosticDto | null;
+
+  @Expose()
+  service?: ResponseWorkOrderServiceDto | null;
 }

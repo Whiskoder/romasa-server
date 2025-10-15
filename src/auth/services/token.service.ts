@@ -6,7 +6,7 @@ import { uuidPlugin } from 'src/core/plugins';
 import { TokenType } from 'src/auth/enum';
 import { AllConfigType } from 'src/core/config';
 import { CryptoService } from 'src/crypto/crypto.service';
-import { User } from 'src/users/domain';
+import { User } from 'src/users/entities';
 
 @Injectable()
 export class TokenService {

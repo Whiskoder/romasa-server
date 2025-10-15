@@ -10,18 +10,71 @@ import {
   WorkOrder,
   WorkOrderDiagnostic,
   WorkOrderService,
-} from 'src/work-orders/domain';
-import { ResponseWorkOrderDto } from 'src/work-orders/dto';
+} from 'src/work-orders/entities';
+import {
+  ResponseWorkOrderDiagnosticDto,
+  ResponseWorkOrderDto,
+  ResponseWorkOrderServiceDto,
+} from 'src/work-orders/dto';
 import { WorkshopMapper } from 'src/workshops/mappers';
+import { ResponseEmployeeDto } from 'src/employees/dto';
 
 export class WorkOrderMapper {
+  static diagnosticToResponseDto(
+    entity: WorkOrderDiagnostic,
+  ): ResponseWorkOrderDiagnosticDto {
+    const base = WorkOrderMapper.toResponseDto(entity);
+    const dto = plainToInstance(ResponseWorkOrderDiagnosticDto, {
+      ...base,
+      reportedByDriver: EmployeeMapper.toResponseDto(entity.reportedByDriver),
+      reportedSymptoms: entity.reportedSymptoms,
+      impactsOperability: entity.impactsOperability,
+      issueFrequency: entity.issueFrequency,
+      technicalDescription: entity.technicalDescription,
+      affectedSystems: entity.affectedSystems,
+      requiredMaterials: entity.requiredMaterials,
+    });
+
+    return dto;
+  }
+
+  static serviceToResponseDto(
+    entity: WorkOrderService,
+  ): ResponseWorkOrderServiceDto {
+    const base = WorkOrderMapper.toResponseDto(entity);
+    const dto = plainToInstance(ResponseWorkOrderServiceDto, {
+      ...base,
+      fuelLevelAtReception: entity.fuelLevelAtReception,
+      mileageAtReception: entity.mileageAtReception,
+      receivedInventoryItems: entity.receivedInventoryItems || [],
+      visualInspection: {
+        roof: entity.roofObservations || [],
+        front: entity.frontObservations || [],
+        leftSide: entity.leftSideObservations || [],
+        rightSide: entity.rightSideObservations || [],
+        rear: entity.rearObservations || [],
+      },
+      workPerformed: entity.performedServices
+        ? {
+            services: entity.performedServices || [],
+            replacementParts: entity.installedReplacementParts || [],
+            fluids: entity.addedFluids || [],
+          }
+        : undefined,
+    });
+
+    return dto;
+  }
+
   static toResponseDto(entity: WorkOrder): ResponseWorkOrderDto {
     const dto = plainToInstance(ResponseWorkOrderDto, {
       id: entity.id,
       status: entity.status,
       requiresApproval: entity.requiresApproval,
 
-      workshop: WorkshopMapper.toResponseDto(entity.workshop),
+      workshop: entity.workshop
+        ? WorkshopMapper.toResponseDto(entity.workshop)
+        : undefined,
 
       scheduling: {
         scheduledDate: entity.scheduledDate,
@@ -34,8 +87,12 @@ export class WorkOrderMapper {
       },
 
       assignment: {
-        supervisor: EmployeeMapper.toResponseDto(entity.supervisor),
-        assignedEmployee: EmployeeMapper.toResponseDto(entity.assignedEmployee),
+        supervisor: entity.supervisor
+          ? EmployeeMapper.toResponseDto(entity.supervisor)
+          : undefined,
+        assignedEmployee: entity.assignedEmployee
+          ? EmployeeMapper.toResponseDto(entity.assignedEmployee)
+          : undefined,
       },
 
       approvalFlow: {
@@ -52,21 +109,11 @@ export class WorkOrderMapper {
       },
     });
 
-    if (entity.type === 'diagnostic' && entity.diagnostic) {
-      dto.diagnostic = WorkOrderDiagnosticMapper.toResponseDto(
-        entity.diagnostic,
-      );
-    }
-
-    if (entity.type === 'service' && entity.service) {
-      dto.service = WorkOrderServiceMapper.toResponseDto(entity.service);
-    }
-
     return dto;
   }
 
-  static toResponseDtoList(workOrders: WorkOrder[]): ResponseWorkOrderDto[] {
-    return workOrders.map((workOrder) =>
+  static toResponseDtoList(entities: WorkOrder[]): ResponseWorkOrderDto[] {
+    return entities.map((workOrder) =>
       WorkOrderMapper.toResponseDto(workOrder),
     );
   }

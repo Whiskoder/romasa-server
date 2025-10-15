@@ -1,29 +1,27 @@
 import { plainToInstance } from 'class-transformer';
 
-import { WorkOrderService } from 'src/work-orders/domain';
+import { WorkOrderService } from 'src/work-orders/entities';
 import { ResponseWorkOrderServiceDto } from 'src/work-orders/dto';
 
 export class WorkOrderServiceMapper {
-  static toResponseDto(
-    workOrderService: WorkOrderService,
-  ): ResponseWorkOrderServiceDto {
+  static toResponseDto(entity: WorkOrderService): ResponseWorkOrderServiceDto {
     const dto = plainToInstance(ResponseWorkOrderServiceDto, {
-      id: workOrderService.id,
-      fuelLevelAtReception: workOrderService.fuelLevelAtReception,
-      mileageAtReception: workOrderService.mileageAtReception,
-      receivedInventoryItems: workOrderService.receivedInventoryItems || [],
+      id: entity.id,
+      fuelLevelAtReception: entity.fuelLevelAtReception,
+      mileageAtReception: entity.mileageAtReception,
+      receivedInventoryItems: entity.receivedInventoryItems || [],
       visualInspection: {
-        roof: workOrderService.roofObservations || [],
-        front: workOrderService.frontObservations || [],
-        leftSide: workOrderService.leftSideObservations || [],
-        rightSide: workOrderService.rightSideObservations || [],
-        rear: workOrderService.rearObservations || [],
+        roof: entity.roofObservations || [],
+        front: entity.frontObservations || [],
+        leftSide: entity.leftSideObservations || [],
+        rightSide: entity.rightSideObservations || [],
+        rear: entity.rearObservations || [],
       },
-      workPerformed: workOrderService.performedServices
+      workPerformed: entity.performedServices
         ? {
-            services: workOrderService.performedServices || [],
-            replacementParts: workOrderService.installedReplacementParts || [],
-            fluids: workOrderService.addedFluids || [],
+            services: entity.performedServices || [],
+            replacementParts: entity.installedReplacementParts || [],
+            fluids: entity.addedFluids || [],
           }
         : undefined,
     });
@@ -32,9 +30,9 @@ export class WorkOrderServiceMapper {
   }
 
   static toResponseDtoList(
-    workOrders: WorkOrderService[],
+    entities: WorkOrderService[],
   ): ResponseWorkOrderServiceDto[] {
-    return workOrders.map((workOrder) =>
+    return entities.map((workOrder) =>
       WorkOrderServiceMapper.toResponseDto(workOrder),
     );
   }

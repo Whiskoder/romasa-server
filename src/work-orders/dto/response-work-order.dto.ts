@@ -34,8 +34,4 @@ export class ResponseWorkOrderDto {
     rejectedBy?: ResponseUserDto[];
     approvalDate?: Date;
   };
-
-  diagnostic?: ResponseWorkOrderDiagnosticDto;
-
-  service?: ResponseWorkOrderServiceDto;
 }

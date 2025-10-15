@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { RelationalVehiclePersistenceModule } from 'src/vehicles/infraestructure/persistence/relational/relational-persistence.module';
 import { VehiclesController } from 'src/vehicles/vehicles.controller';
 import { VehiclesService } from 'src/vehicles/vehicles.service';
+import { Vehicle } from 'src/vehicles/entities';
 
 @Module({
-  imports: [RelationalVehiclePersistenceModule],
+  imports: [TypeOrmModule.forFeature([Vehicle])],
   controllers: [VehiclesController],
   providers: [VehiclesService],
-  exports: [VehiclesService, RelationalVehiclePersistenceModule],
+  exports: [VehiclesService],
 })
 export class VehiclesModule {}

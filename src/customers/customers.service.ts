@@ -1,26 +1,41 @@
+import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 
-import { CustomerRepository } from 'src/customers/infraestructure/persistence/customer.repository';
 import { CreateCustomerDto } from 'src/customers/dto';
-import { Customer } from 'src/customers/domain';
 import { NullableType } from 'src/core/types';
+import { Customer } from 'src/customers/entities';
+import { CustomerAlreadyExistsException } from 'src/customers/exceptions';
+import { uuidPlugin } from 'src/core/plugins';
 
 @Injectable()
 export class CustomersService {
-  constructor(private readonly customerRepository: CustomerRepository) {}
+  constructor(
+    @InjectRepository(Customer)
+    private readonly customerRepository: Repository<Customer>,
+  ) {}
 
   async create(createCustomerDto: CreateCustomerDto): Promise<Customer> {
     const { name, type } = createCustomerDto;
 
-    // TODO: check if name is unique
+    const existingCustomer = await this.findByName(name);
+    if (existingCustomer) throw new CustomerAlreadyExistsException();
 
-    return this.customerRepository.create({
-      name,
-      type,
-    });
+    const customer = { id: uuidPlugin.v7(), name, type };
+
+    const entity = this.customerRepository.create(customer);
+    await this.customerRepository.save(entity);
+
+    return entity;
   }
 
-  async findById(customerId: string): Promise<NullableType<Customer>> {
-    return this.customerRepository.findById(customerId);
+  async findById(id: string): Promise<NullableType<Customer>> {
+    const entity = await this.customerRepository.findOne({ where: { id } });
+    return entity ? entity : null;
+  }
+
+  async findByName(name: string): Promise<NullableType<Customer>> {
+    const entity = await this.customerRepository.findOne({ where: { name } });
+    return entity ? entity : null;
   }
 }
