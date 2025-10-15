@@ -20,13 +20,6 @@ export class WorkOrderEntity {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
 
-  @ManyToOne(
-    () => ServiceRequestEntity,
-    (serviceRequestEntity) => serviceRequestEntity.id,
-    { nullable: false },
-  )
-  serviceRequestEntity: ServiceRequestEntity;
-
   @OneToOne(
     () => WorkOrderDiagnosticEntity,
     (workOrderDiagnosticEntity) => workOrderDiagnosticEntity.id,

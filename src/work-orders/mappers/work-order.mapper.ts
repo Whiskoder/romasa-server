@@ -6,77 +6,68 @@ import {
   WorkOrderDiagnosticMapper,
 } from 'src/work-orders/mappers';
 
-import { WorkOrderDiagnostic, WorkOrderService } from 'src/work-orders/domain';
+import {
+  WorkOrder,
+  WorkOrderDiagnostic,
+  WorkOrderService,
+} from 'src/work-orders/domain';
 import { ResponseWorkOrderDto } from 'src/work-orders/dto';
 import { WorkshopMapper } from 'src/workshops/mappers';
 
 export class WorkOrderMapper {
-  static toResponseDto(
-    entity: WorkOrderDiagnostic | WorkOrderService,
-    type: 'diagnostic' | 'service',
-  ): ResponseWorkOrderDto {
-    const workOrder = entity.workOrder;
-
+  static toResponseDto(entity: WorkOrder): ResponseWorkOrderDto {
     const dto = plainToInstance(ResponseWorkOrderDto, {
-      id: workOrder.id,
-      status: workOrder.status,
-      requiresApproval: workOrder.requiresApproval,
+      id: entity.id,
+      status: entity.status,
+      requiresApproval: entity.requiresApproval,
 
-      serviceRequest: workOrder.serviceRequest,
-      workshop: WorkshopMapper.toResponseDto(workOrder.workshop),
+      workshop: WorkshopMapper.toResponseDto(entity.workshop),
 
       scheduling: {
-        scheduledDate: workOrder.scheduledDate,
-        scheduledBy: workOrder.scheduledBy
-          ? UserMapper.toResponseDto(workOrder.scheduledBy)
+        scheduledDate: entity.scheduledDate,
+        scheduledBy: entity.scheduledBy
+          ? UserMapper.toResponseDto(entity.scheduledBy)
           : undefined,
-        estimatedDuration: workOrder.estimatedDuration,
-        actualDuration: workOrder.actualDuration,
-        vehicleInWorkshop: workOrder.vehicleInWorkshop,
+        estimatedDuration: entity.estimatedDuration,
+        actualDuration: entity.actualDuration,
+        vehicleInWorkshop: entity.vehicleInWorkshop,
       },
 
       assignment: {
-        supervisor: EmployeeMapper.toResponseDto(workOrder.supervisor),
-        assignedEmployee: EmployeeMapper.toResponseDto(
-          workOrder.assignedEmployee,
-        ),
+        supervisor: EmployeeMapper.toResponseDto(entity.supervisor),
+        assignedEmployee: EmployeeMapper.toResponseDto(entity.assignedEmployee),
       },
 
       approvalFlow: {
-        approversRequired: workOrder.approversRequired?.map((user) =>
+        approversRequired: entity.approversRequired?.map((user) =>
           UserMapper.toResponseDto(user),
         ),
-        approvedBy: workOrder.approvedBy?.map((user) =>
+        approvedBy: entity.approvedBy?.map((user) =>
           UserMapper.toResponseDto(user),
         ),
-        rejectedBy: workOrder.rejectedBy?.map((user) =>
+        rejectedBy: entity.rejectedBy?.map((user) =>
           UserMapper.toResponseDto(user),
         ),
-        approvalDate: workOrder.approvalDate,
+        approvalDate: entity.approvalDate,
       },
     });
 
-    if (type === 'diagnostic') {
+    if (entity.type === 'diagnostic' && entity.diagnostic) {
       dto.diagnostic = WorkOrderDiagnosticMapper.toResponseDto(
-        entity as WorkOrderDiagnostic,
+        entity.diagnostic,
       );
     }
 
-    if (type === 'service') {
-      dto.service = WorkOrderServiceMapper.toResponseDto(
-        entity as WorkOrderService,
-      );
+    if (entity.type === 'service' && entity.service) {
+      dto.service = WorkOrderServiceMapper.toResponseDto(entity.service);
     }
 
     return dto;
   }
 
-  static toResponseDtoList(
-    workOrders: WorkOrderDiagnostic[] | WorkOrderService[],
-    type: 'diagnostic' | 'service',
-  ): ResponseWorkOrderDto[] {
+  static toResponseDtoList(workOrders: WorkOrder[]): ResponseWorkOrderDto[] {
     return workOrders.map((workOrder) =>
-      WorkOrderMapper.toResponseDto(workOrder, type),
+      WorkOrderMapper.toResponseDto(workOrder),
     );
   }
 }

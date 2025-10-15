@@ -38,5 +38,5 @@ export class ServiceRequest {
   vehicle: Vehicle;
 
   // Referencia a las órdenes de trabajo que pertenecen a la solicitud
-  workOrders: WorkOrder[];
+  workOrders?: WorkOrder[];
 }

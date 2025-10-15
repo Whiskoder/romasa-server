@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity({ name: 'TBLCATEMP' })
+@Entity({ name: 'TBLCATEMP', synchronize: false })
 export class EmployeeEntity {
   @PrimaryColumn({ name: 'LNGCLVEMP', type: 'int' })
   id: number;

@@ -1,4 +1,5 @@
 import {
+  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsEnum,
@@ -18,6 +19,7 @@ export class CreateWorkOrderDiagnosticDto {
   reportedByDriverId: number;
 
   @IsArray()
+  @ArrayMinSize(1)
   @IsString({ each: true })
   reportedSymptoms: string[];
 

@@ -22,6 +22,9 @@ import {
 import { ServiceRequestsService } from 'src/service-requests/service-requests.service';
 import { EmployeesService } from 'src/employees/employees.service';
 import { OrderStatus } from 'src/work-orders/enums';
+import { WorkOrderType } from 'src/work-orders/types';
+import { WorkOrderDiagnosticMapper } from './infraestructure/persistence/relational/mappers';
+import { WorkOrderServiceMapper } from './infraestructure/persistence/relational/mappers';
 
 @Injectable()
 export class WorkOrdersService {
@@ -36,6 +39,8 @@ export class WorkOrdersService {
 
   private async createWorkOrder(
     createWorkOrderDto: CreateWorkOrderDto,
+    type: WorkOrderType,
+    child: WorkOrderDiagnostic | WorkOrderService,
   ): Promise<WorkOrder> {
     const { workshopId, serviceRequestId, requiresApproval } =
       createWorkOrderDto;
@@ -51,19 +56,33 @@ export class WorkOrdersService {
       ? OrderStatus.pending_approval
       : OrderStatus.scheduled;
 
-    return this.workOrderRepository.create({
+    const workOrder: any = {
       workshop,
       requiresApproval,
       status,
-      type: 'diagnostic',
-    });
+      type,
+    };
+
+    if (type === 'diagnostic') {
+      workOrder.diagnostic = WorkOrderDiagnosticMapper.toPersistence(
+        child as WorkOrderDiagnostic,
+      );
+    }
+
+    if (type === 'service') {
+      workOrder.service = WorkOrderServiceMapper.toPersistence(
+        child as WorkOrderService,
+      );
+    }
+
+    return this.workOrderRepository.create(workOrder);
   }
 
   async createDiagnosticWorkOrder(
     serviceRequestId: string,
     createDiagnosticWorkOrderDto: CreateWorkOrderDiagnosticDto,
     requiresApproval: boolean,
-  ): Promise<WorkOrderDiagnostic> {
+  ): Promise<WorkOrder> {
     const { workshopId, reportedByDriverId, ...rest } =
       createDiagnosticWorkOrderDto;
 
@@ -71,33 +90,41 @@ export class WorkOrdersService {
     const employee = await this.employeesService.findById(reportedByDriverId);
     if (!employee) throw new EmployeeNotFoundException();
 
-    const workOrder = await this.createWorkOrder({
-      workshopId,
-      serviceRequestId,
-      requiresApproval,
-    });
-
-    return this.workOrderDiagnosticRepository.create({
+    const child = await this.workOrderDiagnosticRepository.create({
       reportedByDriver: employee,
       ...rest,
     });
+
+    console.log({ child });
+
+    return this.createWorkOrder(
+      {
+        workshopId,
+        serviceRequestId,
+        requiresApproval,
+      },
+      'diagnostic',
+      child,
+    );
   }
 
   async createServiceWorkOrder(
     serviceRequestId: string,
     createServiceWorkOrderDto: CreateWorkOrderServiceDto,
     requiresApproval: boolean,
-  ): Promise<WorkOrderService> {
+  ): Promise<WorkOrder> {
     const { workshopId } = createServiceWorkOrderDto;
 
-    const workOrder = await this.createWorkOrder({
-      workshopId,
-      serviceRequestId,
-      requiresApproval,
-    });
+    const child = await this.workOrderServiceRepository.create({});
 
-    return this.workOrderServiceRepository.create({
-      workOrder,
-    });
+    return this.createWorkOrder(
+      {
+        workshopId,
+        serviceRequestId,
+        requiresApproval,
+      },
+      'service',
+      child,
+    );
   }
 }

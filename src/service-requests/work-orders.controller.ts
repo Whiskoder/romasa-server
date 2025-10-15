@@ -44,7 +44,7 @@ export class ServiceRequestWorkOrdersController {
     );
     console.log({ workOrder });
     return {
-      workOrder: WorkOrderMapper.toResponseDto(workOrder, 'diagnostic'),
+      workOrder: WorkOrderMapper.toResponseDto(workOrder),
     };
   }
 
@@ -60,7 +60,7 @@ export class ServiceRequestWorkOrdersController {
       createServiceWorkOrderDto,
       true,
     );
-    return { workOrder: WorkOrderMapper.toResponseDto(workOrder, 'service') };
+    return { workOrder: WorkOrderMapper.toResponseDto(workOrder) };
   }
 
   // @Get()

@@ -1,9 +1,10 @@
 import { WorkOrder } from 'src/work-orders/domain';
 import { WorkOrderEntity } from 'src/work-orders/infraestructure/persistence/relational/entities';
-import { ServiceRequestMapper } from 'src/service-requests/infraestructure/persistence/relational/mappers/service-request.mapper';
 import { WorkshopMapper } from 'src/workshops/infraestructure/persistence/relational/mappers/workshop.mapper';
 import { UserMapper } from 'src/users/infraestructure/persistence/relational/mappers/user.mapper';
 import { EmployeeMapper } from 'src/employees/infraestructure/persistence/relational/mappers/employee.mapper';
+import { WorkOrderDiagnosticMapper } from './work-order-diagnostic.mapper';
+import { WorkOrderServiceMapper } from './work-order-service.mapper';
 
 export class WorkOrderMapper {
   static toDomain(raw: WorkOrderEntity): WorkOrder {
@@ -17,12 +18,6 @@ export class WorkOrderMapper {
     domainEntity.actualDuration = raw.actualDuration;
     domainEntity.vehicleInWorkshop = raw.vehicleInWorkshop;
     domainEntity.approvalDate = raw.approvalDate;
-
-    if (raw.serviceRequestEntity) {
-      domainEntity.serviceRequest = ServiceRequestMapper.toDomain(
-        raw.serviceRequestEntity,
-      );
-    }
 
     if (raw.workshopEntity) {
       domainEntity.workshop = WorkshopMapper.toDomain(raw.workshopEntity);
@@ -60,6 +55,16 @@ export class WorkOrderMapper {
       );
     }
 
+    if (raw.diagnostic) {
+      domainEntity.diagnostic = WorkOrderDiagnosticMapper.toDomain(
+        raw.diagnostic,
+      );
+    }
+
+    if (raw.service) {
+      domainEntity.service = WorkOrderServiceMapper.toDomain(raw.service);
+    }
+
     return domainEntity;
   }
 
@@ -67,9 +72,7 @@ export class WorkOrderMapper {
     const rawEntity = new WorkOrderEntity();
 
     rawEntity.id = domain.id;
-    rawEntity.serviceRequestEntity = ServiceRequestMapper.toPersistence(
-      domain.serviceRequest,
-    );
+
     rawEntity.workshopEntity = WorkshopMapper.toPersistence(domain.workshop);
     rawEntity.scheduledDate = domain.scheduledDate;
     rawEntity.scheduledBy = domain.scheduledBy
@@ -94,6 +97,13 @@ export class WorkOrderMapper {
     rawEntity.rejectedBy = domain.rejectedBy?.map((user) =>
       UserMapper.toPersistence(user),
     );
+    rawEntity.diagnostic = domain.diagnostic
+      ? WorkOrderDiagnosticMapper.toPersistence(domain.diagnostic)
+      : undefined;
+    rawEntity.service = domain.service
+      ? WorkOrderServiceMapper.toPersistence(domain.service)
+      : undefined;
+
     rawEntity.approvalDate = domain.approvalDate;
     rawEntity.status = domain.status;
 
