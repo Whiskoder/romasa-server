@@ -1,10 +1,19 @@
-import { Column, Entity, ManyToMany, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
 import { ServiceRequestEntity } from 'src/service-requests/infraestructure/persistence/relational/entities';
 import { WorkshopEntity } from 'src/workshops/infraestructure/persistence/relational/entities';
 import { UserEntity } from 'src/users/infraestructure/persistence/relational/entities';
 import { EmployeeEntity } from 'src/employees/infraestructure/persistence/relational/entities';
 import { OrderStatus } from 'src/work-orders/enums';
+import { WorkOrderDiagnosticEntity } from './work-order-diagnostic.entity';
+import { WorkOrderServiceEntity } from './work-order-service.entity';
 
 @Entity()
 export class WorkOrderEntity {
@@ -14,11 +23,23 @@ export class WorkOrderEntity {
   @ManyToOne(
     () => ServiceRequestEntity,
     (serviceRequestEntity) => serviceRequestEntity.id,
-    {
-      nullable: false,
-    },
+    { nullable: false },
   )
   serviceRequestEntity: ServiceRequestEntity;
+
+  @OneToOne(
+    () => WorkOrderDiagnosticEntity,
+    (workOrderDiagnosticEntity) => workOrderDiagnosticEntity.id,
+    { nullable: true },
+  )
+  diagnostic?: WorkOrderDiagnosticEntity;
+
+  @OneToOne(
+    () => WorkOrderServiceEntity,
+    (workOrderServiceEntity) => workOrderServiceEntity.id,
+    { nullable: true },
+  )
+  service?: WorkOrderServiceEntity;
 
   @ManyToOne(() => WorkshopEntity, (workshopEntity) => workshopEntity.id, {
     nullable: false,

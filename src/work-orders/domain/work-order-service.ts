@@ -4,9 +4,6 @@ export class WorkOrderService {
   /* --- Identificación --- */
   id: string;
 
-  // Referencia a la solicitud de servicio vehicular padre
-  workOrder: WorkOrder;
-
   /* --- Condiciones generales --- */
   // Cantidad de combustible al recibir el vehiculo
   fuelLevelAtReception?: number;

@@ -1,8 +1,9 @@
 import { Employee } from 'src/employees/domain';
 import { OrderStatus } from 'src/work-orders/enums';
-import { ServiceRequest } from 'src/service-requests/domain';
 import { User } from 'src/users/domain';
 import { Workshop } from 'src/workshops/domain';
+import { WorkOrderType } from 'src/work-orders/types';
+import { WorkOrderDiagnostic, WorkOrderService } from 'src/work-orders/domain';
 
 // TODO: should createdAt?
 /**
@@ -13,11 +14,15 @@ export class WorkOrder {
   /* --- Identificación --- */
   id: string;
 
-  // Referencia a la solicitud de servicio a la que pertenece
-  serviceRequest: ServiceRequest;
+  // Tipo de trabajo (diagnóstico, servicio, pintura, etc)
+  type: WorkOrderType;
 
   // Establecimiento donde se realizara el servicio
   workshop: Workshop;
+
+  diagnostic?: WorkOrderDiagnostic;
+
+  service?: WorkOrderService;
 
   /* --- Programación del servicio --- */
   // Fecha de cuando se realizará el servicio

@@ -1,6 +1,5 @@
 import { WorkOrderDiagnostic } from 'src/work-orders/domain';
 import { WorkOrderDiagnosticEntity } from 'src/work-orders/infraestructure/persistence/relational/entities';
-import { WorkOrderMapper } from './work-order.mapper';
 import { EmployeeMapper } from 'src/employees/infraestructure/persistence/relational/mappers/employee.mapper';
 import { IssueFrequency, RepairType } from 'src/work-orders/enums';
 
@@ -12,7 +11,6 @@ export class WorkOrderDiagnosticMapper {
     domainEntity.reportedByDriver = EmployeeMapper.toDomain(
       raw.reportedByDriver,
     );
-    domainEntity.workOrder = WorkOrderMapper.toDomain(raw.workOrderEntity);
     domainEntity.reportedSymptoms = raw.reportedSymptoms
       ? raw.reportedSymptoms.split(',').map((s) => s.trim())
       : [];
@@ -38,7 +36,6 @@ export class WorkOrderDiagnosticMapper {
     rawEntity.reportedByDriver = EmployeeMapper.toPersistence(
       domain.reportedByDriver,
     );
-    rawEntity.workOrderEntity = WorkOrderMapper.toPersistence(domain.workOrder);
     rawEntity.reportedSymptoms = domain.reportedSymptoms.join(',');
     rawEntity.impactsOperability = domain.impactsOperability;
     rawEntity.issueFrequency = domain.issueFrequency;

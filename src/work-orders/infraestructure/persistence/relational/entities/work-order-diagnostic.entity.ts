@@ -1,17 +1,11 @@
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 
-import { WorkOrderEntity } from 'src/work-orders/infraestructure/persistence/relational/entities';
 import { EmployeeEntity } from 'src/employees/infraestructure/persistence/relational/entities';
 
 @Entity()
 export class WorkOrderDiagnosticEntity {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
-
-  @ManyToOne(() => WorkOrderEntity, (workOrderEntity) => workOrderEntity.id, {
-    nullable: false,
-  })
-  workOrderEntity: WorkOrderEntity;
 
   @ManyToOne(() => EmployeeEntity, (employeeEntity) => employeeEntity.id, {
     nullable: false,

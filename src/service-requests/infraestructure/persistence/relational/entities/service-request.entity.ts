@@ -1,11 +1,13 @@
 import { CustomerEntity } from 'src/customers/infraestructure/persistence/relational/entities';
 import { UserEntity } from 'src/users/infraestructure/persistence/relational/entities';
 import { VehicleEntity } from 'src/vehicles/infraestructure/persistence/relational/entities';
+import { WorkOrderEntity } from 'src/work-orders/infraestructure/persistence/relational/entities';
 import {
   Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -46,4 +48,7 @@ export class ServiceRequestEntity {
     nullable: false,
   })
   vehicleEntity: VehicleEntity;
+
+  @OneToMany(() => WorkOrderEntity, (workOrderEntity) => workOrderEntity.id)
+  workOrders: WorkOrderEntity[];
 }

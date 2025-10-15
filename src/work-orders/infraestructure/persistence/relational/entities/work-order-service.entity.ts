@@ -1,15 +1,9 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import { WorkOrderEntity } from 'src/work-orders/infraestructure/persistence/relational/entities';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class WorkOrderServiceEntity {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
-
-  @ManyToOne(() => WorkOrderEntity, (workOrderEntity) => workOrderEntity.id, {
-    nullable: false,
-  })
-  workOrderEntity: WorkOrderEntity;
 
   @Column({ type: 'int', nullable: true })
   fuelLevelAtReception?: number;

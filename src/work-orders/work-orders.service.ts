@@ -53,9 +53,9 @@ export class WorkOrdersService {
 
     return this.workOrderRepository.create({
       workshop,
-      serviceRequest,
       requiresApproval,
       status,
+      type: 'diagnostic',
     });
   }
 
@@ -78,7 +78,6 @@ export class WorkOrdersService {
     });
 
     return this.workOrderDiagnosticRepository.create({
-      workOrder,
       reportedByDriver: employee,
       ...rest,
     });

@@ -10,9 +10,6 @@ export class WorkOrderDiagnostic {
   /* --- Identificación --- */
   id: string;
 
-  // Referencia a la solicitud de servicio vehicular padre
-  workOrder: WorkOrder;
-
   /* --- Reporte del conductor --- */
   // Empleado conductor que detectó el problema
   reportedByDriver: Employee;
