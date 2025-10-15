@@ -4,7 +4,6 @@ import { ServiceRequestMapper } from 'src/service-requests/infraestructure/persi
 import { WorkshopMapper } from 'src/workshops/infraestructure/persistence/relational/mappers/workshop.mapper';
 import { UserMapper } from 'src/users/infraestructure/persistence/relational/mappers/user.mapper';
 import { EmployeeMapper } from 'src/employees/infraestructure/persistence/relational/mappers/employee.mapper';
-import { User } from 'src/users/domain';
 
 export class WorkOrderMapper {
   static toDomain(raw: WorkOrderEntity): WorkOrder {
@@ -14,79 +13,50 @@ export class WorkOrderMapper {
     domainEntity.status = raw.status;
     domainEntity.requiresApproval = raw.requiresApproval;
     domainEntity.scheduledDate = raw.scheduledDate;
+    domainEntity.estimatedDuration = raw.estimatedDuration;
     domainEntity.actualDuration = raw.actualDuration;
     domainEntity.vehicleInWorkshop = raw.vehicleInWorkshop;
     domainEntity.approvalDate = raw.approvalDate;
 
     if (raw.serviceRequestEntity) {
-      domainEntity.serviceRequest = {
-        id: raw.serviceRequestEntity.id,
-        trackingCode: raw.serviceRequestEntity.trackingCode,
-        priority: raw.serviceRequestEntity.priority as any,
-        createdAt: raw.serviceRequestEntity.createdAt,
-        updatedAt: raw.serviceRequestEntity.updatedAt,
-      } as any;
+      domainEntity.serviceRequest = ServiceRequestMapper.toDomain(
+        raw.serviceRequestEntity,
+      );
     }
 
     if (raw.workshopEntity) {
-      domainEntity.workshop = {
-        id: raw.workshopEntity.id,
-        name: raw.workshopEntity.name,
-        capacity: raw.workshopEntity.capacity,
-      } as any;
+      domainEntity.workshop = WorkshopMapper.toDomain(raw.workshopEntity);
     }
 
     if (raw.scheduledBy) {
-      domainEntity.scheduledBy = {
-        id: raw.scheduledBy.id,
-        email: raw.scheduledBy.email,
-      } as any;
+      domainEntity.scheduledBy = UserMapper.toDomain(raw.scheduledBy);
     }
 
     if (raw.supervisor) {
-      domainEntity.supervisor = {
-        id: raw.supervisor.id,
-        employeeNumber: raw.supervisor.employeeNumber,
-        firstName: raw.supervisor.firstName,
-      } as any;
+      domainEntity.supervisor = EmployeeMapper.toDomain(raw.supervisor);
     }
 
     if (raw.assignedEmployeeEntity) {
-      domainEntity.assignedEmployee = {
-        id: raw.assignedEmployeeEntity.id,
-        employeeNumber: raw.assignedEmployeeEntity.employeeNumber,
-        firstName: raw.assignedEmployeeEntity.firstName,
-      } as any;
+      domainEntity.assignedEmployee = EmployeeMapper.toDomain(
+        raw.assignedEmployeeEntity,
+      );
     }
-    domainEntity.estimatedDuration = raw.estimatedDuration;
 
     if (raw.approversRequired) {
-      domainEntity.approversRequired = raw.approversRequired.map(
-        (user) =>
-          ({
-            id: user.id,
-            email: user.email,
-          }) as any,
+      domainEntity.approversRequired = raw.approversRequired.map((user) =>
+        UserMapper.toDomain(user),
       );
     }
 
     if (raw.approvedBy) {
-      domainEntity.approvedBy = raw.approvedBy.map(
-        (user) =>
-          ({
-            id: user.id,
-            email: user.email,
-          }) as any,
+      domainEntity.approvedBy = raw.approvedBy.map((user) =>
+        UserMapper.toDomain(user),
       );
     }
 
     if (raw.rejectedBy) {
-      domainEntity.rejectedBy = raw.rejectedBy.map(
-        (user) =>
-          ({
-            id: user.id,
-            email: user.email,
-          }) as any,
+      domainEntity.rejectedBy = raw.rejectedBy.map((user) =>
+        UserMapper.toDomain(user),
       );
     }
 

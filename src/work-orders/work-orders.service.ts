@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
 import {
-  CreateDiagnosticWorkOrderDto,
-  CreateServiceWorkOrderDto,
+  CreateWorkOrderDiagnosticDto,
+  CreateWorkOrderServiceDto,
   CreateWorkOrderDto,
 } from 'src/work-orders/dto';
 import {
@@ -61,7 +61,7 @@ export class WorkOrdersService {
 
   async createDiagnosticWorkOrder(
     serviceRequestId: string,
-    createDiagnosticWorkOrderDto: CreateDiagnosticWorkOrderDto,
+    createDiagnosticWorkOrderDto: CreateWorkOrderDiagnosticDto,
     requiresApproval: boolean,
   ): Promise<WorkOrderDiagnostic> {
     const { workshopId, reportedByDriverId, ...rest } =
@@ -86,7 +86,7 @@ export class WorkOrdersService {
 
   async createServiceWorkOrder(
     serviceRequestId: string,
-    createServiceWorkOrderDto: CreateServiceWorkOrderDto,
+    createServiceWorkOrderDto: CreateWorkOrderServiceDto,
     requiresApproval: boolean,
   ): Promise<WorkOrderService> {
     const { workshopId } = createServiceWorkOrderDto;

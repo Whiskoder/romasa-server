@@ -9,14 +9,16 @@ import {
 import { AuthGuard } from 'src/auth/decorators';
 import { ApiResponse } from 'src/core/decorators';
 import {
-  CreateDiagnosticWorkOrderDto,
-  CreateServiceWorkOrderDto,
+  CreateWorkOrderDiagnosticDto,
+  CreateWorkOrderServiceDto,
   ResponseWorkOrderDiagnosticDto,
+  ResponseWorkOrderDto,
   ResponseWorkOrderServiceDto,
 } from 'src/work-orders/dto';
 import {
-  DiagnosticWorkOrderMapper,
-  ServiceWorkOrderMapper,
+  WorkOrderDiagnosticMapper,
+  WorkOrderServiceMapper,
+  WorkOrderMapper,
 } from 'src/work-orders/mappers';
 import { WorkOrdersService } from 'src/work-orders/work-orders.service';
 
@@ -33,14 +35,17 @@ export class ServiceRequestWorkOrdersController {
   async createDiagnosticWorkOrder(
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
-    @Body() createDiagnosticWorkOrderDto: CreateDiagnosticWorkOrderDto,
-  ): Promise<{ workOrder: ResponseWorkOrderDiagnosticDto }> {
+    @Body() createDiagnosticWorkOrderDto: CreateWorkOrderDiagnosticDto,
+  ): Promise<{ workOrder: ResponseWorkOrderDto }> {
     const workOrder = await this.workOrdersService.createDiagnosticWorkOrder(
       serviceRequestId,
       createDiagnosticWorkOrderDto,
       true, // TODO <- requires approval must be calculated by user permissions
     );
-    return { workOrder: DiagnosticWorkOrderMapper.toResponseDto(workOrder) };
+    console.log({ workOrder });
+    return {
+      workOrder: WorkOrderMapper.toResponseDto(workOrder, 'diagnostic'),
+    };
   }
 
   @Post('services')
@@ -48,14 +53,14 @@ export class ServiceRequestWorkOrdersController {
   async createServiceWorkOrder(
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
-    @Body() createServiceWorkOrderDto: CreateServiceWorkOrderDto,
-  ): Promise<{ workOrder: ResponseWorkOrderServiceDto }> {
+    @Body() createServiceWorkOrderDto: CreateWorkOrderServiceDto,
+  ): Promise<{ workOrder: ResponseWorkOrderDto }> {
     const workOrder = await this.workOrdersService.createServiceWorkOrder(
       serviceRequestId,
       createServiceWorkOrderDto,
       true,
     );
-    return { workOrder: ServiceWorkOrderMapper.toResponseDto(workOrder) };
+    return { workOrder: WorkOrderMapper.toResponseDto(workOrder, 'service') };
   }
 
   // @Get()

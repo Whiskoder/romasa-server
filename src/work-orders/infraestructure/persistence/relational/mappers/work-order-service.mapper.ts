@@ -11,31 +11,31 @@ export class WorkOrderServiceMapper {
     domainEntity.fuelLevelAtReception = raw.fuelLevelAtReception;
     domainEntity.mileageAtReception = raw.mileageAtReception;
     domainEntity.receivedInventoryItems = raw.receivedInventoryItems
-      ? raw.receivedInventoryItems.split(',')
-      : [];
+      ? raw.receivedInventoryItems.split(',').map((s) => s.trim())
+      : undefined;
     domainEntity.roofObservations = raw.roofObservations
-      ? raw.roofObservations.split(',')
-      : [];
+      ? raw.roofObservations.split(',').map((s) => s.trim())
+      : undefined;
     domainEntity.frontObservations = raw.frontObservations
-      ? raw.frontObservations.split(',')
-      : [];
+      ? raw.frontObservations.split(',').map((s) => s.trim())
+      : undefined;
     domainEntity.leftSideObservations = raw.leftSideObservations
-      ? raw.leftSideObservations.split(',')
-      : [];
+      ? raw.leftSideObservations.split(',').map((s) => s.trim())
+      : undefined;
     domainEntity.rightSideObservations = raw.rightSideObservations
-      ? raw.rightSideObservations.split(',')
-      : [];
+      ? raw.rightSideObservations.split(',').map((s) => s.trim())
+      : undefined;
     domainEntity.rearObservations = raw.rearObservations
-      ? raw.rearObservations.split(',')
-      : [];
+      ? raw.rearObservations.split(',').map((s) => s.trim())
+      : undefined;
     domainEntity.performedServices = raw.performedServices
-      ? raw.performedServices.split(',')
+      ? raw.performedServices.split(',').map((s) => s.trim())
       : undefined;
     domainEntity.installedReplacementParts = raw.installedReplacementParts
-      ? raw.installedReplacementParts.split(',')
+      ? raw.installedReplacementParts.split(',').map((s) => s.trim())
       : undefined;
     domainEntity.addedFluids = raw.addedFluids
-      ? raw.addedFluids.split(',')
+      ? raw.addedFluids.split(',').map((s) => s.trim())
       : undefined;
 
     return domainEntity;
@@ -48,12 +48,24 @@ export class WorkOrderServiceMapper {
     rawEntity.workOrderEntity = WorkOrderMapper.toPersistence(domain.workOrder);
     rawEntity.fuelLevelAtReception = domain.fuelLevelAtReception;
     rawEntity.mileageAtReception = domain.mileageAtReception;
-    rawEntity.receivedInventoryItems = domain.receivedInventoryItems?.join(',');
-    rawEntity.roofObservations = domain.roofObservations?.join(',');
-    rawEntity.frontObservations = domain.frontObservations?.join(',');
-    rawEntity.leftSideObservations = domain.leftSideObservations?.join(',');
-    rawEntity.rightSideObservations = domain.rightSideObservations?.join(',');
-    rawEntity.rearObservations = domain.rearObservations?.join(',');
+    rawEntity.receivedInventoryItems = domain.receivedInventoryItems
+      ? domain.receivedInventoryItems.join(',')
+      : undefined;
+    rawEntity.roofObservations = domain.roofObservations
+      ? domain.roofObservations.join(',')
+      : undefined;
+    rawEntity.frontObservations = domain.frontObservations
+      ? domain.frontObservations.join(',')
+      : undefined;
+    rawEntity.leftSideObservations = domain.leftSideObservations
+      ? domain.leftSideObservations.join(',')
+      : undefined;
+    rawEntity.rightSideObservations = domain.rightSideObservations
+      ? domain.rightSideObservations.join(',')
+      : undefined;
+    rawEntity.rearObservations = domain.rearObservations
+      ? domain.rearObservations.join(',')
+      : undefined;
     rawEntity.performedServices = domain.performedServices
       ? domain.performedServices.join(',')
       : undefined;

@@ -1,6 +1,6 @@
 import { IsUUID } from 'class-validator';
 
-export class CreateServiceWorkOrderDto {
+export class CreateWorkOrderServiceDto {
   @IsUUID('7')
   workshopId: string;
 }

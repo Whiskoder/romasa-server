@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { IssueFrequency } from 'src/work-orders/enums';
 
-export class CreateDiagnosticWorkOrderDto {
+export class CreateWorkOrderDiagnosticDto {
   @IsUUID('7')
   workshopId: string;
 
