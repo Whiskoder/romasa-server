@@ -1,14 +1,14 @@
 import { plainToInstance } from 'class-transformer';
 
 import { WorkOrderService } from 'src/work-orders/domain';
-import { ResponseServiceWorkOrderDto } from 'src/work-orders/dto';
+import { ResponseWorkOrderServiceDto } from 'src/work-orders/dto';
 
 export class ServiceWorkOrderMapper {
   static toResponseDto(
     workOrderService: WorkOrderService,
-  ): ResponseServiceWorkOrderDto {
+  ): ResponseWorkOrderServiceDto {
     const { workOrder, ...rest } = workOrderService;
-    const dto = plainToInstance(ResponseServiceWorkOrderDto, {
+    const dto = plainToInstance(ResponseWorkOrderServiceDto, {
       ...rest,
       ...workOrder,
     });
@@ -18,7 +18,7 @@ export class ServiceWorkOrderMapper {
 
   static toResponseDtoList(
     workOrders: WorkOrderService[],
-  ): ResponseServiceWorkOrderDto[] {
+  ): ResponseWorkOrderServiceDto[] {
     return workOrders.map((workOrder) =>
       ServiceWorkOrderMapper.toResponseDto(workOrder),
     );

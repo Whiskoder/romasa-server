@@ -11,8 +11,8 @@ import { ApiResponse } from 'src/core/decorators';
 import {
   CreateDiagnosticWorkOrderDto,
   CreateServiceWorkOrderDto,
-  ResponseDiagnosticWorkOrderDto,
-  ResponseServiceWorkOrderDto,
+  ResponseWorkOrderDiagnosticDto,
+  ResponseWorkOrderServiceDto,
 } from 'src/work-orders/dto';
 import {
   DiagnosticWorkOrderMapper,
@@ -34,7 +34,7 @@ export class ServiceRequestWorkOrdersController {
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
     @Body() createDiagnosticWorkOrderDto: CreateDiagnosticWorkOrderDto,
-  ): Promise<{ workOrder: ResponseDiagnosticWorkOrderDto }> {
+  ): Promise<{ workOrder: ResponseWorkOrderDiagnosticDto }> {
     const workOrder = await this.workOrdersService.createDiagnosticWorkOrder(
       serviceRequestId,
       createDiagnosticWorkOrderDto,
@@ -49,7 +49,7 @@ export class ServiceRequestWorkOrdersController {
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
     @Body() createServiceWorkOrderDto: CreateServiceWorkOrderDto,
-  ): Promise<{ workOrder: ResponseServiceWorkOrderDto }> {
+  ): Promise<{ workOrder: ResponseWorkOrderServiceDto }> {
     const workOrder = await this.workOrdersService.createServiceWorkOrder(
       serviceRequestId,
       createServiceWorkOrderDto,

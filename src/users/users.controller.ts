@@ -9,7 +9,7 @@ import { AuthGuard } from 'src/auth/decorators';
   version: '1',
   path: 'users',
 })
-@AuthGuard()
+// @AuthGuard()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

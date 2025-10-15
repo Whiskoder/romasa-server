@@ -1,58 +1,42 @@
-import { Exclude, Expose } from 'class-transformer';
-
-import { OrderStatus } from 'src/work-orders/enums';
-import { ResponseUserDto } from 'src/users/dto';
-import { ResponseServiceRequestDto } from 'src/service-requests/dtos';
-import { ResponseWorkshopDto } from 'src/workshops/dto';
 import { ResponseEmployeeDto } from 'src/employees/dto';
+import { ServiceRequestSummaryDto } from 'src/service-requests/dtos';
+import { UserSummaryDto } from 'src/users/dto';
+import { ResponseWorkshopDto } from 'src/workshops/dto';
+import { ResponseWorkOrderDiagnosticDto } from './response-diagnostic-work-order.dto';
+import { ResponseWorkOrderServiceDto } from './response-service-work-order.dto';
+import { VehicleSummaryDto } from 'src/vehicles/dto';
 
-@Exclude()
 export class ResponseWorkOrderDto {
-  @Expose()
   id: string;
-
-  @Expose()
-  serviceRequest: ResponseServiceRequestDto;
-
-  @Expose()
-  workshop: ResponseWorkshopDto;
-
-  @Expose()
-  scheduledDate: Date;
-
-  @Expose()
-  scheduledBy: ResponseUserDto;
-
-  @Expose()
-  estimatedDuration: Date;
-
-  @Expose()
-  actualDuration: Date;
-
-  @Expose()
-  supervisor: ResponseEmployeeDto;
-
-  @Expose()
-  assignedEmployee: ResponseEmployeeDto;
-
-  @Expose()
-  vehicleInWorkshop: boolean;
-
-  @Expose()
+  status: string;
   requiresApproval: boolean;
 
-  @Expose()
-  approversRequired: ResponseUserDto[];
+  serviceRequest: ServiceRequestSummaryDto;
+  vehicle: VehicleSummaryDto;
 
-  @Expose()
-  approvedBy: ResponseUserDto[];
+  workshop: ResponseWorkshopDto;
 
-  @Expose()
-  rejectedBy: ResponseUserDto[];
+  scheduling?: {
+    scheduledDate?: Date;
+    scheduledBy?: UserSummaryDto;
+    estimatedDuration?: Date;
+    actualDuration?: Date;
+    vehicleInWorkshop?: boolean;
+  };
 
-  @Expose()
-  approvalDate: Date;
+  assignment?: {
+    supervisor?: ResponseEmployeeDto;
+    assignedEmployee?: ResponseEmployeeDto;
+  };
 
-  @Expose()
-  status: OrderStatus;
+  approvalFlow?: {
+    approversRequired?: UserSummaryDto[];
+    approvedBy?: UserSummaryDto[];
+    rejectedBy?: UserSummaryDto[];
+    approvalDate?: Date;
+  };
+
+  diagnostic?: ResponseWorkOrderDiagnosticDto;
+
+  service?: ResponseWorkOrderServiceDto;
 }

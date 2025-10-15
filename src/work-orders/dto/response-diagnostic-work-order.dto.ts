@@ -1,33 +1,12 @@
-import { IntersectionType } from '@nestjs/mapped-types';
-import { Exclude, Expose } from 'class-transformer';
+import { ResponseEmployeeDto } from 'src/employees/dto';
 
-import { ResponseWorkOrderDto } from 'src/work-orders/dto';
-
-@Exclude()
-export class ResponseDiagnosticWorkOrderDto extends IntersectionType(
-  ResponseWorkOrderDto,
-) {
-  @Expose()
-  diagnosticWorkOrderId: string;
-
-  @Expose()
-  reportedByDriver: string;
-
-  @Expose()
+export class ResponseWorkOrderDiagnosticDto {
+  id: string;
+  reportedByDriver: ResponseEmployeeDto;
   reportedSymptoms: string[];
-
-  @Expose()
   impactsOperability: boolean;
-
-  @Expose()
   issueFrequency: string;
-
-  @Expose()
-  technicalDescription: string[];
-
-  @Expose()
-  affectedSystems: string[];
-
-  @Expose()
-  requiredMaterials: string[];
+  technicalDescription?: string[];
+  affectedSystems?: string[];
+  requiredMaterials?: string[];
 }
