@@ -17,7 +17,6 @@ import {
   ResponseWorkOrderServiceDto,
 } from 'src/work-orders/dto';
 import { WorkshopMapper } from 'src/workshops/mappers';
-import { ResponseEmployeeDto } from 'src/employees/dto';
 
 export class WorkOrderMapper {
   static diagnosticToResponseDto(
@@ -26,7 +25,9 @@ export class WorkOrderMapper {
     const base = WorkOrderMapper.toResponseDto(entity);
     const dto = plainToInstance(ResponseWorkOrderDiagnosticDto, {
       ...base,
-      reportedByDriver: EmployeeMapper.toResponseDto(entity.reportedByDriver),
+      reportedByDriver: entity.reportedByDriver
+        ? EmployeeMapper.toResponseDto(entity.reportedByDriver)
+        : undefined,
       reportedSymptoms: entity.reportedSymptoms,
       impactsOperability: entity.impactsOperability,
       issueFrequency: entity.issueFrequency,

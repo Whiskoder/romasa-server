@@ -27,7 +27,7 @@ export class SearchFilterAndPaginationInterceptor<T>
 {
   constructor(
     private readonly filterableFields: Array<keyof T>,
-    private readonly alias: T,
+    private readonly alias: string,
   ) {}
 
   async intercept(

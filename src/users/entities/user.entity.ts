@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 
 import { Employee } from 'src/employees/entities';
+import { Group } from 'src/groups/entities';
 
 @Entity()
 export class User {
@@ -23,6 +24,9 @@ export class User {
 
   @ManyToOne(() => Employee, (employee) => employee.id, { eager: true })
   employee: Employee;
+
+  @ManyToOne(() => Group, (group) => group.id, { eager: true })
+  group: Group;
 
   @Column({ type: 'bit', nullable: false, default: 1 })
   isActive: boolean;

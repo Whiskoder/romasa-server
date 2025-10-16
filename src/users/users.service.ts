@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -57,5 +57,12 @@ export class UsersService {
   async findById(id: string): Promise<NullableType<User>> {
     const entity = await this.usersRepository.findOne({ where: { id } });
     return entity ? entity : null;
+  }
+
+  async findByIds(ids: string[]): Promise<User[]> {
+    const entities = await this.usersRepository.find({
+      where: { id: In(ids) },
+    });
+    return entities ? entities : [];
   }
 }

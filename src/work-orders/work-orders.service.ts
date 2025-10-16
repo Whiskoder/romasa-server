@@ -6,7 +6,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   CreateWorkOrderDiagnosticDto,
   CreateWorkOrderServiceDto,
-  CreateWorkOrderDto,
 } from 'src/work-orders/dto';
 
 import { WorkshopsService } from 'src/workshops/workshops.service';
@@ -14,23 +13,22 @@ import {
   WorkshopNotFoundException,
   ServiceRequestNotFoundException,
   EmployeeNotFoundException,
+  ServiceRequestAlreadyHasAnOrderException,
 } from 'src/work-orders/exceptions';
 import { ServiceRequestsService } from 'src/service-requests/service-requests.service';
 import { EmployeesService } from 'src/employees/employees.service';
 import { OrderStatus } from 'src/work-orders/enums';
-import { WorkOrderType } from 'src/work-orders/types';
 import {
-  WorkOrder,
   WorkOrderDiagnostic,
   WorkOrderService,
 } from 'src/work-orders/entities';
 import { uuidPlugin } from 'src/core/plugins';
+import { Workshop } from 'src/workshops/entities';
+import { ServiceRequest } from 'src/service-requests/entities';
 
 @Injectable()
 export class WorkOrdersService {
   constructor(
-    // @InjectRepository(WorkOrder)
-    // private readonly workOrdersRepository: Repository<WorkOrder>,
     @InjectRepository(WorkOrderDiagnostic)
     private readonly workOrderDiagnosticsRepository: Repository<WorkOrderDiagnostic>,
     @InjectRepository(WorkOrderService)
@@ -40,36 +38,41 @@ export class WorkOrdersService {
     private readonly employeesService: EmployeesService,
   ) {}
 
-  // TODO: CHECK BEFORE INSERT NEW
-  private async createWorkOrder(
-    createWorkOrderDto: CreateWorkOrderDto,
-  ): Promise<WorkOrder> {
-    const { workshopId, serviceRequestId, requiresApproval } =
-      createWorkOrderDto;
-
+  private async validateWorkOrderPrerequisites(
+    workshopId: string,
+    serviceRequestId: string,
+    type: 'service' | 'diagnostic',
+  ): Promise<{ workshop: Workshop; serviceRequest: ServiceRequest }> {
     const workshop = await this.workshopService.findById(workshopId);
     if (!workshop) throw new WorkshopNotFoundException();
 
     const serviceRequest =
       await this.serviceRequestService.findById(serviceRequestId);
+
     if (!serviceRequest) throw new ServiceRequestNotFoundException();
 
-    const status = requiresApproval
-      ? OrderStatus.pending_approval
-      : OrderStatus.scheduled;
+    const existingOrder =
+      type === 'service' ? serviceRequest.service : serviceRequest.diagnostic;
 
-    const workOrder = {
+    if (existingOrder) throw new ServiceRequestAlreadyHasAnOrderException();
+
+    return { workshop, serviceRequest };
+  }
+
+  private createBaseWorkOrder(
+    workshop: Workshop,
+    serviceRequest: ServiceRequest,
+    requiresApproval: boolean,
+  ) {
+    return {
       id: uuidPlugin.v7(),
       serviceRequest,
       workshop,
       requiresApproval,
-      status,
+      status: requiresApproval
+        ? OrderStatus.pending_approval
+        : OrderStatus.scheduled,
     };
-
-    // const entity = this.workOrdersRepository.create(workOrder);
-    // await this.workOrdersRepository.save(entity);
-
-    return workOrder;
   }
 
   async createDiagnosticWorkOrder(
@@ -80,20 +83,27 @@ export class WorkOrdersService {
     const { workshopId, reportedByDriverId, reportedSymptoms, ...rest } =
       createDiagnosticWorkOrderDto;
 
+    const { workshop, serviceRequest } =
+      await this.validateWorkOrderPrerequisites(
+        workshopId,
+        serviceRequestId,
+        'diagnostic',
+      );
+
     const employee = await this.employeesService.findById(reportedByDriverId);
     if (!employee) throw new EmployeeNotFoundException();
 
-    const workOrderBase = await this.createWorkOrder({
-      workshopId,
-      serviceRequestId,
+    const workOrderBase = this.createBaseWorkOrder(
+      workshop,
+      serviceRequest,
       requiresApproval,
-    });
+    );
 
     const workOrderDiagnostic = {
       ...rest,
+      ...workOrderBase,
       reportedSymptoms: reportedSymptoms.join(','),
       reportedByDriver: employee,
-      ...workOrderBase,
     };
 
     const entity =
@@ -111,15 +121,19 @@ export class WorkOrdersService {
   ): Promise<WorkOrderService> {
     const { workshopId } = createServiceWorkOrderDto;
 
-    const workOrderBase = await this.createWorkOrder({
-      workshopId,
-      serviceRequestId,
-      requiresApproval,
-    });
+    const { workshop, serviceRequest } =
+      await this.validateWorkOrderPrerequisites(
+        workshopId,
+        serviceRequestId,
+        'service',
+      );
 
-    const workOrderService = {
-      ...workOrderBase,
-    };
+    const workOrderService = this.createBaseWorkOrder(
+      workshop,
+      serviceRequest,
+      requiresApproval,
+    );
+
     const entity = this.workOrderServicesRepository.create(workOrderService);
 
     await this.workOrderServicesRepository.save(entity);

@@ -10,10 +10,13 @@ export class UserMapper {
       id: entity.id,
       email: entity.email,
       isActive: entity.isActive,
-      employee: EmployeeMapper.toResponseDto(entity.employee),
+      employee: entity.employee
+        ? EmployeeMapper.toResponseDto(entity.employee)
+        : null,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
+
     return dto;
   }
 

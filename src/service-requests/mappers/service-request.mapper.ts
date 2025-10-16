@@ -9,21 +9,31 @@ import { WorkOrderMapper } from 'src/work-orders/mappers';
 
 export class ServiceRequestMapper {
   static toResponseDto(entity: ServiceRequest): ResponseServiceRequestDto {
-    const dto = plainToInstance(ResponseServiceRequestDto, entity);
-    if (entity.createdBy)
-      dto.createdBy = UserMapper.toResponseDto(entity.createdBy);
-    if (entity.updatedBy)
-      dto.updatedBy = UserMapper.toResponseDto(entity.updatedBy);
-    if (entity.requester)
-      dto.requester = CustomerMapper.toResponseDto(entity.requester);
-    if (entity.vehicle)
-      dto.vehicle = VehicleMapper.toResponseDto(entity.vehicle);
-    if (entity.service)
-      dto.service = WorkOrderMapper.serviceToResponseDto(entity.service);
-    if (entity.diagnostic)
-      dto.diagnostic = WorkOrderMapper.diagnosticToResponseDto(
-        entity.diagnostic,
-      );
+    const dto = plainToInstance(ResponseServiceRequestDto, {
+      id: entity.id,
+      trackingCode: entity.trackingCode,
+      priority: entity.priority,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+      createdBy: entity.createdBy
+        ? UserMapper.toResponseDto(entity.createdBy)
+        : undefined,
+      updatedBy: entity.updatedBy
+        ? UserMapper.toResponseDto(entity.updatedBy)
+        : undefined,
+      requester: entity.requester
+        ? CustomerMapper.toResponseDto(entity.requester)
+        : undefined,
+      vehicle: entity.vehicle
+        ? VehicleMapper.toResponseDto(entity.vehicle)
+        : undefined,
+      diagnostic: entity.diagnostic
+        ? WorkOrderMapper.diagnosticToResponseDto(entity.diagnostic)
+        : undefined,
+      service: entity.service
+        ? WorkOrderMapper.serviceToResponseDto(entity.service)
+        : undefined,
+    });
 
     return dto;
   }

@@ -5,7 +5,9 @@ import { Vehicle } from 'src/vehicles/entities';
 
 export class VehicleMapper {
   static toResponseDto(entity: Vehicle): ResponseVehicleDto {
-    const dto = plainToInstance(ResponseVehicleDto, entity);
+    const dto = plainToInstance(ResponseVehicleDto, {
+      id: entity.id,
+    });
     return dto;
   }
 

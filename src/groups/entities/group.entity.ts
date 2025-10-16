@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
@@ -21,8 +22,10 @@ export class Group {
   isActive: boolean;
 
   @OneToMany(() => User, (user) => user.id)
+  @JoinColumn()
   users: User[];
 
+  // TODO
   @Column({ type: 'text', nullable: true })
   permissions: string;
 

@@ -5,7 +5,13 @@ import { Workshop } from 'src/workshops/entities';
 
 export class WorkshopMapper {
   static toResponseDto(entity: Workshop): ResponseWorkshopDto {
-    const dto = plainToInstance(ResponseWorkshopDto, entity);
+    const dto = plainToInstance(ResponseWorkshopDto, {
+      id: entity.id,
+      name: entity.name,
+      capacity: entity.capacity,
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
+    });
     return dto;
   }
 

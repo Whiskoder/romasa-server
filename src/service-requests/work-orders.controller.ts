@@ -1,26 +1,12 @@
-import {
-  Body,
-  Controller,
-  Get,
-  NotImplementedException,
-  Param,
-  ParseUUIDPipe,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 import { AuthGuard } from 'src/auth/decorators';
 import { ApiResponse } from 'src/core/decorators';
 import {
   CreateWorkOrderDiagnosticDto,
   CreateWorkOrderServiceDto,
-  ResponseWorkOrderDiagnosticDto,
   ResponseWorkOrderDto,
-  ResponseWorkOrderServiceDto,
 } from 'src/work-orders/dto';
-import {
-  WorkOrderDiagnosticMapper,
-  WorkOrderServiceMapper,
-  WorkOrderMapper,
-} from 'src/work-orders/mappers';
+import { WorkOrderMapper } from 'src/work-orders/mappers';
 import { WorkOrdersService } from 'src/work-orders/work-orders.service';
 
 @Controller({
@@ -62,8 +48,4 @@ export class ServiceRequestWorkOrdersController {
     );
     return { workOrder: WorkOrderMapper.serviceToResponseDto(workOrder) };
   }
-
-  // @Get()
-  // @ApiResponse(200, 'Service request work orders found')
-  // async findAllByServiceRequestId() {}
 }

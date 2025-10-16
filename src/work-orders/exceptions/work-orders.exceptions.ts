@@ -17,3 +17,9 @@ export class EmployeeNotFoundException extends UnprocessableEntityException {
     super({ message, errorCode: 'WO_ERR_EMPLOYEE_NOT_FOUND' });
   }
 }
+
+export class ServiceRequestAlreadyHasAnOrderException extends UnprocessableEntityException {
+  constructor(message = 'El servicio ya tiene un pedido') {
+    super({ message, errorCode: 'WO_ERR_SERVICE_REQUEST_HAS_ORDER' });
+  }
+}

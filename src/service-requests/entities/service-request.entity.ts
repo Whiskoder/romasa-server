@@ -5,6 +5,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryColumn,
@@ -44,6 +45,7 @@ export class ServiceRequest {
   @ManyToOne(() => User, (user) => user.id, {
     nullable: false,
   })
+  @JoinColumn()
   createdBy: User;
 
   // Usuario del sistema que actualizó la solicitud
@@ -65,9 +67,15 @@ export class ServiceRequest {
   vehicle: Vehicle;
 
   // Referencia a las órdenes de trabajo que pertenecen a la solicitud
-  @OneToOne(() => WorkOrderService, (workOrder) => workOrder.serviceRequest)
+  @OneToOne(() => WorkOrderService, (workOrder) => workOrder.serviceRequest, {
+    eager: true,
+  })
   service: WorkOrderService;
 
-  @OneToOne(() => WorkOrderDiagnostic, (workOrder) => workOrder.serviceRequest)
+  @OneToOne(
+    () => WorkOrderDiagnostic,
+    (workOrder) => workOrder.serviceRequest,
+    { eager: true },
+  )
   diagnostic: WorkOrderDiagnostic;
 }
