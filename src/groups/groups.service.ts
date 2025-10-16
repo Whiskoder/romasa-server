@@ -7,13 +7,18 @@ import { Group } from 'src/groups/entities';
 import { NullableType } from 'src/core/types';
 import { CreateGroupDto } from './dto';
 import {
-  GroupAlreadyExistsException,
-  GroupNotFoundException,
-  GroupUsersNotFoundException,
-  UsersNotFoundException,
+  GroupAlreadyExistsEntityException,
+  GroupNotFoundEntityException,
+  GroupUsersNotFoundEntityException,
+  UsersNotFoundEntityException,
 } from 'src/groups/exceptions';
 import { uuidPlugin } from 'src/core/plugins';
 import { UsersService } from 'src/users/users.service';
+import { User } from 'src/users/entities';
+import { Query } from 'src/core/interfaces';
+import { ResponsePaginationDto } from 'src/core/dto';
+import { createPagination } from 'src/core/utils';
+import { PermissionCacheService } from 'src/permissions/permission-cache.service';
 
 @Injectable()
 export class GroupsService {
@@ -21,6 +26,7 @@ export class GroupsService {
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
     private readonly usersService: UsersService,
+    private readonly permissionCacheService: PermissionCacheService,
   ) {}
 
   async create(createGroupDto: CreateGroupDto): Promise<Group> {
@@ -29,7 +35,7 @@ export class GroupsService {
     const $name = name.trim().toLowerCase();
 
     const existingGroup = await this.findByName($name);
-    if (existingGroup) throw new GroupAlreadyExistsException();
+    if (existingGroup) throw new GroupAlreadyExistsEntityException();
 
     const group = { id: uuidPlugin.v7(), name: $name };
 
@@ -39,8 +45,14 @@ export class GroupsService {
     return entity;
   }
 
-  async findById(id: string): Promise<NullableType<Group>> {
-    const entity = await this.groupRepository.findOne({ where: { id } });
+  async findById(
+    id: string,
+    relations?: string[],
+  ): Promise<NullableType<Group>> {
+    const entity = await this.groupRepository.findOne({
+      where: { id },
+      relations,
+    });
     return entity ? entity : null;
   }
 
@@ -49,60 +61,118 @@ export class GroupsService {
     return entity ? entity : null;
   }
 
-  async findAll(): Promise<[Group[], number]> {
-    // TODO: temporal
-    const [entities, total] = await this.groupRepository.findAndCount();
+  async findAll(relations?: string[]): Promise<Group[]> {
+    const entities = await this.groupRepository.find({ relations });
 
-    return [entities, total];
+    return entities ? entities : [];
+  }
+
+  async findAllWithPagination(
+    query: Query<Group>,
+  ): Promise<[Group[], ResponsePaginationDto]> {
+    const { where, relations, pagination } = query;
+
+    const { offset, limit, sortBy, sortOrder } = pagination;
+
+    const [entities, total] = await this.groupRepository.findAndCount({
+      order: { [sortBy]: sortOrder },
+      relations,
+      take: limit,
+      skip: offset,
+      where,
+    });
+
+    const paginationDto = createPagination(total, limit, offset);
+
+    return [entities, paginationDto];
   }
 
   async delete(id: string): Promise<void> {
     const entity = await this.groupRepository.findOne({ where: { id } });
-    if (!entity) throw new GroupNotFoundException();
+    if (!entity) throw new GroupNotFoundEntityException();
+
+    this.permissionCacheService.invalidateGroup(id);
     await this.groupRepository.delete({ id });
   }
 
-  async addPermissions(groupId: string, permissions: string): Promise<Group> {
-    throw new Error('Method not implemented.');
+  // TODO: validate if permissions exist
+  async addPermissions(groupId: string, permissions: string[]): Promise<Group> {
+    const group = await this.findById(groupId);
+    if (!group) throw new GroupNotFoundEntityException();
+
+    const groupPermissions = (group.permissions ?? '').split(',');
+    const groupPermissionsSet = new Set([...groupPermissions, ...permissions]);
+
+    group.permissions = Array.from(groupPermissionsSet).join(',');
+    this.permissionCacheService.invalidateGroup(groupId);
+
+    return this.groupRepository.save(group);
   }
 
   async removePermissions(
     groupId: string,
-    permissions: string,
+    permissions: string[],
   ): Promise<Group> {
-    throw new Error('Method not implemented.');
+    const group = await this.findById(groupId);
+    if (!group) throw new GroupNotFoundEntityException();
+
+    const permissionsToRemove = new Set(permissions);
+    group.permissions = (group.permissions ?? '')
+      .split(',')
+      .filter((permission) => !permissionsToRemove.has(permission))
+      .join(',');
+
+    this.permissionCacheService.invalidateGroup(groupId);
+
+    return this.groupRepository.save(group);
   }
 
   async addUsers(groupId: string, userIds: string[]): Promise<Group> {
-    const group = await this.findById(groupId);
-    if (!group) throw new GroupNotFoundException();
+    const group = await this.getGroupWithUsers(groupId);
+    const userEntities = await this.getValidUsers(userIds);
 
-    const userEntities = await this.usersService.findByIds(userIds);
-    if (!userEntities.length) throw new UsersNotFoundException();
+    const newUsers = this.filterNewUsers(group.users ?? [], userEntities);
+    group.users = [...(group.users ?? []), ...newUsers];
 
-    if (!group.users?.length) {
-      group.users = userEntities;
-    } else {
-      group.users = group.users.concat(userEntities);
-    }
+    this.permissionCacheService.invalidateGroup(groupId);
 
-    await this.groupRepository.save(group);
-
-    return group;
+    return this.groupRepository.save(group);
   }
 
   async removeUsers(groupId: string, userIds: string[]): Promise<Group> {
-    const group = await this.findById(groupId);
-    if (!group) throw new GroupNotFoundException();
+    const group = await this.getGroupWithUsers(groupId);
+    const userEntities = await this.getValidUsers(userIds);
 
-    const userEntities = await this.usersService.findByIds(userIds);
-    if (!userEntities.length) throw new UsersNotFoundException();
+    this.validateGroupHasUsers(group);
 
-    if (!group.users.length) throw new GroupUsersNotFoundException();
-    group.users = group.users.filter((user) => !userEntities.includes(user));
+    const userIdsToRemove = new Set(userEntities.map((u) => u.id));
+    group.users = (group.users ?? []).filter(
+      (user) => !userIdsToRemove.has(user.id),
+    );
 
-    await this.groupRepository.save(group);
+    this.permissionCacheService.invalidateGroup(groupId);
 
+    return this.groupRepository.save(group);
+  }
+
+  private async getGroupWithUsers(groupId: string): Promise<Group> {
+    const group = await this.findById(groupId, ['users']);
+    if (!group) throw new GroupNotFoundEntityException();
     return group;
+  }
+
+  private async getValidUsers(userIds: string[]): Promise<User[]> {
+    const userEntities = await this.usersService.findByIds(userIds);
+    if (!userEntities.length) throw new UsersNotFoundEntityException();
+    return userEntities;
+  }
+
+  private filterNewUsers(existingUsers: User[], newUsers: User[]): User[] {
+    const existingUserIds = new Set(existingUsers.map((u) => u.id));
+    return newUsers.filter((user) => !existingUserIds.has(user.id));
+  }
+
+  private validateGroupHasUsers(group: Group): void {
+    if (!group.users?.length) throw new GroupUsersNotFoundEntityException();
   }
 }

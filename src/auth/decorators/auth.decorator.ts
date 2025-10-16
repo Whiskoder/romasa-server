@@ -4,10 +4,15 @@ import {
   AccessTokenGuard,
   RefreshTokenGuard,
   OneTimeTokenGuard,
+  UserPermissionGuard,
 } from 'src/auth/guards';
+import { PermissionProtected } from 'src/auth/decorators';
 
-export function AuthGuard() {
-  return applyDecorators(UseGuards(AccessTokenGuard));
+export function AuthGuard(...permissions: string[]) {
+  return applyDecorators(
+    PermissionProtected(...permissions),
+    UseGuards(AccessTokenGuard, UserPermissionGuard),
+  );
 }
 
 export function AuthRefreshToken() {

@@ -9,12 +9,11 @@ import { AuthGuard } from 'src/auth/decorators';
   version: '1',
   path: 'users',
 })
-// @AuthGuard()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  // TODO: add guards
+  @AuthGuard('users:create')
   @ApiResponse(201, 'User created')
   async create(
     @Body() createUserDto: CreateUserDto,

@@ -1,3 +1,8 @@
+import { ArrayMinSize, IsArray, IsString } from 'class-validator';
+
 export class AddGroupPermissionsDto {
-  permissions: string;
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsString({ each: true })
+  permissions: string[];
 }

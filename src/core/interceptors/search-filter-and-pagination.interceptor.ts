@@ -17,7 +17,8 @@ import {
 } from 'src/core/constants';
 import { pick, formatValidationError } from 'src/core/utils';
 import { FilterQueryDto, FilterOperationDto } from 'src/core/dto';
-import { Pagination, ModelMappingsForWhere } from 'src/core/interfaces';
+import { Pagination } from 'src/core/interfaces';
+import { Equal, ILike, LessThan, Like, MoreThan } from 'typeorm';
 
 // TODO: implement selectable fields
 // TODO: need some validations in where builder
@@ -27,9 +28,15 @@ export class SearchFilterAndPaginationInterceptor<T>
 {
   constructor(
     private readonly filterableFields: Array<keyof T>,
-    private readonly alias: string,
+    private readonly relations: Array<keyof T>,
   ) {}
 
+  /**
+   *
+   * TODO:
+   * Validar si el dato del campo es valido con el tipo de filtro
+   * Por ejemplo MoreThan solo acepta numeros o fechas
+   */
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
@@ -39,7 +46,7 @@ export class SearchFilterAndPaginationInterceptor<T>
     const queryStr = originalUrl.split('?')[1] ?? '';
     const parsedQuery = this.safeParseQuery(queryStr);
 
-    const dto = plainToInstance(FilterQueryDto, parsedQuery);
+    const dto = plainToInstance(FilterQueryDto<T>, parsedQuery);
     const errors = await validate(dto);
     if (errors.length > 0)
       throw new BadRequestException(
@@ -51,14 +58,15 @@ export class SearchFilterAndPaginationInterceptor<T>
       limit = DEFAULT_PAGINATION_LIMIT,
       sortBy = 'id',
       sortOrder = 'asc',
+      relations = '',
       ...rawFilters
     } = dto;
 
     const filterFields = pick(rawFilters, this.filterableFields.map(String));
 
     const whereConditions: string[] = [];
-    const parameters: Record<string, any> = {};
-    let paramIndex = 0;
+
+    const where = {};
 
     for (const [field, rawValue] of Object.entries(filterFields)) {
       if (!isObject(rawValue)) continue;
@@ -84,39 +92,25 @@ export class SearchFilterAndPaginationInterceptor<T>
             `unsupported_multiple_search_for_same_field: ${field}`,
           );
 
-        // Safe unique param name per field/operator
-        const paramKey = `param_${field}_${paramIndex++}`;
-
         switch (operator) {
           case 'eq':
-            whereConditions.push(
-              `UPPER(${this.alias}.${field}) = UPPER(:${paramKey})`,
-            );
-            parameters[paramKey] = value;
+            where[field] = Equal(value);
             break;
 
           case 'like':
-            whereConditions.push(
-              `UPPER(${this.alias}.${field}) LIKE UPPER(:${paramKey})`,
-            );
-            parameters[paramKey] = value;
+            where[field] = Like(value);
             break;
 
           case 'ilike':
-            whereConditions.push(
-              `UPPER(${this.alias}.${field}) LIKE UPPER(:${paramKey})`,
-            );
-            parameters[paramKey] = value;
+            where[field] = ILike(value);
             break;
 
           case 'gt':
-            whereConditions.push(`${this.alias}.${field} > :${paramKey}`);
-            parameters[paramKey] = value;
+            where[field] = MoreThan(value);
             break;
 
           case 'lt':
-            whereConditions.push(`${this.alias}.${field} < :${paramKey}`);
-            parameters[paramKey] = value;
+            where[field] = LessThan(value);
             break;
 
           default:
@@ -125,13 +119,13 @@ export class SearchFilterAndPaginationInterceptor<T>
       }
     }
 
-    const where = whereConditions.join(' AND ');
-
-    const validatedSortBy: keyof T = this.filterableFields.includes(
-      sortBy as keyof T,
-    )
+    const validatedSortBy = this.filterableFields.includes(sortBy as keyof T)
       ? (sortBy as keyof T)
       : ('id' as keyof T);
+
+    const validatedRelations = relations
+      .split(',')
+      .filter((r) => this.relations.includes(r as keyof T));
 
     const validatedSortOrder = sortOrder.toUpperCase() as 'ASC' | 'DESC';
 
@@ -144,7 +138,7 @@ export class SearchFilterAndPaginationInterceptor<T>
 
     request['pagination'] = pagination;
     request['where'] = where;
-    request['parameters'] = parameters;
+    request['relations'] = validatedRelations;
 
     return next.handle();
   }

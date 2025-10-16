@@ -71,7 +71,7 @@ export class ServiceRequestsController {
   @UseInterceptors(
     new SearchFilterAndPaginationInterceptor<ServiceRequest>(
       ['createdBy', 'updatedBy'],
-      'ServiceRequest',
+      ['vehicle', 'diagnostic', 'service'],
     ),
   )
   @ApiResponse(200, 'ServiceRequests found')

@@ -77,13 +77,13 @@ export class ServiceRequestsService {
     query: Query<ServiceRequest>,
   ): Promise<[ServiceRequest[], number]> {
     const { limit, offset, sortBy, sortOrder } = query.pagination;
-    const parameters = query.parameters;
+    // const parameters = query.parameters;
     const where = query.where;
 
     // Usar consultas normales y modificar paginationInterceptor
     const qb = this.serviceRequestsRepository
       .createQueryBuilder('serviceRequest')
-      .where(where, parameters)
+      // .where(where, parameters)
       .orderBy(`serviceRequest.${sortBy}`, sortOrder)
       .select([
         'serviceRequest.id',
@@ -111,8 +111,6 @@ export class ServiceRequestsService {
       .take(limit)
       .skip(offset)
       .getManyAndCount();
-
-    console.log(await qb);
 
     return qb;
   }

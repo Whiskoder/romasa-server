@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
 
 export class InvalidCredentialsException extends UnauthorizedException {
   constructor(message = 'Credenciales incorrectas') {
@@ -31,5 +31,17 @@ export class PayloadNotInRequestException extends UnauthorizedException {
     message = 'No se encontró el payload en la solicitud. ¿Falta un guard de autenticación?',
   ) {
     super({ message, errorCode: 'AUTH_ERR_PAYLOAD_MISSING' });
+  }
+}
+
+export class UserForbiddenException extends ForbiddenException {
+  constructor(message = 'No tiene permisos suficientes') {
+    super({ message, errorCode: 'AUTH_ERR_USER_FORBIDDEN' });
+  }
+}
+
+export class UserPermissionsExpiredException extends UnauthorizedException {
+  constructor(message = 'Permisos expirados, actualice su sesión') {
+    super({ message, errorCode: 'AUTH_ERR_USER_PERMISSIONS_EXPIRED' });
   }
 }

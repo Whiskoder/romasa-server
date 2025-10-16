@@ -6,7 +6,7 @@ import { TokenType } from 'src/auth/enum';
 class PayloadVariableValidator {
   @IsString()
   @IsUUID('7')
-  sub: string;
+  userId: string;
 
   @IsString()
   @IsUUID('7')

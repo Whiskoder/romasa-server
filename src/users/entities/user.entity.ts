@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
@@ -25,7 +26,8 @@ export class User {
   @ManyToOne(() => Employee, (employee) => employee.id, { eager: true })
   employee: Employee;
 
-  @ManyToOne(() => Group, (group) => group.id, { eager: true })
+  @ManyToOne(() => Group, (group) => group.users, { eager: true })
+  @JoinColumn()
   group: Group;
 
   @Column({ type: 'bit', nullable: false, default: 1 })

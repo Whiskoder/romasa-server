@@ -13,9 +13,16 @@ import {
 import { AuthController } from 'src/auth/auth.controller';
 import { CryptoModule } from 'src/crypto/crypto.module';
 import { UsersModule } from 'src/users/users.module';
+import { GroupsModule } from 'src/groups/groups.module';
 
 @Module({
-  imports: [JwtModule.register({}), CryptoModule, UsersModule, PassportModule],
+  imports: [
+    JwtModule.register({}),
+    CryptoModule,
+    UsersModule,
+    PassportModule,
+    GroupsModule,
+  ],
   providers: [
     AuthService,
     TokenService,

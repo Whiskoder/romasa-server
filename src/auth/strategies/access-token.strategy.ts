@@ -32,14 +32,16 @@ export class AccessTokenStrategy extends PassportStrategy(
   }
 
   async validate(req: any, payload: JwtPayload, done: VerifiedCallback) {
-    const { type, sub } = payload;
+    const { type, userId, userGroupId, permissionsVersion } = payload;
     if (type !== TokenType.access_token)
       return done(
         new InvalidTokenException('El token no es de tipo access_token'),
       );
 
-    req.userId = sub;
+    req.userId = userId;
+    req.userGroupId = userGroupId;
+    req.permissionsVersion = permissionsVersion;
 
-    done(null, sub);
+    done(null, userId);
   }
 }

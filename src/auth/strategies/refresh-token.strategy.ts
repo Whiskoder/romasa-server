@@ -30,13 +30,20 @@ export class RefreshTokenStrategy extends PassportStrategy(
         (req: Request) => extractTokenFromCookie(req, TokenType.refresh_token),
       ]),
       secretOrKeyProvider: async (req, rawJwtToken, done) => {
-        const payload: any = this.jwtService.decode(rawJwtToken);
+        let payload: JwtPayload | undefined;
+        try {
+          payload = this.jwtService.decode(rawJwtToken);
+        } catch (e) {
+          return done(new InvalidTokenException('Token no válido'));
+        }
+
+        if (!payload) return done(new InvalidTokenException('Token no válido'));
 
         const isValidPayload = await validatePayload(payload);
         if (!isValidPayload)
-          done(new InvalidTokenException('Payload no válido'));
+          return done(new InvalidTokenException('Payload no válido'));
 
-        const user = await this.usersService.findById(payload.sub);
+        const user = await this.usersService.findById(payload.userId);
         if (!user)
           return done(new InvalidTokenException('Usuario no encontrado'));
 

@@ -23,6 +23,7 @@ import { VehiclesModule } from 'src/vehicles/vehicles.module';
 import { WorkOrdersModule } from 'src/work-orders/work-orders.module';
 import { ServiceRequestsModule } from 'src/service-requests/service-requests.module';
 import { WorkshopsModule } from 'src/workshops/workshops.module';
+import { PermissionsModule } from 'src/permissions/permissions.module';
 
 const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
   useClass: TypeOrmConfigService,
@@ -49,6 +50,7 @@ const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
     WorkOrdersModule,
     ServiceRequestsModule,
     WorkshopsModule,
+    PermissionsModule,
   ],
   providers: [
     // {

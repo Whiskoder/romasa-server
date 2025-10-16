@@ -7,6 +7,8 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Req,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiResponse } from 'src/core/decorators';
 import { GroupsService } from 'src/groups/groups.service';
@@ -15,9 +17,13 @@ import {
   AddUsersToGroupDto,
   CreateGroupDto,
   ResponseGroupDto,
-} from './dto';
+} from 'src/groups/dto';
 import { GroupMapper } from './mappers';
 import { AuthGuard } from 'src/auth/decorators';
+import { SearchFilterAndPaginationInterceptor } from 'src/core/interceptors';
+import { Group } from 'src/groups/entities';
+import { GroupNotFoundException } from 'src/groups/exceptions';
+import { ResponsePaginationDto } from 'src/core/dto';
 
 @Controller({
   version: '1',
@@ -37,10 +43,21 @@ export class GroupsController {
   }
 
   @Get()
+  @UseInterceptors(
+    new SearchFilterAndPaginationInterceptor<Group>(['id', 'name'], ['users']),
+  )
   @ApiResponse(200, 'Groups found')
-  async findAll(): Promise<{ groups: ResponseGroupDto[]; total: number }> {
-    const [groups, total] = await this.groupsService.findAll();
-    return { groups: GroupMapper.toResponseDtoList(groups), total };
+  async findAll(
+    @Req() request: Request,
+  ): Promise<{
+    groups: ResponseGroupDto[];
+    pagination: ResponsePaginationDto;
+  }> {
+    const [groups, pagination] = await this.groupsService.findAllWithPagination(
+      request as any,
+    );
+    if (!groups.length) throw new GroupNotFoundException();
+    return { groups: GroupMapper.toResponseDtoList(groups), pagination };
   }
 
   @Delete(':groupId')

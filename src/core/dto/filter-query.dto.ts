@@ -1,24 +1,41 @@
 import { Type } from 'class-transformer';
-import { IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsPositive,
+  IsString,
+  Max,
+  Min,
+  MinLength,
+} from 'class-validator';
 
-export class FilterQueryDto {
+export class FilterQueryDto<T> {
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @Type()
+  @Min(0)
   offset?: number;
 
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
+  @IsPositive()
+  @Max(1000)
   limit?: number;
 
   @IsOptional()
   @IsString()
-  sortBy?: string;
+  sortBy?: keyof T;
 
   @IsOptional()
   @IsIn(['ASC', 'DESC', 'asc', 'desc'])
   sortOrder?: string;
+
+  @IsOptional()
+  @IsString()
+  relations?: string;
 
   [key: string]: any;
 }
