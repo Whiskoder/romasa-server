@@ -19,13 +19,13 @@ export class TokenService {
   ) {}
 
   async generateAccessToken(user: User): Promise<string> {
-    const userGroupId = user.group.id;
     const permissionsVersion =
-      this.permissionCacheService.getGroupPermissionsVersion(userGroupId);
+      this.permissionCacheService.getGroupPermissionsVersion(user.group.id);
 
     const payload = {
       userId: user.id,
       userGroupId: user.group.id,
+      isSuperAdmin: user.isSuperAdmin,
       permissionsVersion,
       type: TokenType.access_token,
     };

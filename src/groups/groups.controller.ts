@@ -24,16 +24,17 @@ import { SearchFilterAndPaginationInterceptor } from 'src/core/interceptors';
 import { Group } from 'src/groups/entities';
 import { GroupNotFoundException } from 'src/groups/exceptions';
 import { ResponsePaginationDto } from 'src/core/dto';
+import { Permissions } from 'src/permissions/constants';
 
 @Controller({
   version: '1',
   path: 'groups',
 })
-@AuthGuard()
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
 
   @Post()
+  @AuthGuard(Permissions.groups.create)
   @ApiResponse(201, 'Group created')
   async create(
     @Body() createGroupDto: CreateGroupDto,
@@ -43,13 +44,12 @@ export class GroupsController {
   }
 
   @Get()
+  @AuthGuard(Permissions.groups.view_all)
   @UseInterceptors(
     new SearchFilterAndPaginationInterceptor<Group>(['id', 'name'], ['users']),
   )
   @ApiResponse(200, 'Groups found')
-  async findAll(
-    @Req() request: Request,
-  ): Promise<{
+  async findAll(@Req() request: Request): Promise<{
     groups: ResponseGroupDto[];
     pagination: ResponsePaginationDto;
   }> {
@@ -61,6 +61,7 @@ export class GroupsController {
   }
 
   @Delete(':groupId')
+  @AuthGuard(Permissions.groups.delete)
   @ApiResponse(204, 'Group deleted')
   async delete(
     @Param('groupId', new ParseUUIDPipe({ version: '7' }))
@@ -70,6 +71,7 @@ export class GroupsController {
   }
 
   @Post(':groupId/permissions')
+  @AuthGuard(Permissions.groups.manage_permissions)
   @ApiResponse(200, 'Group updated')
   async update(
     @Param('groupId', new ParseUUIDPipe({ version: '7' }))
@@ -82,6 +84,7 @@ export class GroupsController {
   }
 
   @Delete(':groupId/permissions')
+  @AuthGuard(Permissions.groups.manage_permissions)
   @ApiResponse(200, 'Group permissions removed')
   async removePermissions(
     @Param('groupId', new ParseUUIDPipe({ version: '7' }))
@@ -97,6 +100,7 @@ export class GroupsController {
   }
 
   @Post(':groupId/users')
+  @AuthGuard(Permissions.groups.manage_users)
   @ApiResponse(200, 'Users added to group')
   async addUser(
     @Param('groupId', new ParseUUIDPipe({ version: '7' }))
@@ -109,6 +113,7 @@ export class GroupsController {
   }
 
   @Delete(':groupId/users')
+  @AuthGuard(Permissions.groups.manage_users)
   @ApiResponse(200, 'Users removed from group')
   async removeUser(
     @Param('groupId', new ParseUUIDPipe({ version: '7' }))

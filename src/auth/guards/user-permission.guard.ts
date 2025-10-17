@@ -19,6 +19,10 @@ export class UserPermissionGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
+    const req = context.switchToHttp().getRequest();
+
+    if (req.isSuperAdmin) return true;
+
     const requiredPermissions: string[] = this.reflector.getAllAndOverride<
       string[]
     >(META_PERMISSION, [context.getHandler(), context.getClass()]);
@@ -26,7 +30,6 @@ export class UserPermissionGuard implements CanActivate {
     if (!requiredPermissions) return true;
     if (!requiredPermissions.length) return true;
 
-    const req = context.switchToHttp().getRequest();
     const userGroupId = req.userGroupId;
     const permissionsVersion = req.permissionsVersion;
 
@@ -42,6 +45,8 @@ export class UserPermissionGuard implements CanActivate {
     );
 
     if (!hasPermission) throw new UserForbiddenException();
+
+    req.userPermissions = userPermissions;
 
     return true;
   }

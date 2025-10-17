@@ -32,7 +32,8 @@ export class AccessTokenStrategy extends PassportStrategy(
   }
 
   async validate(req: any, payload: JwtPayload, done: VerifiedCallback) {
-    const { type, userId, userGroupId, permissionsVersion } = payload;
+    const { type, userId, userGroupId, permissionsVersion, isSuperAdmin } =
+      payload;
     if (type !== TokenType.access_token)
       return done(
         new InvalidTokenException('El token no es de tipo access_token'),
@@ -41,6 +42,7 @@ export class AccessTokenStrategy extends PassportStrategy(
     req.userId = userId;
     req.userGroupId = userGroupId;
     req.permissionsVersion = permissionsVersion;
+    req.isSuperAdmin = isSuperAdmin;
 
     done(null, userId);
   }

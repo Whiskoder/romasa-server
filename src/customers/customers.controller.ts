@@ -4,16 +4,17 @@ import { AuthGuard } from 'src/auth/decorators';
 import { CustomersService } from 'src/customers/customers.service';
 import { CreateCustomerDto, ResponseCustomerDto } from 'src/customers/dto';
 import { CustomerMapper } from 'src/customers/mappers';
+import { Permissions } from 'src/permissions/constants';
 
 @Controller({
   version: '1',
   path: 'customers',
 })
-@AuthGuard()
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Post()
+  @AuthGuard(Permissions.customers.create)
   async create(
     @Body() createCustomerDto: CreateCustomerDto,
   ): Promise<{ customer: ResponseCustomerDto }> {

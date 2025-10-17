@@ -11,7 +11,12 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 
-import { AuthGuard, GetUserId } from 'src/auth/decorators';
+import {
+  AuthGuard,
+  GetUser,
+  GetUserId,
+  GetUserPermissions,
+} from 'src/auth/decorators';
 import { ServiceRequestsService } from 'src/service-requests/service-requests.service';
 import {
   CreateServiceRequestDto,
@@ -21,19 +26,22 @@ import { ServiceRequestMapper } from 'src/service-requests/mappers';
 import { ApiResponse } from 'src/core/decorators';
 import { ServiceRequestNotFoundException } from 'src/service-requests/exceptions';
 import { SearchFilterAndPaginationInterceptor } from 'src/core/interceptors';
-import { ServiceRequest } from './entities';
+import { ServiceRequest } from 'src/service-requests/entities';
+import { Permissions } from 'src/permissions/constants';
+import { FindOptionsWhere } from 'typeorm';
+import { ResponsePaginationDto } from 'src/core/dto';
 
 @Controller({
   version: '1',
   path: 'service-requests',
 })
-@AuthGuard()
 export class ServiceRequestsController {
   constructor(
     private readonly serviceRequestsService: ServiceRequestsService,
   ) {}
 
   @Post()
+  @AuthGuard(Permissions.service_requests.create)
   @ApiResponse(201, 'ServiceRequest created')
   async create(
     @Body()
@@ -50,17 +58,25 @@ export class ServiceRequestsController {
   }
 
   @Get(':serviceRequestId')
+  @AuthGuard(
+    Permissions.service_requests.view_all,
+    Permissions.service_requests.view_own,
+  )
   @ApiResponse(200, 'ServiceRequest found')
   async findById(
-    @Query('relations', new ParseArrayPipe({ items: String }))
-    relations: string[],
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
+    @GetUserPermissions() userPermissions: string[],
+    @GetUserId() userId: string,
   ): Promise<{ serviceRequest: ResponseServiceRequestDto }> {
-    const serviceRequest = await this.serviceRequestsService.findById(
-      serviceRequestId,
-      relations,
-    );
+    let where: FindOptionsWhere<ServiceRequest> = {};
+
+    if (userPermissions.includes(Permissions.service_requests.view_own)) {
+      where = { createdBy: { id: userId } };
+    }
+
+    const serviceRequest =
+      await this.serviceRequestsService.findById(serviceRequestId);
     if (!serviceRequest) throw new ServiceRequestNotFoundException();
     return {
       serviceRequest: ServiceRequestMapper.toResponseDto(serviceRequest),
@@ -68,23 +84,25 @@ export class ServiceRequestsController {
   }
 
   @Get()
+  @AuthGuard(Permissions.service_requests.view_all)
   @UseInterceptors(
     new SearchFilterAndPaginationInterceptor<ServiceRequest>(
-      ['createdBy', 'updatedBy'],
+      ['trackingCode'],
       ['vehicle', 'diagnostic', 'service'],
     ),
   )
   @ApiResponse(200, 'ServiceRequests found')
-  async findAll(
-    @Req() req: Request,
-  ): Promise<{ serviceRequests: ResponseServiceRequestDto[]; total: number }> {
-    const [serviceRequests, total] =
+  async findAll(@Req() req: Request): Promise<{
+    serviceRequests: ResponseServiceRequestDto[];
+    pagination: ResponsePaginationDto;
+  }> {
+    const [serviceRequests, pagination] =
       await this.serviceRequestsService.findAllWithPagination(req as any);
 
     if (!serviceRequests.length) throw new ServiceRequestNotFoundException();
     return {
       serviceRequests: ServiceRequestMapper.toResponseDtoList(serviceRequests),
-      total,
+      pagination,
     };
   }
 }

@@ -4,6 +4,7 @@ import { UsersService } from 'src/users/users.service';
 import { CreateUserDto, ResponseUserDto } from 'src/users/dto';
 import { UserMapper } from 'src/users/mappers';
 import { AuthGuard } from 'src/auth/decorators';
+import { Permissions } from 'src/permissions/constants';
 
 @Controller({
   version: '1',
@@ -13,7 +14,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @AuthGuard('users:create')
+  @AuthGuard(Permissions.users.create)
   @ApiResponse(201, 'User created')
   async create(
     @Body() createUserDto: CreateUserDto,

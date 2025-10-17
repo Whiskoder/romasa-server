@@ -26,6 +26,14 @@ export class UserNotInRequestException extends UnauthorizedException {
   }
 }
 
+export class UserPermissionsNotInRequestException extends UnauthorizedException {
+  constructor(
+    message = 'No se encontraron los permisos del usuario en la solicitud. ¿Falta un guard de autenticación?',
+  ) {
+    super({ message, errorCode: 'AUTH_ERR_USER_MISSING_PERMISSIONS' });
+  }
+}
+
 export class PayloadNotInRequestException extends UnauthorizedException {
   constructor(
     message = 'No se encontró el payload en la solicitud. ¿Falta un guard de autenticación?',

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -30,5 +31,11 @@ export class UsersNotFoundEntityException extends UnprocessableEntityException {
 export class GroupUsersNotFoundEntityException extends UnprocessableEntityException {
   constructor(message = 'No hay usuarios en el grupo') {
     super({ message, errorCode: 'GRP_ERR_USERS_NOT_FOUND' });
+  }
+}
+
+export class InvalidPermissionsValueException extends BadRequestException {
+  constructor(message = 'Los permisos no son válidos') {
+    super({ message, errorCode: 'PERMISSIONS_ERR_DOES_NOT_EXIST' });
   }
 }

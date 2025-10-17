@@ -25,8 +25,8 @@ import { User } from 'src/users/entities';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @AuthGuard()
   @Get('me')
+  @AuthGuard()
   @ApiResponse(200, 'User found')
   async meUser(
     @GetUserId() userId: string,
@@ -45,8 +45,8 @@ export class AuthController {
     return { user: UserMapper.toResponseDto(user) };
   }
 
-  @AuthRefreshToken()
   @Post('refresh')
+  @AuthRefreshToken()
   @ApiResponse(200, 'User token refreshed')
   async refresh(
     @GetUser() user: User,

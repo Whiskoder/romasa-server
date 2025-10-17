@@ -1,5 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { EmployeeMapper } from 'src/employees/mappers';
+import { GroupMapper } from 'src/groups/mappers';
 
 import { ResponseUserDto } from 'src/users/dto';
 import { User } from 'src/users/entities';
@@ -12,7 +13,8 @@ export class UserMapper {
       isActive: entity.isActive,
       employee: entity.employee
         ? EmployeeMapper.toResponseDto(entity.employee)
-        : null,
+        : undefined,
+      group: entity.group ? GroupMapper.toResponseDto(entity.group) : undefined,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });

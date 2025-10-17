@@ -1,5 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 import { ResponseEmployeeDto } from 'src/employees/dto';
+import { ResponseGroupDto } from 'src/groups/dto';
 
 @Exclude()
 export class ResponseUserDto {
@@ -15,7 +16,8 @@ export class ResponseUserDto {
   @Expose()
   employee: ResponseEmployeeDto;
 
-  // groups: ResponseGroupDto[];
+  @Expose()
+  group: ResponseGroupDto;
 
   @Expose()
   createdAt: Date;

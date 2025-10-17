@@ -30,8 +30,11 @@ export class User {
   @JoinColumn()
   group: Group;
 
-  @Column({ type: 'bit', nullable: false, default: 1 })
+  @Column({ type: 'bit', nullable: false, default: true })
   isActive: boolean;
+
+  @Column({ type: 'bit', nullable: false, default: false })
+  isSuperAdmin: boolean;
 
   @Column({ type: 'varbinary', length: 255, nullable: false })
   encryptedTokenSecret: Buffer;

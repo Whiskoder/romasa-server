@@ -10,8 +10,12 @@ export class GroupMapper {
       id: entity.id,
       name: entity.name,
       isActive: entity.isActive,
-      permissions: entity.permissions,
-      users: entity.users ? UserMapper.toResponseDtoList(entity.users) : [],
+      permissions: entity.permissions
+        ? entity.permissions.split(',')
+        : undefined,
+      users: entity.users
+        ? UserMapper.toResponseDtoList(entity.users)
+        : undefined,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });

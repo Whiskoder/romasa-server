@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,6 +16,8 @@ import {
   UserNotFoundException,
   VehicleNotFoundException,
 } from 'src/service-requests/exceptions';
+import { ResponsePaginationDto } from 'src/core/dto';
+import { createPagination } from 'src/core/utils';
 
 @Injectable()
 export class ServiceRequestsService {
@@ -64,10 +66,11 @@ export class ServiceRequestsService {
 
   async findById(
     id: string,
+    where?: FindOptionsWhere<ServiceRequest>,
     relations?: string[],
   ): Promise<NullableType<ServiceRequest>> {
     const entity = await this.serviceRequestsRepository.findOne({
-      where: { id },
+      where: { id, ...where },
       relations,
     });
     return entity ? entity : null;
@@ -75,43 +78,53 @@ export class ServiceRequestsService {
 
   async findAllWithPagination(
     query: Query<ServiceRequest>,
-  ): Promise<[ServiceRequest[], number]> {
-    const { limit, offset, sortBy, sortOrder } = query.pagination;
-    // const parameters = query.parameters;
-    const where = query.where;
+  ): Promise<[ServiceRequest[], ResponsePaginationDto]> {
+    const { where, relations, pagination } = query;
+    const { offset, limit, sortBy, sortOrder } = pagination;
 
+    const [entities, total] = await this.serviceRequestsRepository.findAndCount(
+      {
+        where,
+        relations,
+        order: { [sortBy]: sortOrder },
+        take: limit,
+        skip: offset,
+      },
+    );
+
+    const paginationDto = createPagination(total, limit, offset);
+    return [entities, paginationDto];
     // Usar consultas normales y modificar paginationInterceptor
-    const qb = this.serviceRequestsRepository
-      .createQueryBuilder('serviceRequest')
-      // .where(where, parameters)
-      .orderBy(`serviceRequest.${sortBy}`, sortOrder)
-      .select([
-        'serviceRequest.id',
-        'serviceRequest.trackingCode',
-        'serviceRequest.priority',
-        'serviceRequest.createdAt',
-        'serviceRequest.updatedAt',
-      ])
-      .leftJoin('serviceRequest.diagnostic', 'diagnostic')
-      .addSelect('diagnostic')
-      .leftJoin('serviceRequest.service', 'service')
-      .addSelect('service')
-      .leftJoin('serviceRequest.vehicle', 'vehicle')
-      .addSelect('vehicle')
-      .leftJoin('serviceRequest.createdBy', 'createdBy')
-      .addSelect('createdBy')
-      .leftJoin('serviceRequest.createdBy.employee', 'createdByEmployee')
-      .addSelect('createdByEmployee')
-      .leftJoin('serviceRequest.updatedBy', 'updatedBy')
-      .addSelect('updatedBy')
-      // .leftJoin('serviceRequest.updatedBy.employee', 'updatedByEmployee')
-      // .addSelect('updatedByEmployee')
-      .leftJoin('serviceRequest.requester', 'requester')
-      .addSelect('requester')
-      .take(limit)
-      .skip(offset)
-      .getManyAndCount();
 
-    return qb;
+    // const qb = this.serviceRequestsRepository
+    //   .createQueryBuilder('serviceRequest')
+    //   // .where(where, parameters)
+    //   .orderBy(`serviceRequest.${sortBy}`, sortOrder)
+    //   .select([
+    //     'serviceRequest.id',
+    //     'serviceRequest.trackingCode',
+    //     'serviceRequest.priority',
+    //     'serviceRequest.createdAt',
+    //     'serviceRequest.updatedAt',
+    //   ])
+    //   .leftJoin('serviceRequest.diagnostic', 'diagnostic')
+    //   .addSelect('diagnostic')
+    //   .leftJoin('serviceRequest.service', 'service')
+    //   .addSelect('service')
+    //   .leftJoin('serviceRequest.vehicle', 'vehicle')
+    //   .addSelect('vehicle')
+    //   .leftJoin('serviceRequest.createdBy', 'createdBy')
+    //   .addSelect('createdBy')
+    //   .leftJoin('serviceRequest.createdBy.employee', 'createdByEmployee')
+    //   .addSelect('createdByEmployee')
+    //   .leftJoin('serviceRequest.updatedBy', 'updatedBy')
+    //   .addSelect('updatedBy')
+    //   // .leftJoin('serviceRequest.updatedBy.employee', 'updatedByEmployee')
+    //   // .addSelect('updatedByEmployee')
+    //   .leftJoin('serviceRequest.requester', 'requester')
+    //   .addSelect('requester')
+    //   .take(limit)
+    //   .skip(offset)
+    //   .getManyAndCount();
   }
 }
