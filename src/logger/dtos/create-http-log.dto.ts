@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 
-import { HttpMethod } from 'src/shared/enums';
+import { HttpMethod } from 'src/core/enums';
 
 export interface RequestUser {
   id: string;

@@ -1,18 +1,17 @@
-import { Injectable } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 
-import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
-import { ResponseVehicleDto } from 'src/vehicles/dto/response-vehicle.dto';
+import { ResponseVehicleDto } from 'src/vehicles/dto';
+import { Vehicle } from 'src/vehicles/entities';
 
-@Injectable()
 export class VehicleMapper {
-  toResponseDto(vehicleEntity: Vehicle): ResponseVehicleDto {
-    const dto = plainToInstance(ResponseVehicleDto, vehicleEntity);
-
+  static toResponseDto(entity: Vehicle): ResponseVehicleDto {
+    const dto = plainToInstance(ResponseVehicleDto, {
+      id: entity.id,
+    });
     return dto;
   }
 
-  toResponseDtoList(vehicleEntities: Vehicle[]): ResponseVehicleDto[] {
-    return vehicleEntities.map((e) => this.toResponseDto(e));
+  static toResponseDtoList(entities: Vehicle[]): ResponseVehicleDto[] {
+    return entities.map((vehicle) => VehicleMapper.toResponseDto(vehicle));
   }
 }

@@ -1,21 +1,23 @@
-import { Injectable } from '@nestjs/common';
-
 import { plainToInstance } from 'class-transformer';
 
-import { ResponseEmployeeDto } from 'src/employees/dto';
 import { Employee } from 'src/employees/entities';
+import { ResponseEmployeeDto } from 'src/employees/dto';
 
-@Injectable()
 export class EmployeeMapper {
-  constructor() {}
-
-  toResponseDto(employeeEntity: Employee): ResponseEmployeeDto {
-    const dto = plainToInstance(ResponseEmployeeDto, employeeEntity);
+  static toResponseDto(entity: Employee): ResponseEmployeeDto {
+    const dto = plainToInstance(ResponseEmployeeDto, {
+      id: entity.id,
+      employeeNumber: entity.employeeNumber,
+      // fullName: entity.fullName,
+      firstName: entity.firstName,
+      fatherName: entity.fatherName,
+      motherName: entity.motherName,
+    });
 
     return dto;
   }
 
-  toResponseDtoList(employeeEntities: Employee[]): ResponseEmployeeDto[] {
-    return employeeEntities.map((e) => this.toResponseDto(e));
+  static toResponseDtoList(entities: Employee[]): ResponseEmployeeDto[] {
+    return entities.map((entity) => EmployeeMapper.toResponseDto(entity));
   }
 }

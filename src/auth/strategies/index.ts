@@ -1,5 +1,3 @@
-import { AccessTokenStrategy } from './access-token.strategy';
-import { RefreshTokenStrategy } from './refresh-token.strategy';
-import { OneTimeTokenStrategy } from './one-time-token.strategy';
-
-export { AccessTokenStrategy, RefreshTokenStrategy, OneTimeTokenStrategy };
+export * from './access-token.strategy';
+export * from './refresh-token.strategy';
+export * from './one-time-token.strategy';

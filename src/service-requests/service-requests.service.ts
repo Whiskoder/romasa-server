@@ -1,0 +1,130 @@
+import { FindOptionsWhere, Repository } from 'typeorm';
+
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import { Query } from 'src/core/interfaces';
+import { CreateServiceRequestDto } from 'src/service-requests/dtos';
+import { CustomersService } from 'src/customers/customers.service';
+import { NullableType } from 'src/core/types';
+import { ServiceRequest } from 'src/service-requests/entities';
+import { UsersService } from 'src/users/users.service';
+import { uuidPlugin } from 'src/core/plugins';
+import { VehiclesService } from 'src/vehicles/vehicles.service';
+import {
+  CustomerNotFoundException,
+  UserNotFoundException,
+  VehicleNotFoundException,
+} from 'src/service-requests/exceptions';
+import { ResponsePaginationDto } from 'src/core/dto';
+import { createPagination } from 'src/core/utils';
+
+@Injectable()
+export class ServiceRequestsService {
+  constructor(
+    @InjectRepository(ServiceRequest)
+    private readonly serviceRequestsRepository: Repository<ServiceRequest>,
+    private readonly customersService: CustomersService,
+    private readonly vehiclesService: VehiclesService,
+    private readonly usersService: UsersService,
+  ) {}
+
+  async create(
+    createServiceRequestDto: CreateServiceRequestDto,
+    userId: string,
+  ): Promise<ServiceRequest> {
+    const { vehicleId, customerId, priority } = createServiceRequestDto;
+
+    const customer = await this.customersService.findById(customerId);
+    if (!customer) throw new CustomerNotFoundException();
+
+    const vehicle = await this.vehiclesService.findById(vehicleId);
+    if (!vehicle) throw new VehicleNotFoundException();
+
+    const user = await this.usersService.findById(userId);
+    if (!user) throw new UserNotFoundException();
+
+    // TODO: Implement tracking code
+    const trackingCode = uuidPlugin.short();
+
+    const serviceRequest = {
+      id: uuidPlugin.v7(),
+      requester: customer,
+      vehicle,
+      priority,
+      trackingCode,
+      createdBy: user,
+      updatedBy: user,
+    };
+
+    const entity = this.serviceRequestsRepository.create(serviceRequest);
+
+    await this.serviceRequestsRepository.save(entity);
+
+    return entity;
+  }
+
+  async findById(
+    id: string,
+    where?: FindOptionsWhere<ServiceRequest>,
+    relations?: string[],
+  ): Promise<NullableType<ServiceRequest>> {
+    const entity = await this.serviceRequestsRepository.findOne({
+      where: { id, ...where },
+      relations,
+    });
+    return entity ? entity : null;
+  }
+
+  async findAllWithPagination(
+    query: Query<ServiceRequest>,
+  ): Promise<[ServiceRequest[], ResponsePaginationDto]> {
+    const { where, relations, pagination } = query;
+    const { offset, limit, sortBy, sortOrder } = pagination;
+
+    const [entities, total] = await this.serviceRequestsRepository.findAndCount(
+      {
+        where,
+        relations,
+        order: { [sortBy]: sortOrder },
+        take: limit,
+        skip: offset,
+      },
+    );
+
+    const paginationDto = createPagination(total, limit, offset);
+    return [entities, paginationDto];
+    // Usar consultas normales y modificar paginationInterceptor
+
+    // const qb = this.serviceRequestsRepository
+    //   .createQueryBuilder('serviceRequest')
+    //   // .where(where, parameters)
+    //   .orderBy(`serviceRequest.${sortBy}`, sortOrder)
+    //   .select([
+    //     'serviceRequest.id',
+    //     'serviceRequest.trackingCode',
+    //     'serviceRequest.priority',
+    //     'serviceRequest.createdAt',
+    //     'serviceRequest.updatedAt',
+    //   ])
+    //   .leftJoin('serviceRequest.diagnostic', 'diagnostic')
+    //   .addSelect('diagnostic')
+    //   .leftJoin('serviceRequest.service', 'service')
+    //   .addSelect('service')
+    //   .leftJoin('serviceRequest.vehicle', 'vehicle')
+    //   .addSelect('vehicle')
+    //   .leftJoin('serviceRequest.createdBy', 'createdBy')
+    //   .addSelect('createdBy')
+    //   .leftJoin('serviceRequest.createdBy.employee', 'createdByEmployee')
+    //   .addSelect('createdByEmployee')
+    //   .leftJoin('serviceRequest.updatedBy', 'updatedBy')
+    //   .addSelect('updatedBy')
+    //   // .leftJoin('serviceRequest.updatedBy.employee', 'updatedByEmployee')
+    //   // .addSelect('updatedByEmployee')
+    //   .leftJoin('serviceRequest.requester', 'requester')
+    //   .addSelect('requester')
+    //   .take(limit)
+    //   .skip(offset)
+    //   .getManyAndCount();
+  }
+}

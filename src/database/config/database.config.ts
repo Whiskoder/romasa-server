@@ -3,7 +3,7 @@ import { registerAs } from '@nestjs/config';
 import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 import { DatabaseConfig } from 'src/database/config/database-config.type';
-import { validateConfig } from 'src/utils';
+import { validateConfig } from 'src/core/utils';
 
 class EnvironmentVariablesValidator {
   @IsString()

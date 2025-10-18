@@ -1,3 +1,2 @@
-import { Employee } from './employee.entity';
-
-export { Employee };
+export * from './employee.entity';
+export * from './employee-search-view.entity';

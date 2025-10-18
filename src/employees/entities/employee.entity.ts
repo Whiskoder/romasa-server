@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity({ name: 'TBLCATEMP' })
+@Entity({ name: 'TBLCATEMP', synchronize: false })
 export class Employee {
   @PrimaryColumn({ name: 'LNGCLVEMP', type: 'int' })
   id: number;
@@ -18,10 +18,10 @@ export class Employee {
   firstName: string;
 
   @Column({ name: 'STRAPPEMP', type: 'nvarchar', length: 255, nullable: true })
-  lastName: string;
+  fatherName: string;
 
   @Column({ name: 'STRAPMEMP', type: 'nvarchar', length: 255, nullable: true })
-  middleName: string;
+  motherName: string;
 
   @Column({ name: 'STRCALEMP', type: 'nvarchar', length: 255, nullable: true })
   street: string;
@@ -63,7 +63,7 @@ export class Employee {
   gender: number;
 
   @Column({ name: 'STRGRPSNG', type: 'nvarchar', length: 6, nullable: true })
-  bloodType: string;
+  bloodGroup: string;
 
   @Column({ name: 'INTSTDCVL', type: 'smallint', nullable: true })
   maritalStatus: number;
@@ -127,7 +127,4 @@ export class Employee {
 
   @Column({ name: 'LNGCLVQPM_PDT', type: 'int', nullable: true })
   updatedFromDeviceId: number;
-
-  @Column({ name: 'SSMA_TimeStamp', type: 'int' })
-  version: number;
 }

@@ -1,25 +1,8 @@
-import { Exclude, Expose } from 'class-transformer';
-
-@Exclude()
 export class ResponseEmployeeDto {
-  @Expose()
-  id: string;
-
-  @Expose()
+  id: number;
   employeeNumber: number;
-
-  @Expose()
-  rfc: string;
-
-  @Expose()
-  curp: string;
-
-  @Expose()
+  fullName: string;
   firstName: string;
-
-  @Expose()
-  lastName: string;
-
-  @Expose()
-  middleName: string;
+  fatherName: string;
+  motherName: string;
 }

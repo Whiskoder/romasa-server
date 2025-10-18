@@ -4,6 +4,8 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 
+import { UserNotInRequestException } from 'src/auth/exceptions';
+
 import { User } from 'src/users/entities';
 
 type UserProperties =
@@ -17,7 +19,7 @@ export const GetUser = createParamDecorator(
     const req = ctx.switchToHttp().getRequest();
     const user = req.user;
 
-    if (!user) return new InternalServerErrorException();
+    if (!user) throw new UserNotInRequestException();
 
     return !data ? user : user[data];
   },

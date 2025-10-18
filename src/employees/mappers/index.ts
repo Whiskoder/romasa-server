@@ -1,3 +1,1 @@
-import { EmployeeMapper } from './employee.mapper';
-
-export { EmployeeMapper };
+export * from './employee.mapper';

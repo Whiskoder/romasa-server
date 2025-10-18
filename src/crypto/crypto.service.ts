@@ -14,7 +14,7 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AllConfigType } from 'src/config/config.type';
+import { AllConfigType } from 'src/core/config';
 
 @Injectable()
 export class CryptoService implements OnModuleInit {

@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, Column } from 'typeorm';
 
-@Entity({ name: 'TBLTRNVHC_CP' })
+@Entity({ name: 'TBLTRNVHC_CP', synchronize: false })
 export class Vehicle {
   @PrimaryColumn({ name: 'LNGDNTTRN', type: 'int' })
   id: number;

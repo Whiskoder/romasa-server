@@ -5,19 +5,25 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { DataSource, DataSourceOptions } from 'typeorm';
 
-import { AuthModule } from 'src/auth/auth.module';
-import { EmployeesModule } from 'src/employees/employee.module';
-import { HttpExceptionFilter } from 'src/shared/filters';
-import { ResponseInterceptor } from 'src/shared/interceptors';
-import { ServiceOperationsModule } from 'src/service-operations/service-operations.module';
+import { HttpExceptionFilter } from 'src/core/filters';
+import { ResponseInterceptor } from 'src/core/interceptors';
 import { TypeOrmConfigService } from 'src/database/typeorm-config.service';
-import { UsersModule } from 'src/users/user.module';
-import { VehiclesModule } from 'src/vehicles/vehicle.module';
 
-import appConfig from 'src/config/app.config';
+import { appConfig } from 'src/core/config';
 import authConfig from 'src/auth/config/auth.config';
 import cryptoConfig from 'src/crypto/config/crypto.config';
 import databaseConfig from 'src/database/config/database.config';
+
+import { AuthModule } from 'src/auth/auth.module';
+import { CustomersModule } from 'src/customers/customers.module';
+import { EmployeesModule } from 'src/employees/employees.module';
+import { GroupsModule } from 'src/groups/groups.module';
+import { UsersModule } from 'src/users/users.module';
+import { VehiclesModule } from 'src/vehicles/vehicles.module';
+import { WorkOrdersModule } from 'src/work-orders/work-orders.module';
+import { ServiceRequestsModule } from 'src/service-requests/service-requests.module';
+import { WorkshopsModule } from 'src/workshops/workshops.module';
+import { PermissionsModule } from 'src/permissions/permissions.module';
 
 const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
   useClass: TypeOrmConfigService,
@@ -36,10 +42,15 @@ const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
     }),
     infrastructureDatabaseModule,
     AuthModule,
+    CustomersModule,
     EmployeesModule,
-    ServiceOperationsModule,
+    GroupsModule,
     UsersModule,
     VehiclesModule,
+    WorkOrdersModule,
+    ServiceRequestsModule,
+    WorkshopsModule,
+    PermissionsModule,
   ],
   providers: [
     // {

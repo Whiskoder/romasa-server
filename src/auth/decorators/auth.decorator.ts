@@ -4,15 +4,14 @@ import {
   AccessTokenGuard,
   RefreshTokenGuard,
   OneTimeTokenGuard,
-  UserRoleGuard,
+  UserPermissionGuard,
 } from 'src/auth/guards';
-import { RoleProtected } from 'src/auth/decorators';
-import { Roles } from 'src/users/enums';
+import { PermissionProtected } from 'src/auth/decorators';
 
-export function AuthAccess(...roles: Roles[]) {
+export function AuthGuard(...permissions: string[]) {
   return applyDecorators(
-    RoleProtected(...roles),
-    UseGuards(AccessTokenGuard, UserRoleGuard),
+    PermissionProtected(...permissions),
+    UseGuards(AccessTokenGuard, UserPermissionGuard),
   );
 }
 

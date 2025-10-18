@@ -1,3 +1,1 @@
-import { Vehicle } from './vehicle.entity';
-
-export { Vehicle };
+export * from './vehicle.entity';

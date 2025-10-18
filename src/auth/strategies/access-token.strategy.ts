@@ -1,15 +1,16 @@
 import { Request } from 'express';
 
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
+import { ConfigService } from '@nestjs/config';
 
 import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
 
-import { extractTokenFromCookie } from 'src/utils';
-import { JwtPayload } from 'src/shared/interfaces';
+import { AllConfigType } from 'src/core/config';
+import { extractTokenFromCookie } from 'src/core/utils';
+import { InvalidTokenException } from 'src/auth/exceptions';
+import { JwtPayload } from 'src/core/interfaces';
 import { TokenType } from 'src/auth/enum';
-import { ConfigService } from '@nestjs/config';
-import { AllConfigType } from 'src/config/config.type';
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(
@@ -31,13 +32,18 @@ export class AccessTokenStrategy extends PassportStrategy(
   }
 
   async validate(req: any, payload: JwtPayload, done: VerifiedCallback) {
-    const { type, sub, role } = payload;
+    const { type, userId, userGroupId, permissionsVersion, isSuperAdmin } =
+      payload;
     if (type !== TokenType.access_token)
-      return done(new UnauthorizedException('Token is not an access token'));
+      return done(
+        new InvalidTokenException('El token no es de tipo access_token'),
+      );
 
-    req.userId = sub;
-    req.role = role;
+    req.userId = userId;
+    req.userGroupId = userGroupId;
+    req.permissionsVersion = permissionsVersion;
+    req.isSuperAdmin = isSuperAdmin;
 
-    done(null, sub);
+    done(null, userId);
   }
 }

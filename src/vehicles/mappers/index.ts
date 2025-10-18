@@ -1,3 +1,1 @@
-import { VehicleMapper } from './vehicle.mapper';
-
-export { VehicleMapper };
+export * from './vehicle.mapper';
