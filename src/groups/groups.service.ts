@@ -48,6 +48,19 @@ export class GroupsService {
     return entity;
   }
 
+  async updateName(id: string, name: string): Promise<Group> {
+    const existingGroup = await this.findByName(name);
+    if (existingGroup) throw new GroupAlreadyExistsEntityException();
+
+    const entity = await this.groupRepository.findOne({ where: { id } });
+    if (!entity) throw new GroupNotFoundEntityException();
+
+    const $name = name.trim().toLowerCase();
+    entity.name = $name;
+
+    return this.groupRepository.save(entity);
+  }
+
   async findById(
     id: string,
     relations?: string[],
@@ -74,7 +87,6 @@ export class GroupsService {
     query: Query<Group>,
   ): Promise<[Group[], ResponsePaginationDto]> {
     const { where, relations, pagination } = query;
-
     const { offset, limit, sortBy, sortOrder } = pagination;
 
     const [entities, total] = await this.groupRepository.findAndCount({
@@ -94,7 +106,7 @@ export class GroupsService {
     const entity = await this.groupRepository.findOne({ where: { id } });
     if (!entity) throw new GroupNotFoundEntityException();
 
-    this.permissionCacheService.invalidateGroup(id);
+    this.permissionCacheService.deleteGroup(id);
     await this.groupRepository.delete({ id });
   }
 
@@ -179,7 +191,8 @@ export class GroupsService {
     permissions: Set<string>,
   ): Promise<Group> {
     group.permissions = Array.from(permissions).join(',');
-    this.permissionCacheService.invalidateGroup(group.id);
+
+    this.permissionCacheService.invalidateGroup(group.id, permissions);
 
     return this.groupRepository.save(group);
   }

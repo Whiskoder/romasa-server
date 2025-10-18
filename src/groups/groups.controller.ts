@@ -60,9 +60,22 @@ export class GroupsController {
     return { groups: GroupMapper.toResponseDtoList(groups), pagination };
   }
 
+  @Patch(':groupId')
+  @AuthGuard(Permissions.groups.update)
+  @ApiResponse(200, 'Group updated')
+  async updateName(
+    @Param('groupId', new ParseUUIDPipe({ version: '7' }))
+    groupId: string,
+    @Body() updateGroupDto: CreateGroupDto,
+  ): Promise<{ group: ResponseGroupDto }> {
+    const { name } = updateGroupDto;
+    const group = await this.groupsService.updateName(groupId, name);
+    return { group: GroupMapper.toResponseDto(group) };
+  }
+
   @Delete(':groupId')
   @AuthGuard(Permissions.groups.delete)
-  @ApiResponse(204, 'Group deleted')
+  @ApiResponse(200, 'Group deleted')
   async delete(
     @Param('groupId', new ParseUUIDPipe({ version: '7' }))
     groupId: string,

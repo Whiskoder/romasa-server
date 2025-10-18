@@ -42,6 +42,12 @@ export class PayloadNotInRequestException extends UnauthorizedException {
   }
 }
 
+export class UserNotAssignedToGroupException extends ForbiddenException {
+  constructor(message = 'El usuario no está asignado a un grupo') {
+    super({ message, errorCode: 'AUTH_ERR_USER_NOT_ASSIGNED_TO_GROUP' });
+  }
+}
+
 export class UserForbiddenException extends ForbiddenException {
   constructor(message = 'No tiene permisos suficientes') {
     super({ message, errorCode: 'AUTH_ERR_USER_FORBIDDEN' });

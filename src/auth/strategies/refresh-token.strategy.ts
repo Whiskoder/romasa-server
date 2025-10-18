@@ -43,7 +43,10 @@ export class RefreshTokenStrategy extends PassportStrategy(
         if (!isValidPayload)
           return done(new InvalidTokenException('Payload no válido'));
 
-        const user = await this.usersService.findById(payload.userId);
+        const user = await this.usersService.findById(payload.userId, [
+          'group',
+          'employee',
+        ]);
         if (!user)
           return done(new InvalidTokenException('Usuario no encontrado'));
 

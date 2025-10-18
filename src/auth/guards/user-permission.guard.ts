@@ -5,6 +5,7 @@ import { META_PERMISSION } from 'src/auth/decorators';
 import { PermissionCacheService } from 'src/permissions/permission-cache.service';
 import {
   UserForbiddenException,
+  UserNotAssignedToGroupException,
   UserNotInRequestException,
   UserPermissionsExpiredException,
 } from '../exceptions';
@@ -33,10 +34,15 @@ export class UserPermissionGuard implements CanActivate {
     const userGroupId = req.userGroupId;
     const permissionsVersion = req.permissionsVersion;
 
+    if (!userGroupId || !permissionsVersion)
+      throw new UserNotAssignedToGroupException();
+
     const userPermissions = this.permissionCacheService.getGroupPermissions(
       userGroupId,
       permissionsVersion,
     );
+
+    console.log(userPermissions);
 
     if (userPermissions === null) throw new UserPermissionsExpiredException();
 
@@ -51,3 +57,7 @@ export class UserPermissionGuard implements CanActivate {
     return true;
   }
 }
+
+//! TODO: el usuario debe estar asignado a un grupo
+// Si no tiene un grupo asignado, asignarle por defecto al grupo 1 sin permisos
+// ! TODO: jwtio signature token

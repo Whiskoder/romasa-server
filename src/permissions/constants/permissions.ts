@@ -9,17 +9,21 @@ export const Permissions = {
     schedule: 'service_requests:schedule',
   },
   users: {
+    view_all: 'users:view:all',
     create: 'users:create',
   },
   groups: {
     view_all: 'groups:view:all',
     create: 'groups:create',
     edit: 'groups:edit',
+    update: 'groups:update',
     delete: 'groups:delete',
     manage_permissions: 'groups:manage:permissions',
     manage_users: 'groups:manage:users',
   },
-  employees: {},
+  employees: {
+    view_all: 'employees:view:all',
+  },
   workshops: {
     create: 'workshops:create',
   },

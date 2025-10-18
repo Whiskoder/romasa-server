@@ -20,7 +20,10 @@ export class AuthService {
   ) {}
 
   async me(userId: string): Promise<User> {
-    const user = await this.usersService.findById(userId);
+    const user = await this.usersService.findById(userId, [
+      'group',
+      'employee',
+    ]);
     if (!user) throw new UserNoLongerActiveException();
     return user;
   }
@@ -28,7 +31,10 @@ export class AuthService {
   async login(loginUserDto: LoginUserDto, res: Response): Promise<User> {
     const { email, password } = loginUserDto;
 
-    const user = await this.usersService.findByEmail(email);
+    const user = await this.usersService.findByEmail(email, [
+      'group',
+      'employee',
+    ]);
     if (!user)
       throw new InvalidCredentialsException(
         'El usuario con ese email no existe',

@@ -29,8 +29,12 @@ export class PermissionCacheService implements OnModuleInit {
     });
   }
 
-  getGroupPermissions(groupId: string, permissionsVersion: string) {
+  getGroupPermissions(groupId?: string, permissionsVersion?: string) {
+    if (!groupId || !permissionsVersion) return null;
     const validVersion = this._permissionVersions.get(groupId);
+
+    if (!validVersion) return null;
+
     if (validVersion !== permissionsVersion) return null;
 
     const permissions = this._cache.get(groupId);
@@ -46,22 +50,31 @@ export class PermissionCacheService implements OnModuleInit {
     return permissionsVersion;
   }
 
-  async invalidateGroup(id: string) {
+  deleteGroup(id: string) {
     this._cache.delete(id);
     this._permissionVersions.delete(id);
-
-    const group = await this.groupsRepository.findOne({
-      where: { id },
-    });
-    if (!group) return;
-
-    const permissions = group?.permissions?.split(',');
-
-    if (!permissions) return;
-    if (!permissions.length) return;
-
-    this._cache.set(id, new Set([...permissions]));
     this._permissionVersions.set(id, uuidPlugin.v7());
+  }
+
+  async invalidateGroup(id: string, newPermissions?: Set<string>) {
+    this._permissionVersions.delete(id);
+    this._permissionVersions.set(id, uuidPlugin.v7());
+
+    if (!newPermissions) return;
+    this._cache.delete(id);
+    this._cache.set(id, newPermissions);
+
+    // const group = await this.groupsRepository.findOne({
+    //   where: { id },
+    // });
+    // if (!group) return;
+
+    // console.log(group);
+
+    // const permissions = group?.permissions?.split(',');
+
+    // if (!permissions) return;
+    // if (!permissions.length) return;
   }
 }
 

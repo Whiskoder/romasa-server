@@ -13,6 +13,9 @@ import {
 import { CryptoService } from 'src/crypto/crypto.service';
 import { EmployeesService } from 'src/employees/employees.service';
 import { User } from 'src/users/entities';
+import { Query } from 'src/core/interfaces';
+import { ResponsePaginationDto } from 'src/core/dto';
+import { createPagination } from 'src/core/utils';
 
 @Injectable()
 export class UsersService {
@@ -24,13 +27,17 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const { password, email, employeeId } = createUserDto;
+    const { email, employeeId } = createUserDto;
 
     const existingUser = await this.findByEmail(email);
     if (existingUser) throw new UserAlreadyExistsException();
 
     const employeeEntity = await this.employeeService.findById(employeeId);
     if (!employeeEntity) throw new UserEmployeeNotFoundException();
+
+    // Send temporal password via email
+    const password = uuidPlugin.short();
+    console.log(password);
 
     const hashedPassword = bcryptPlugin.hash(password);
     const encryptedTokenSecret = this.cryptoService.generateSecret();
@@ -49,13 +56,44 @@ export class UsersService {
     return entity;
   }
 
-  async findByEmail(email: string): Promise<NullableType<User>> {
-    const entity = await this.usersRepository.findOne({ where: { email } });
+  async findAllWithPagination(
+    query: Query<User>,
+  ): Promise<[User[], ResponsePaginationDto]> {
+    const { where, relations, pagination } = query;
+    const { offset, limit, sortBy, sortOrder } = pagination;
+
+    const [entities, total] = await this.usersRepository.findAndCount({
+      where,
+      relations,
+      order: { [sortBy]: sortOrder },
+      take: limit,
+      skip: offset,
+    });
+
+    const paginationDto = createPagination(total, limit, offset);
+
+    return [entities, paginationDto];
+  }
+
+  async findByEmail(
+    email: string,
+    relations?: string[],
+  ): Promise<NullableType<User>> {
+    const entity = await this.usersRepository.findOne({
+      where: { email },
+      relations,
+    });
     return entity ? entity : null;
   }
 
-  async findById(id: string): Promise<NullableType<User>> {
-    const entity = await this.usersRepository.findOne({ where: { id } });
+  async findById(
+    id: string,
+    relations?: string[],
+  ): Promise<NullableType<User>> {
+    const entity = await this.usersRepository.findOne({
+      where: { id },
+      relations,
+    });
     return entity ? entity : null;
   }
 

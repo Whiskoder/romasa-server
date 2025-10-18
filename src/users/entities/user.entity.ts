@@ -26,9 +26,9 @@ export class User {
   @ManyToOne(() => Employee, (employee) => employee.id, { eager: true })
   employee: Employee;
 
-  @ManyToOne(() => Group, (group) => group.users, { eager: true })
+  @ManyToOne(() => Group, (group) => group.users)
   @JoinColumn()
-  group: Group;
+  group?: Group;
 
   @Column({ type: 'bit', nullable: false, default: true })
   isActive: boolean;
