@@ -6,7 +6,7 @@ import { uuidPlugin } from 'src/core/plugins';
 import { TokenType } from 'src/auth/enum';
 import { AllConfigType } from 'src/core/config';
 import { CryptoService } from 'src/crypto/crypto.service';
-import { User } from 'src/users/entities';
+import { User } from 'src/users/entities/user.entity';
 import { PermissionCacheService } from 'src/permissions/permission-cache.service';
 
 @Injectable()

@@ -1,8 +1,17 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToOne,
+} from 'typeorm';
 
 import { Employee } from 'src/employees/entities';
 import { WorkOrder } from './work-order.entity';
 import { ServiceRequest } from '../../service-requests/entities/service-request.entity';
+import { User } from 'src/users/entities/user.entity';
 
 /**
  * Evaluación técnica inicial del vehículo para identificar fallas,
@@ -50,4 +59,16 @@ export class WorkOrderDiagnostic extends WorkOrder {
   // Refacciones, fluidos y materiales requeridos con cantidad y especificaciones
   @Column({ type: 'nvarchar', length: 255, nullable: true })
   requiredMaterials?: string;
+
+  @ManyToMany(() => User, (user) => user.workOrderDiagnosticApprovers)
+  @JoinTable()
+  approversRequired?: User[];
+
+  @ManyToMany(() => User, (user) => user.workOrderDiagnosticApprovedBy)
+  @JoinTable()
+  approvedBy?: User[];
+
+  @ManyToMany(() => User, (user) => user.workOrderDiagnosticRejectedBy)
+  @JoinTable()
+  rejectedBy?: User[];
 }

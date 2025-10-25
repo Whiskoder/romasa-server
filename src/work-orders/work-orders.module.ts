@@ -11,12 +11,15 @@ import { WorkshopsModule } from 'src/workshops/workshops.module';
 
 import { EmployeesModule } from 'src/employees/employees.module';
 import { ServiceRequestsModule } from 'src/service-requests/service-requests.module';
+// import { UsersModule } from 'src/users/users.module';
+import { GroupsModule } from 'src/groups/groups.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([WorkOrderDiagnostic, WorkOrderService]),
     forwardRef(() => ServiceRequestsModule),
     WorkshopsModule,
     EmployeesModule,
+    GroupsModule,
   ],
   controllers: [WorkOrdersController],
   providers: [WorkOrdersService],

@@ -12,7 +12,7 @@ import {
 } from 'src/users/exceptions';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { EmployeesService } from 'src/employees/employees.service';
-import { User } from 'src/users/entities';
+import { User } from 'src/users/entities/user.entity';
 import { Query } from 'src/core/interfaces';
 import { ResponsePaginationDto } from 'src/core/dto';
 import { createPagination } from 'src/core/utils';

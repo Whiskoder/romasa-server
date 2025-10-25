@@ -3,19 +3,20 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Group } from 'src/groups/entities';
+import { Group } from 'src/groups/entities/group.entity';
 import { NullableType } from 'src/core/types';
 import { CreateGroupDto } from './dto';
 import {
   GroupAlreadyExistsEntityException,
   GroupNotFoundEntityException,
   GroupUsersNotFoundEntityException,
+  GroupWorkOrderDiagnosticApproversNotFoundEntityException,
   InvalidPermissionsValueException,
   UsersNotFoundEntityException,
 } from 'src/groups/exceptions';
 import { uuidPlugin } from 'src/core/plugins';
 import { UsersService } from 'src/users/users.service';
-import { User } from 'src/users/entities';
+import { User } from 'src/users/entities/user.entity';
 import { Query } from 'src/core/interfaces';
 import { ResponsePaginationDto } from 'src/core/dto';
 import { createPagination } from 'src/core/utils';
@@ -244,5 +245,60 @@ export class GroupsService {
 
   private validateGroupHasUsers(group: Group): void {
     if (!group.users?.length) throw new GroupUsersNotFoundEntityException();
+  }
+
+  async addWorkOrderDiagnosticApprovers(
+    groupId: string,
+    userIds: string[],
+  ): Promise<Group> {
+    const group = await this.getGroupWithWorkOrderDiagnosticApprovers(groupId);
+    const userEntities = await this.getValidUsers(userIds);
+
+    const newUsers = this.filterNewUsers(
+      group.workOrderDiagnosticApprovers ?? [],
+      userEntities,
+    );
+    group.workOrderDiagnosticApprovers = [
+      ...(group.workOrderDiagnosticApprovers ?? []),
+      ...newUsers,
+    ];
+
+    this.permissionCacheService.invalidateGroup(groupId);
+
+    return this.groupRepository.save(group);
+  }
+
+  async removeWorkOrderDiagnosticApprovers(
+    groupId: string,
+    userIds: string[],
+  ): Promise<Group> {
+    const group = await this.getGroupWithWorkOrderDiagnosticApprovers(groupId);
+    const userEntities = await this.getValidUsers(userIds);
+
+    this.validateGroupHasWorkOrderDiagnosticApprovers(group);
+
+    const userIdsToRemove = new Set(userEntities.map((u) => u.id));
+    group.workOrderDiagnosticApprovers = (
+      group.workOrderDiagnosticApprovers ?? []
+    ).filter((user) => !userIdsToRemove.has(user.id));
+
+    this.permissionCacheService.invalidateGroup(groupId);
+
+    return this.groupRepository.save(group);
+  }
+
+  private validateGroupHasWorkOrderDiagnosticApprovers(group: Group): void {
+    if (!group.workOrderDiagnosticApprovers?.length)
+      throw new GroupWorkOrderDiagnosticApproversNotFoundEntityException();
+  }
+
+  private async getGroupWithWorkOrderDiagnosticApprovers(
+    groupId: string,
+  ): Promise<Group> {
+    const group = await this.findById(groupId, [
+      'workOrderDiagnosticApprovers',
+    ]);
+    if (!group) throw new GroupNotFoundEntityException();
+    return group;
   }
 }

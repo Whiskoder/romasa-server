@@ -1,6 +1,6 @@
 import { Body, Controller, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 
-import { AuthGuard, GetUserPermissions } from 'src/auth/decorators';
+import { AuthGuard, GetUserId, GetUserPermissions } from 'src/auth/decorators';
 import { ApiResponse } from 'src/core/decorators';
 import {
   CreateWorkOrderDiagnosticDto,
@@ -10,6 +10,7 @@ import {
 import { WorkOrderMapper } from 'src/work-orders/mappers';
 import { WorkOrdersService } from 'src/work-orders/work-orders.service';
 import { Permissions } from 'src/permissions/constants';
+import { GetUserGroupId } from 'src/auth/decorators/get-user-group-id.decorator';
 
 @Controller({
   version: '1',
@@ -28,21 +29,15 @@ export class ServiceRequestWorkOrdersController {
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
     @Body() createDiagnosticWorkOrderDto: CreateWorkOrderDiagnosticDto,
-    @GetUserPermissions() userPermissions: string[],
+    @GetUserGroupId() userGroupId: string,
+    @GetUserPermissions() userPermissions: Set<string>,
   ): Promise<{ workOrder: ResponseWorkOrderDto }> {
-    let approvalRequired = true;
-    if (
-      userPermissions.includes(
-        Permissions.diagnostic_work_orders.create_without_approval,
-      )
-    ) {
-      approvalRequired = false;
-    }
-
+    console.log(userPermissions);
     const workOrder = await this.workOrdersService.createDiagnosticWorkOrder(
       serviceRequestId,
       createDiagnosticWorkOrderDto,
-      approvalRequired,
+      userGroupId,
+      userPermissions,
     );
     return {
       workOrder: WorkOrderMapper.diagnosticToResponseDto(workOrder),

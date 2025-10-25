@@ -6,7 +6,7 @@ import {
 
 import { UserNotInRequestException } from 'src/auth/exceptions';
 
-import { User } from 'src/users/entities';
+import { User } from 'src/users/entities/user.entity';
 
 type UserProperties =
   | {

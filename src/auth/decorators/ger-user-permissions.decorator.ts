@@ -8,7 +8,7 @@ export const GetUserPermissions = createParamDecorator(
     const req = ctx.switchToHttp().getRequest();
     const isSuperAdmin = req.isSuperAdmin;
 
-    if (isSuperAdmin) return ALL_PERMISSIONS_VALUES;
+    if (isSuperAdmin) return new Set([...ALL_PERMISSIONS_VALUES]);
 
     const userPermissions = req.userPermissions;
 

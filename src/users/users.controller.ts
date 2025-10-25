@@ -14,7 +14,7 @@ import { AuthGuard } from 'src/auth/decorators';
 import { Permissions } from 'src/permissions/constants';
 import { ResponsePaginationDto } from 'src/core/dto';
 import { SearchFilterAndPaginationInterceptor } from 'src/core/interceptors';
-import { User } from './entities';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller({
   version: '1',

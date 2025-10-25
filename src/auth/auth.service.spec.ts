@@ -11,7 +11,7 @@
 import { Response } from 'express';
 import { bcryptPlugin } from 'src/core/plugins';
 import { uuidPlugin } from 'src/core/plugins';
-import { User } from 'src/users/entities';
+import { User } from 'src/users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { UsersService } from 'src/users/users.service';
 import { CookieService, TokenService } from './services';

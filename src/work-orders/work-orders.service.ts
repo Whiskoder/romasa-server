@@ -14,6 +14,7 @@ import {
   ServiceRequestNotFoundException,
   EmployeeNotFoundException,
   ServiceRequestAlreadyHasAnOrderException,
+  NoApproversConfiguredException,
 } from 'src/work-orders/exceptions';
 import { ServiceRequestsService } from 'src/service-requests/service-requests.service';
 import { EmployeesService } from 'src/employees/employees.service';
@@ -25,6 +26,10 @@ import {
 import { uuidPlugin } from 'src/core/plugins';
 import { Workshop } from 'src/workshops/entities';
 import { ServiceRequest } from 'src/service-requests/entities';
+import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
+import { Permissions } from 'src/permissions/constants';
+import { GroupsService } from 'src/groups/groups.service';
 
 @Injectable()
 export class WorkOrdersService {
@@ -36,6 +41,8 @@ export class WorkOrdersService {
     private readonly workshopService: WorkshopsService,
     private readonly serviceRequestService: ServiceRequestsService,
     private readonly employeesService: EmployeesService,
+    // private readonly usersService: UsersService,
+    private readonly groupsService: GroupsService,
   ) {}
 
   private async validateWorkOrderPrerequisites(
@@ -75,13 +82,40 @@ export class WorkOrdersService {
     };
   }
 
+  private async determineDefaultApprovers(
+    userGroupId: string,
+  ): Promise<User[]> {
+    const group = await this.groupsService.findById(userGroupId, [
+      'workOrderDiagnosticApprovers',
+    ]);
+    console.log(group);
+    const users = group?.workOrderDiagnosticApprovers;
+    if (!users?.length) throw new NoApproversConfiguredException();
+    return users;
+  }
+
   async createDiagnosticWorkOrder(
     serviceRequestId: string,
     createDiagnosticWorkOrderDto: CreateWorkOrderDiagnosticDto,
-    requiresApproval: boolean,
+    userGroupId: string,
+    userPermissions: Set<string>,
   ): Promise<WorkOrderDiagnostic> {
     const { workshopId, reportedByDriverId, reportedSymptoms, ...rest } =
       createDiagnosticWorkOrderDto;
+
+    let requiresApproval = true;
+    if (
+      userPermissions.has(
+        Permissions.service_work_orders.create_without_approval,
+      )
+    ) {
+      requiresApproval = false;
+    }
+
+    let approversRequired: User[] = [];
+    if (requiresApproval) {
+      approversRequired = await this.determineDefaultApprovers(userGroupId);
+    }
 
     const { workshop, serviceRequest } =
       await this.validateWorkOrderPrerequisites(
@@ -104,6 +138,7 @@ export class WorkOrdersService {
       ...workOrderBase,
       reportedSymptoms: reportedSymptoms.join(','),
       reportedByDriver: employee,
+      approversRequired,
     };
 
     const entity =

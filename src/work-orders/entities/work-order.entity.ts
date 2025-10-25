@@ -1,8 +1,14 @@
-import { Column, ManyToMany, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
-import { Workshop } from 'src/workshops/entities';
-import { User } from 'src/users/entities';
-import { Employee } from 'src/employees/entities';
+import { Workshop } from 'src/workshops/entities/workshop.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Employee } from 'src/employees/entities/employee.entity';
 import { OrderStatus } from 'src/work-orders/enums';
 
 /**
@@ -62,17 +68,20 @@ export abstract class WorkOrder {
   @Column({ type: 'bit', default: true, nullable: false })
   requiresApproval: boolean;
 
-  // Define los usuarios que deben aprobar la solicitud
-  @ManyToMany(() => User)
-  approversRequired?: User[];
+  // // Define los usuarios que deben aprobar la solicitud
+  // @ManyToMany(() => User, (user) => user.workOrderApprovers)
+  // @JoinTable()
+  // approversRequired?: User[];
 
-  // Define los usuarios que han aprobado la solicitud
-  @ManyToMany(() => User)
-  approvedBy?: User[];
+  // // Define los usuarios que han aprobado la solicitud
+  // @ManyToMany(() => User)
+  // @JoinTable()
+  // approvedBy?: User[];
 
-  // Define los usuarios que han rechazado la solicitud
-  @ManyToMany(() => User)
-  rejectedBy?: User[];
+  // // Define los usuarios que han rechazado la solicitud
+  // @ManyToMany(() => User)
+  // @JoinTable()
+  // rejectedBy?: User[];
 
   // Fecha de aprobación
   @Column({ type: 'datetime', nullable: true })

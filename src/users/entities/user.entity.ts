@@ -3,13 +3,16 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-import { Employee } from 'src/employees/entities';
-import { Group } from 'src/groups/entities';
+import { Employee } from 'src/employees/entities/employee.entity';
+import { Group } from 'src/groups/entities/group.entity';
+import { WorkOrderDiagnostic } from 'src/work-orders/entities/work-order-diagnostic.entity';
+// import { WorkOrder } from 'src/work-orders/entities';
 
 @Entity()
 export class User {
@@ -44,4 +47,19 @@ export class User {
 
   @UpdateDateColumn({ type: 'datetime' })
   updatedAt: Date;
+
+  @ManyToMany(() => Group, (group) => group.woDiagnosticApprovers)
+  woDiagnosticApproverGroups: Group[];
+
+  @ManyToMany(
+    () => WorkOrderDiagnostic,
+    (workOrder) => workOrder.approversRequired,
+  )
+  workOrderDiagnosticApprovers: WorkOrderDiagnostic[];
+
+  @ManyToMany(() => WorkOrderDiagnostic, (workOrder) => workOrder.approvedBy)
+  workOrderDiagnosticApprovedBy: WorkOrderDiagnostic[];
+
+  @ManyToMany(() => WorkOrderDiagnostic, (workOrder) => workOrder.rejectedBy)
+  workOrderDiagnosticRejectedBy: WorkOrderDiagnostic[];
 }

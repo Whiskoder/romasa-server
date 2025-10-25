@@ -23,3 +23,9 @@ export class ServiceRequestAlreadyHasAnOrderException extends UnprocessableEntit
     super({ message, errorCode: 'WO_ERR_SERVICE_REQUEST_HAS_ORDER' });
   }
 }
+
+export class NoApproversConfiguredException extends UnprocessableEntityException {
+  constructor(message = 'No hay aprobadores configurados') {
+    super({ message, errorCode: 'WO_ERR_NO_APPROVERS_CONFIGURED' });
+  }
+}

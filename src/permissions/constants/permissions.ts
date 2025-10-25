@@ -30,6 +30,8 @@ export const Permissions = {
     delete: 'groups:delete',
     manage_permissions: 'groups:manage:permissions',
     manage_users: 'groups:manage:users',
+    manage_work_order_diagnostic_approvers:
+      'groups:manage:work-order-diagnostic:approvers',
   },
   employees: {
     view_all: 'employees:view:all',

@@ -1,7 +1,7 @@
 import { plainToInstance } from 'class-transformer';
 
 import { ResponseGroupDto } from 'src/groups/dto';
-import { Group } from 'src/groups/entities';
+import { Group } from 'src/groups/entities/group.entity';
 import { UserMapper } from 'src/users/mappers';
 
 export class GroupMapper {
@@ -18,6 +18,9 @@ export class GroupMapper {
         : undefined,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      workOrderDiagnosticApprovers: entity.workOrderDiagnosticApprovers
+        ? UserMapper.toResponseDtoList(entity.workOrderDiagnosticApprovers)
+        : undefined,
     });
     return dto;
   }

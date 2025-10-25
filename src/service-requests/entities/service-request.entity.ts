@@ -1,5 +1,5 @@
 import { Customer } from 'src/customers/entities';
-import { User } from 'src/users/entities';
+import { User } from 'src/users/entities/user.entity';
 import { Vehicle } from 'src/vehicles/entities';
 import {
   Column,

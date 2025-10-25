@@ -15,13 +15,14 @@ import { GroupsService } from 'src/groups/groups.service';
 import {
   AddGroupPermissionsDto,
   AddUsersToGroupDto,
+  AddWorkOrderDiagnosticApproversDto,
   CreateGroupDto,
   ResponseGroupDto,
 } from 'src/groups/dto';
 import { GroupMapper } from './mappers';
 import { AuthGuard } from 'src/auth/decorators';
 import { SearchFilterAndPaginationInterceptor } from 'src/core/interceptors';
-import { Group } from 'src/groups/entities';
+import { Group } from 'src/groups/entities/group.entity';
 import { GroupNotFoundException } from 'src/groups/exceptions';
 import { ResponsePaginationDto } from 'src/core/dto';
 import { Permissions } from 'src/permissions/constants';
@@ -46,7 +47,10 @@ export class GroupsController {
   @Get()
   @AuthGuard(Permissions.groups.view_all)
   @UseInterceptors(
-    new SearchFilterAndPaginationInterceptor<Group>(['id', 'name'], ['users']),
+    new SearchFilterAndPaginationInterceptor<Group>(
+      ['id', 'name'],
+      ['users', 'workOrderDiagnosticApprovers'],
+    ),
   )
   @ApiResponse(200, 'Groups found')
   async findAll(@Req() request: Request): Promise<{
@@ -135,6 +139,40 @@ export class GroupsController {
   ): Promise<{ group: ResponseGroupDto }> {
     const { userIds } = addUsersToGroupDto;
     const group = await this.groupsService.removeUsers(groupId, userIds);
+    return { group: GroupMapper.toResponseDto(group) };
+  }
+
+  @Post(':groupId/work-order-diagnostic/approvers')
+  @AuthGuard(Permissions.groups.manage_work_order_diagnostic_approvers)
+  @ApiResponse(200, 'Users added to group')
+  async addWorkOrderDiagnosticApprovers(
+    @Param('groupId', new ParseUUIDPipe({ version: '7' }))
+    groupId: string,
+    @Body()
+    addWorkOrderDiagnosticApproversDto: AddWorkOrderDiagnosticApproversDto,
+  ): Promise<{ group: ResponseGroupDto }> {
+    const { userIds } = addWorkOrderDiagnosticApproversDto;
+    const group = await this.groupsService.addWorkOrderDiagnosticApprovers(
+      groupId,
+      userIds,
+    );
+    return { group: GroupMapper.toResponseDto(group) };
+  }
+
+  @Delete(':groupId/work-order-diagnostic/approvers')
+  @AuthGuard(Permissions.groups.manage_work_order_diagnostic_approvers)
+  @ApiResponse(200, 'Users removed from group')
+  async removeWorkOrderDiagnosticApprovers(
+    @Param('groupId', new ParseUUIDPipe({ version: '7' }))
+    groupId: string,
+    @Body()
+    addWorkOrderDiagnosticApproversDto: AddWorkOrderDiagnosticApproversDto,
+  ): Promise<{ group: ResponseGroupDto }> {
+    const { userIds } = addWorkOrderDiagnosticApproversDto;
+    const group = await this.groupsService.removeWorkOrderDiagnosticApprovers(
+      groupId,
+      userIds,
+    );
     return { group: GroupMapper.toResponseDto(group) };
   }
 }

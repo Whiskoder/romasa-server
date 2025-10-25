@@ -3,7 +3,7 @@ import { EmployeeMapper } from 'src/employees/mappers';
 import { GroupMapper } from 'src/groups/mappers';
 
 import { ResponseUserDto } from 'src/users/dto';
-import { User } from 'src/users/entities';
+import { User } from 'src/users/entities/user.entity';
 
 export class UserMapper {
   static toResponseDto(entity: User): ResponseUserDto {

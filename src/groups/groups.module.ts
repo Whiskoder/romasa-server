@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 
 import { GroupsController } from 'src/groups/groups.controller';
 import { GroupsService } from 'src/groups/groups.service';
-import { Group } from 'src/groups/entities';
+import { Group } from 'src/groups/entities/group.entity';
 import { UsersModule } from 'src/users/users.module';
 import { PermissionsModule } from 'src/permissions/permissions.module';
 
