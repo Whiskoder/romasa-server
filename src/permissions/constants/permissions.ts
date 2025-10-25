@@ -8,6 +8,16 @@ export const Permissions = {
     reject: 'service_requests:reject',
     schedule: 'service_requests:schedule',
   },
+  diagnostic_work_orders: {
+    create_without_approval: 'diagnostic_work_orders:create:without_approval',
+    create_with_required_approval:
+      'diagnostic_work_orders:create:with_required_approval',
+  },
+  service_work_orders: {
+    create_without_approval: 'service_work_orders:create:without_approval',
+    create_with_required_approval:
+      'service_work_orders:create:with_required_approval',
+  },
   users: {
     view_all: 'users:view:all',
     create: 'users:create',
@@ -29,6 +39,7 @@ export const Permissions = {
   },
   customers: {
     create: 'customers:create',
+    view_all: 'customers:view:all',
   },
   vehicles: {
     view_all: 'vehicles:view:all',

@@ -8,6 +8,7 @@ import { ServiceRequest } from '../../service-requests/entities/service-request.
  * Evaluación técnica inicial del vehículo para identificar fallas,
  * determinar necesidades de reparación y generar cotización
  */
+// TODO: fuelLevelAtDiagnostic, mileageAtDiagnostic
 @Entity()
 export class WorkOrderDiagnostic extends WorkOrder {
   // Este campo se repite para evitar la dependencia circular
