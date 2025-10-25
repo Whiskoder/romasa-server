@@ -1,6 +1,6 @@
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 
-const bcryptPlugin = {
+export const bcryptPlugin = {
   hash: (password: string, rounds?: number): string => {
     const salt = genSaltSync((rounds = 10));
     return hashSync(password, salt);
@@ -9,5 +9,3 @@ const bcryptPlugin = {
     return compareSync(password, hash);
   },
 };
-
-export default bcryptPlugin;

@@ -28,12 +28,19 @@ export class WorkOrderMapper {
       reportedByDriver: entity.reportedByDriver
         ? EmployeeMapper.toResponseDto(entity.reportedByDriver)
         : undefined,
-      reportedSymptoms: entity.reportedSymptoms,
+      reportedSymptoms: entity.reportedSymptoms
+        ? entity.reportedSymptoms.split(',')
+        : undefined,
       impactsOperability: entity.impactsOperability,
       issueFrequency: entity.issueFrequency,
       technicalDescription: entity.technicalDescription,
-      affectedSystems: entity.affectedSystems,
-      requiredMaterials: entity.requiredMaterials,
+
+      affectedSystems: entity.affectedSystems
+        ? entity.affectedSystems.split(',')
+        : undefined,
+      requiredMaterials: entity.requiredMaterials
+        ? entity.requiredMaterials.split(',')
+        : undefined,
     });
 
     return dto;
@@ -47,13 +54,25 @@ export class WorkOrderMapper {
       ...base,
       fuelLevelAtReception: entity.fuelLevelAtReception,
       mileageAtReception: entity.mileageAtReception,
-      receivedInventoryItems: entity.receivedInventoryItems || [],
+      receivedInventoryItems: entity.receivedInventoryItems
+        ? entity.receivedInventoryItems.split(',')
+        : undefined,
       visualInspection: {
-        roof: entity.roofObservations || [],
-        front: entity.frontObservations || [],
-        leftSide: entity.leftSideObservations || [],
-        rightSide: entity.rightSideObservations || [],
-        rear: entity.rearObservations || [],
+        roof: entity.roofObservations
+          ? entity.roofObservations.split(',')
+          : undefined,
+        front: entity.frontObservations
+          ? entity.frontObservations.split(',')
+          : undefined,
+        leftSide: entity.leftSideObservations
+          ? entity.leftSideObservations.split(',')
+          : undefined,
+        rightSide: entity.rightSideObservations
+          ? entity.rightSideObservations.split(',')
+          : undefined,
+        rear: entity.rearObservations
+          ? entity.rearObservations.split(',')
+          : undefined,
       },
       workPerformed: entity.performedServices
         ? {

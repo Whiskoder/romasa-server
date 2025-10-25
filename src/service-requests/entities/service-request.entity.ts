@@ -13,6 +13,7 @@ import {
 } from 'typeorm';
 import { WorkOrderDiagnostic } from '../../work-orders/entities/work-order-diagnostic.entity';
 import { WorkOrderService } from '../../work-orders/entities/work-order-service.entity';
+import { ServiceRequestStatus } from 'src/service-requests/enums';
 
 /**
  * Contenedor maestro que agrupa una o múltiples órdenes de trabajo
@@ -78,4 +79,7 @@ export class ServiceRequest {
     { eager: true },
   )
   diagnostic: WorkOrderDiagnostic;
+
+  @Column({ type: 'nvarchar', length: 30, nullable: false })
+  status: ServiceRequestStatus;
 }

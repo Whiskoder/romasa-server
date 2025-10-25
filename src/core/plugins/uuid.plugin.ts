@@ -1,7 +1,7 @@
 import { customAlphabet, nanoid } from 'nanoid';
 import { v7 as uuidv7 } from 'uuid';
 
-const uuidPlugin = {
+export const uuidPlugin = {
   v7: () => uuidv7(),
   short: () => {
     const alphabet =
@@ -11,5 +11,3 @@ const uuidPlugin = {
     return nanoid();
   },
 };
-
-export default uuidPlugin;

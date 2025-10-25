@@ -18,6 +18,7 @@ import {
 } from 'src/service-requests/exceptions';
 import { ResponsePaginationDto } from 'src/core/dto';
 import { createPagination } from 'src/core/utils';
+import { ServiceRequestStatus } from 'src/service-requests/enums';
 
 @Injectable()
 export class ServiceRequestsService {
@@ -55,6 +56,7 @@ export class ServiceRequestsService {
       trackingCode,
       createdBy: user,
       updatedBy: user,
+      status: ServiceRequestStatus.draft,
     };
 
     const entity = this.serviceRequestsRepository.create(serviceRequest);
@@ -71,6 +73,17 @@ export class ServiceRequestsService {
   ): Promise<NullableType<ServiceRequest>> {
     const entity = await this.serviceRequestsRepository.findOne({
       where: { id, ...where },
+      relations,
+    });
+    return entity ? entity : null;
+  }
+
+  async findByTrackingCode(
+    trackingCode: string,
+    relations?: string[],
+  ): Promise<NullableType<ServiceRequest>> {
+    const entity = await this.serviceRequestsRepository.findOne({
+      where: { trackingCode },
       relations,
     });
     return entity ? entity : null;

@@ -21,13 +21,13 @@ export class WorkOrdersController {
   // }
 
   // // ===== Approval =====
-  // @Patch(':id/approval')
-  // async updateApproval(
-  //   @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
-  //   @Body() dto: ApprovalActionDto,
-  // ) {
-  //   return await this.workOrdersService.updateApproval(id, dto);
-  // }
+  @Patch(':id/approval')
+  async updateApproval(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    // @Body() dto: ApprovalActionDto,
+  ) {
+    // return await this.workOrdersService.updateApproval(id, dto);
+  }
 
   // @Get(':id/approval')
   // async getApproval(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string,) {

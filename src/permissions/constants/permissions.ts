@@ -30,6 +30,9 @@ export const Permissions = {
   customers: {
     create: 'customers:create',
   },
+  vehicles: {
+    view_all: 'vehicles:view:all',
+  },
 } as const;
 
 export const ALL_PERMISSIONS_VALUES = Object.values(Permissions)

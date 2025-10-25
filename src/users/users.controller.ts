@@ -24,7 +24,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  @AuthGuard(Permissions.users.create)
+  // @AuthGuard(Permissions.users.create)
   @ApiResponse(201, 'User created')
   async create(
     @Body() createUserDto: CreateUserDto,

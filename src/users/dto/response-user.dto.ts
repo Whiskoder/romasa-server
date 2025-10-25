@@ -20,6 +20,9 @@ export class ResponseUserDto {
   group: ResponseGroupDto;
 
   @Expose()
+  isSuperAdmin: boolean;
+
+  @Expose()
   createdAt: Date;
 
   @Expose()
