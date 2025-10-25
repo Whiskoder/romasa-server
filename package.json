@@ -84,15 +84,35 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(nanoid|uuid)/)"
+    ],
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!src/**/*.spec.ts",
+      "!src/**/*.interface.ts",
+      "!src/**/*.enum.ts",
+      "!src/**/*.type.ts",
+      "!src/**/*.dto.ts",
+      "!src/main.ts",
+      "!src/**/*.module.ts",
+      "!src/database/data-source.ts",
+      "!src/database/migrations/**"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/src/",
+      "<rootDir>/test/"
+    ],
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/src/$1",
+      "^test/(.*)$": "<rootDir>/src/test/$1"
+    }
   }
 }

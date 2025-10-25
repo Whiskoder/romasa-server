@@ -57,7 +57,7 @@ export class ServiceRequestsController {
     };
   }
 
-  @Get(':serviceRequestId')
+  @Get('id/:serviceRequestId')
   @AuthGuard(
     Permissions.service_requests.view_all,
     Permissions.service_requests.view_own,
@@ -66,17 +66,50 @@ export class ServiceRequestsController {
   async findById(
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
+    @Query('relations') relations: string[],
     @GetUserPermissions() userPermissions: string[],
     @GetUserId() userId: string,
   ): Promise<{ serviceRequest: ResponseServiceRequestDto }> {
     let where: FindOptionsWhere<ServiceRequest> = {};
 
+    // TODO, solo si incluye este campo, sin incluye mas deberia se un error
     if (userPermissions.includes(Permissions.service_requests.view_own)) {
       where = { createdBy: { id: userId } };
     }
 
-    const serviceRequest =
-      await this.serviceRequestsService.findById(serviceRequestId);
+    const serviceRequest = await this.serviceRequestsService.findById(
+      serviceRequestId,
+      where,
+      relations,
+    );
+    if (!serviceRequest) throw new ServiceRequestNotFoundException();
+    return {
+      serviceRequest: ServiceRequestMapper.toResponseDto(serviceRequest),
+    };
+  }
+
+  @Get('tracking-code/:trackingCode')
+  @AuthGuard(
+    Permissions.service_requests.view_all,
+    Permissions.service_requests.view_own,
+  )
+  @ApiResponse(200, 'ServiceRequest found')
+  async findByTrackingCode(
+    @Query('relations') relations: string,
+    @Param('trackingCode') trackingCode: string,
+    // @GetUserPermissions() userPermissions: string[],
+    // @GetUserId() userId: string,
+  ): Promise<{ serviceRequest: ResponseServiceRequestDto }> {
+    // let where: FindOptionsWhere<ServiceRequest> = {};
+
+    // if (userPermissions.includes(Permissions.service_requests.view_own)) {
+    //   where = { createdBy: { id: userId } };
+    // }
+
+    const serviceRequest = await this.serviceRequestsService.findByTrackingCode(
+      trackingCode,
+      relations.split(','),
+    );
     if (!serviceRequest) throw new ServiceRequestNotFoundException();
     return {
       serviceRequest: ServiceRequestMapper.toResponseDto(serviceRequest),
@@ -87,8 +120,15 @@ export class ServiceRequestsController {
   @AuthGuard(Permissions.service_requests.view_all)
   @UseInterceptors(
     new SearchFilterAndPaginationInterceptor<ServiceRequest>(
-      ['trackingCode'],
-      ['vehicle', 'diagnostic', 'service'],
+      ['trackingCode', 'status'],
+      [
+        'vehicle',
+        'diagnostic',
+        'service',
+        'requester',
+        'createdBy',
+        'updatedBy',
+      ],
     ),
   )
   @ApiResponse(200, 'ServiceRequests found')

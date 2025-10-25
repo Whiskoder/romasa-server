@@ -33,6 +33,7 @@ export class ServiceRequestMapper {
       service: entity.service
         ? WorkOrderMapper.serviceToResponseDto(entity.service)
         : undefined,
+      status: entity.status,
     });
 
     return dto;

@@ -9,7 +9,6 @@ import { ResponseUserDto } from 'src/users/dto';
 export class ResponseWorkOrderDto {
   id: string;
   status: string;
-  requiresApproval: boolean;
 
   serviceRequest: ResponseServiceRequestDto;
 
@@ -18,8 +17,8 @@ export class ResponseWorkOrderDto {
   scheduling?: {
     scheduledDate?: Date;
     scheduledBy?: ResponseUserDto;
-    estimatedDuration?: Date;
-    actualDuration?: Date;
+    estimatedDuration?: number; // TODO -> use in minutes
+    actualDuration?: number;
     vehicleInWorkshop?: boolean;
   };
 
@@ -29,6 +28,7 @@ export class ResponseWorkOrderDto {
   };
 
   approvalFlow?: {
+    requiresApproval: boolean; // TODO -> required: boolean
     approversRequired?: ResponseUserDto[];
     approvedBy?: ResponseUserDto[];
     rejectedBy?: ResponseUserDto[];

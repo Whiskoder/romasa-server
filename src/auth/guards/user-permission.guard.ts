@@ -42,8 +42,6 @@ export class UserPermissionGuard implements CanActivate {
       permissionsVersion,
     );
 
-    console.log(userPermissions);
-
     if (userPermissions === null) throw new UserPermissionsExpiredException();
 
     const hasPermission = requiredPermissions.find((permission) =>

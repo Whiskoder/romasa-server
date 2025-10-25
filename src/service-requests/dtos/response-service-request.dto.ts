@@ -1,6 +1,9 @@
 import { Exclude, Expose } from 'class-transformer';
 import { ResponseUserDto } from 'src/users/dto';
-import { ServiceRequestPriority } from 'src/service-requests/enums';
+import {
+  ServiceRequestPriority,
+  ServiceRequestStatus,
+} from 'src/service-requests/enums';
 import { ResponseCustomerDto } from 'src/customers/dto';
 import { ResponseVehicleDto } from 'src/vehicles/dto';
 import {
@@ -43,4 +46,7 @@ export class ResponseServiceRequestDto {
 
   @Expose()
   service?: ResponseWorkOrderServiceDto | null;
+
+  @Expose()
+  status: ServiceRequestStatus;
 }

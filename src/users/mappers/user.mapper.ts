@@ -17,6 +17,7 @@ export class UserMapper {
       group: entity.group ? GroupMapper.toResponseDto(entity.group) : undefined,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      isSuperAdmin: entity.isSuperAdmin,
     });
 
     return dto;
