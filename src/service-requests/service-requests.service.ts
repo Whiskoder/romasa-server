@@ -80,10 +80,11 @@ export class ServiceRequestsService {
 
   async findByTrackingCode(
     trackingCode: string,
+    where?: FindOptionsWhere<ServiceRequest>,
     relations?: string[],
   ): Promise<NullableType<ServiceRequest>> {
     const entity = await this.serviceRequestsRepository.findOne({
-      where: { trackingCode },
+      where: { trackingCode, ...where },
       relations,
     });
     return entity ? entity : null;

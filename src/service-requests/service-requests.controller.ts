@@ -97,17 +97,21 @@ export class ServiceRequestsController {
   async findByTrackingCode(
     @Query('relations') relations: string,
     @Param('trackingCode') trackingCode: string,
-    // @GetUserPermissions() userPermissions: string[],
-    // @GetUserId() userId: string,
+    @GetUserPermissions() userPermissions: string[],
+    @GetUserId() userId: string,
   ): Promise<{ serviceRequest: ResponseServiceRequestDto }> {
-    // let where: FindOptionsWhere<ServiceRequest> = {};
+    let where: FindOptionsWhere<ServiceRequest> = {};
 
-    // if (userPermissions.includes(Permissions.service_requests.view_own)) {
-    //   where = { createdBy: { id: userId } };
-    // }
+    if (
+      !userPermissions.includes(Permissions.service_requests.view_all) &&
+      userPermissions.includes(Permissions.service_requests.view_own)
+    ) {
+      where = { createdBy: { id: userId } };
+    }
 
     const serviceRequest = await this.serviceRequestsService.findByTrackingCode(
       trackingCode,
+      where,
       relations.split(','),
     );
     if (!serviceRequest) throw new ServiceRequestNotFoundException();

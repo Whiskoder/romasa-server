@@ -7,6 +7,9 @@ import { NullableType } from 'src/core/types';
 import { Customer } from 'src/customers/entities';
 import { CustomerAlreadyExistsException } from 'src/customers/exceptions';
 import { uuidPlugin } from 'src/core/plugins';
+import { createPagination } from 'src/core/utils';
+import { ResponsePaginationDto } from 'src/core/dto';
+import { Query } from 'src/core/interfaces';
 
 @Injectable()
 export class CustomersService {
@@ -37,5 +40,23 @@ export class CustomersService {
   async findByName(name: string): Promise<NullableType<Customer>> {
     const entity = await this.customerRepository.findOne({ where: { name } });
     return entity ? entity : null;
+  }
+
+  async findAllWithPagination(
+    query: Query<Customer>,
+  ): Promise<[Customer[], ResponsePaginationDto]> {
+    const { where, relations, pagination } = query;
+    const { offset, limit, sortBy, sortOrder } = pagination;
+
+    const [entities, total] = await this.customerRepository.findAndCount({
+      where,
+      relations,
+      order: { [sortBy]: sortOrder },
+      take: limit,
+      skip: offset,
+    });
+
+    const paginationDto = createPagination(total, limit, offset);
+    return [entities, paginationDto];
   }
 }
