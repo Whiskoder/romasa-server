@@ -49,7 +49,7 @@ export class GroupsController {
   @UseInterceptors(
     new SearchFilterAndPaginationInterceptor<Group>(
       ['id', 'name'],
-      ['users', 'workOrderDiagnosticApprovers'],
+      ['users', 'woDiagnosticApprovers'],
     ),
   )
   @ApiResponse(200, 'Groups found')

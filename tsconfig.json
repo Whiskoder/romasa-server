@@ -34,6 +34,7 @@
       "@shared": ["src/core"],
       "@users": ["src/users"],
       "@vehicles": ["src/vehicles"]
-    }
+    },
+    "jsx": "react-jsx"
   }
 }

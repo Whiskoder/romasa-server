@@ -11,6 +11,25 @@ import { User } from 'src/users/entities/user.entity';
 import { Employee } from 'src/employees/entities/employee.entity';
 import { OrderStatus } from 'src/work-orders/enums';
 
+export class Approval {
+  @Column({ type: 'bit', default: true, nullable: false })
+  requiresApproval: boolean;
+
+  @Column({ type: 'datetime', nullable: true })
+  approvalDate?: Date;
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  approversRequired?: User[];
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  approvedBy?: User[];
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  rejectedBy?: User[];
+}
 /**
  * Representa cualquier solicitud de servicio vehicular (diagnóstico,
  * reparación, pintura, hojalatería, etc)
@@ -39,12 +58,12 @@ export abstract class WorkOrder {
   scheduledBy?: User;
 
   // Tiempo aproximado que tomara el servicio
-  @Column({ type: 'datetime', nullable: true })
-  estimatedDuration?: Date;
+  @Column({ type: 'int', nullable: true })
+  estimatedDuration?: number;
 
   // Tiempo real que tomó el servicio
-  @Column({ type: 'datetime', nullable: true })
-  actualDuration?: Date;
+  @Column({ type: 'int', nullable: true })
+  actualDuration?: number;
 
   // Empleado a cargo del servicio
   @ManyToOne(() => Employee, (employee) => employee.id, {
@@ -68,20 +87,20 @@ export abstract class WorkOrder {
   @Column({ type: 'bit', default: true, nullable: false })
   requiresApproval: boolean;
 
-  // // Define los usuarios que deben aprobar la solicitud
-  // @ManyToMany(() => User, (user) => user.workOrderApprovers)
-  // @JoinTable()
-  // approversRequired?: User[];
+  // Define los usuarios que deben aprobar la solicitud
+  @ManyToMany(() => User)
+  @JoinTable()
+  approversRequired?: User[];
 
-  // // Define los usuarios que han aprobado la solicitud
-  // @ManyToMany(() => User)
-  // @JoinTable()
-  // approvedBy?: User[];
+  // Define los usuarios que han aprobado la solicitud
+  @ManyToMany(() => User)
+  @JoinTable()
+  approvedBy?: User[];
 
-  // // Define los usuarios que han rechazado la solicitud
-  // @ManyToMany(() => User)
-  // @JoinTable()
-  // rejectedBy?: User[];
+  // Define los usuarios que han rechazado la solicitud
+  @ManyToMany(() => User)
+  @JoinTable()
+  rejectedBy?: User[];
 
   // Fecha de aprobación
   @Column({ type: 'datetime', nullable: true })

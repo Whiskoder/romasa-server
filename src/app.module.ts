@@ -13,6 +13,7 @@ import { appConfig } from 'src/core/config';
 import authConfig from 'src/auth/config/auth.config';
 import cryptoConfig from 'src/crypto/config/crypto.config';
 import databaseConfig from 'src/database/config/database.config';
+import notificationsConfig from 'src/notifications/config/notifications.config';
 
 import { AuthModule } from 'src/auth/auth.module';
 import { CustomersModule } from 'src/customers/customers.module';
@@ -36,7 +37,13 @@ const infrastructureDatabaseModule = TypeOrmModule.forRootAsync({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, cryptoConfig, databaseConfig],
+      load: [
+        appConfig,
+        authConfig,
+        cryptoConfig,
+        databaseConfig,
+        notificationsConfig,
+      ],
       envFilePath: '.env',
       cache: true,
     }),

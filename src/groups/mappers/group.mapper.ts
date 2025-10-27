@@ -18,8 +18,8 @@ export class GroupMapper {
         : undefined,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
-      workOrderDiagnosticApprovers: entity.workOrderDiagnosticApprovers
-        ? UserMapper.toResponseDtoList(entity.workOrderDiagnosticApprovers)
+      workOrderDiagnosticApprovers: entity.woDiagnosticApprovers
+        ? UserMapper.toResponseDtoList(entity.woDiagnosticApprovers)
         : undefined,
     });
     return dto;

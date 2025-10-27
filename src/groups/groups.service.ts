@@ -255,11 +255,11 @@ export class GroupsService {
     const userEntities = await this.getValidUsers(userIds);
 
     const newUsers = this.filterNewUsers(
-      group.workOrderDiagnosticApprovers ?? [],
+      group.woDiagnosticApprovers ?? [],
       userEntities,
     );
-    group.workOrderDiagnosticApprovers = [
-      ...(group.workOrderDiagnosticApprovers ?? []),
+    group.woDiagnosticApprovers = [
+      ...(group.woDiagnosticApprovers ?? []),
       ...newUsers,
     ];
 
@@ -278,9 +278,9 @@ export class GroupsService {
     this.validateGroupHasWorkOrderDiagnosticApprovers(group);
 
     const userIdsToRemove = new Set(userEntities.map((u) => u.id));
-    group.workOrderDiagnosticApprovers = (
-      group.workOrderDiagnosticApprovers ?? []
-    ).filter((user) => !userIdsToRemove.has(user.id));
+    group.woDiagnosticApprovers = (group.woDiagnosticApprovers ?? []).filter(
+      (user) => !userIdsToRemove.has(user.id),
+    );
 
     this.permissionCacheService.invalidateGroup(groupId);
 
@@ -288,16 +288,14 @@ export class GroupsService {
   }
 
   private validateGroupHasWorkOrderDiagnosticApprovers(group: Group): void {
-    if (!group.workOrderDiagnosticApprovers?.length)
+    if (!group.woDiagnosticApprovers?.length)
       throw new GroupWorkOrderDiagnosticApproversNotFoundEntityException();
   }
 
   private async getGroupWithWorkOrderDiagnosticApprovers(
     groupId: string,
   ): Promise<Group> {
-    const group = await this.findById(groupId, [
-      'workOrderDiagnosticApprovers',
-    ]);
+    const group = await this.findById(groupId, ['woDiagnosticApprovers']);
     if (!group) throw new GroupNotFoundEntityException();
     return group;
   }

@@ -32,7 +32,6 @@ export class ServiceRequestWorkOrdersController {
     @GetUserGroupId() userGroupId: string,
     @GetUserPermissions() userPermissions: Set<string>,
   ): Promise<{ workOrder: ResponseWorkOrderDto }> {
-    console.log(userPermissions);
     const workOrder = await this.workOrdersService.createDiagnosticWorkOrder(
       serviceRequestId,
       createDiagnosticWorkOrderDto,

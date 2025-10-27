@@ -67,13 +67,13 @@ export class ServiceRequestsController {
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
     @Query('relations') relations: string[],
-    @GetUserPermissions() userPermissions: string[],
+    @GetUserPermissions() userPermissions: Set<string>,
     @GetUserId() userId: string,
   ): Promise<{ serviceRequest: ResponseServiceRequestDto }> {
     let where: FindOptionsWhere<ServiceRequest> = {};
 
     // TODO, solo si incluye este campo, sin incluye mas deberia se un error
-    if (userPermissions.includes(Permissions.service_requests.view_own)) {
+    if (userPermissions.has(Permissions.service_requests.view_own)) {
       where = { createdBy: { id: userId } };
     }
 
@@ -97,14 +97,14 @@ export class ServiceRequestsController {
   async findByTrackingCode(
     @Query('relations') relations: string,
     @Param('trackingCode') trackingCode: string,
-    @GetUserPermissions() userPermissions: string[],
+    @GetUserPermissions() userPermissions: Set<string>,
     @GetUserId() userId: string,
   ): Promise<{ serviceRequest: ResponseServiceRequestDto }> {
     let where: FindOptionsWhere<ServiceRequest> = {};
 
     if (
-      !userPermissions.includes(Permissions.service_requests.view_all) &&
-      userPermissions.includes(Permissions.service_requests.view_own)
+      !userPermissions.has(Permissions.service_requests.view_all) &&
+      userPermissions.has(Permissions.service_requests.view_own)
     ) {
       where = { createdBy: { id: userId } };
     }

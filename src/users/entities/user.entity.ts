@@ -51,15 +51,15 @@ export class User {
   @ManyToMany(() => Group, (group) => group.woDiagnosticApprovers)
   woDiagnosticApproverGroups: Group[];
 
-  @ManyToMany(
-    () => WorkOrderDiagnostic,
-    (workOrder) => workOrder.approversRequired,
-  )
-  workOrderDiagnosticApprovers: WorkOrderDiagnostic[];
+  // @ManyToMany(
+  //   () => WorkOrderDiagnostic,
+  //   (workOrder) => workOrder.approversRequired,
+  // )
+  // workOrderDiagnosticApprovers: WorkOrderDiagnostic[];
 
-  @ManyToMany(() => WorkOrderDiagnostic, (workOrder) => workOrder.approvedBy)
-  workOrderDiagnosticApprovedBy: WorkOrderDiagnostic[];
+  // @ManyToMany(() => WorkOrderDiagnostic, (workOrder) => workOrder.approvedBy)
+  // workOrderDiagnosticApprovedBy: WorkOrderDiagnostic[];
 
-  @ManyToMany(() => WorkOrderDiagnostic, (workOrder) => workOrder.rejectedBy)
-  workOrderDiagnosticRejectedBy: WorkOrderDiagnostic[];
+  // @ManyToMany(() => WorkOrderDiagnostic, (workOrder) => workOrder.rejectedBy)
+  // workOrderDiagnosticRejectedBy: WorkOrderDiagnostic[];
 }
