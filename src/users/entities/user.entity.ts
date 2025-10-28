@@ -29,7 +29,7 @@ export class User {
   @ManyToOne(() => Employee, (employee) => employee.id, { eager: true })
   employee: Employee;
 
-  @ManyToOne(() => Group, (group) => group.users)
+  @ManyToOne(() => Group, (group) => group.users, { eager: false })
   @JoinColumn()
   group?: Group;
 
@@ -48,7 +48,9 @@ export class User {
   @UpdateDateColumn({ type: 'datetime' })
   updatedAt: Date;
 
-  @ManyToMany(() => Group, (group) => group.woDiagnosticApprovers)
+  @ManyToMany(() => Group, (group) => group.woDiagnosticApprovers, {
+    eager: false,
+  })
   woDiagnosticApproverGroups: Group[];
 
   // @ManyToMany(

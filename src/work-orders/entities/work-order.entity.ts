@@ -87,24 +87,31 @@ export abstract class WorkOrder {
   @Column({ type: 'bit', default: true, nullable: false })
   requiresApproval: boolean;
 
+  @Column({ type: 'int', nullable: false, default: 1 })
+  minimumApprovalsRequired: number;
+
   // Define los usuarios que deben aprobar la solicitud
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, { eager: true })
   @JoinTable()
   approversRequired?: User[];
 
   // Define los usuarios que han aprobado la solicitud
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, { eager: true })
   @JoinTable()
   approvedBy?: User[];
 
   // Define los usuarios que han rechazado la solicitud
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, { eager: true })
   @JoinTable()
   rejectedBy?: User[];
 
   // Fecha de aprobación
   @Column({ type: 'datetime', nullable: true })
   approvalDate?: Date;
+
+  // Fecha de rechazo
+  @Column({ type: 'datetime', nullable: true })
+  rejectionDate?: Date;
 
   /* --- Estado --- */
   @Column({ type: 'nvarchar', length: 25, nullable: false })

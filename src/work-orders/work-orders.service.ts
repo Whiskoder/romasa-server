@@ -16,14 +16,17 @@ import {
   ServiceRequestAlreadyHasAnOrderException,
   NoApproversConfiguredException,
   WorkOrderNotFoundEntityException,
-  WorkOrderAlreadyApprovedException,
+  WorkOrderAlreadyProcessedException,
   UserIsNotApproverException,
   UserAlreadyApprovedException,
+  InvalidWorkOrderTypeException,
+  WorkOrderNotFoundException,
 } from 'src/work-orders/exceptions';
 import { ServiceRequestsService } from 'src/service-requests/service-requests.service';
 import { EmployeesService } from 'src/employees/employees.service';
 import { OrderStatus } from 'src/work-orders/enums';
 import {
+  WorkOrder,
   WorkOrderDiagnostic,
   WorkOrderService,
 } from 'src/work-orders/entities';
@@ -35,9 +38,12 @@ import { Permissions } from 'src/permissions/constants';
 import { GroupsService } from 'src/groups/groups.service';
 import { NullableType } from 'src/core/types';
 import { UsersService } from 'src/users/users.service';
+import { WorkOrderType } from 'src/work-orders/types';
 
 @Injectable()
 export class WorkOrdersService {
+  private readonly repositoryMap: Map<WorkOrderType, Repository<WorkOrder>>;
+
   constructor(
     @InjectRepository(WorkOrderDiagnostic)
     private readonly workOrderDiagnosticsRepository: Repository<WorkOrderDiagnostic>,
@@ -48,7 +54,34 @@ export class WorkOrdersService {
     private readonly employeesService: EmployeesService,
     private readonly groupsService: GroupsService,
     private readonly usersService: UsersService,
-  ) {}
+  ) {
+    this.repositoryMap = new Map([
+      [
+        'diagnostic',
+        this.workOrderDiagnosticsRepository as Repository<WorkOrder>,
+      ],
+      ['service', this.workOrderServicesRepository as Repository<WorkOrder>],
+    ]);
+  }
+
+  private getRepository(type: WorkOrderType): Repository<WorkOrder> {
+    const repository = this.repositoryMap.get(type);
+    if (!repository) throw new InvalidWorkOrderTypeException(type);
+    return repository;
+  }
+
+  async findById<T extends WorkOrder>(
+    id: string,
+    type: WorkOrderType,
+    relations?: string[],
+  ): Promise<NullableType<T>> {
+    const repository = this.getRepository(type);
+    const entity = await repository.findOne({
+      where: { id },
+      relations,
+    });
+    return entity ? (entity as T) : null;
+  }
 
   private async validateWorkOrderPrerequisites(
     workshopId: string,
@@ -89,14 +122,16 @@ export class WorkOrdersService {
 
   private async determineDefaultApprovers(
     userGroupId: string,
-  ): Promise<User[]> {
+  ): Promise<{ users: User[]; minimumApprovalsRequired: number }> {
     const group = await this.groupsService.findById(userGroupId, [
       'woDiagnosticApprovers',
     ]);
-    console.log(group);
+    const minimumApprovalsRequired =
+      group?.woDiagnosticMinimumApprovalsRequired;
+    if (!minimumApprovalsRequired) throw new NoApproversConfiguredException();
     const users = group?.woDiagnosticApprovers;
     if (!users?.length) throw new NoApproversConfiguredException();
-    return users;
+    return { users, minimumApprovalsRequired };
   }
 
   async createDiagnosticWorkOrder(
@@ -118,8 +153,11 @@ export class WorkOrdersService {
     }
 
     let approversRequired: User[] = [];
+    let minimumApprovalsRequired: number = 1;
     if (requiresApproval) {
-      approversRequired = await this.determineDefaultApprovers(userGroupId);
+      const res = await this.determineDefaultApprovers(userGroupId);
+      approversRequired = res.users;
+      minimumApprovalsRequired = res.minimumApprovalsRequired;
     }
 
     const { workshop, serviceRequest } =
@@ -144,6 +182,7 @@ export class WorkOrdersService {
       reportedSymptoms: reportedSymptoms.join(','),
       reportedByDriver: employee,
       approversRequired,
+      minimumApprovalsRequired,
       type: 'diagnostic',
     };
 
@@ -182,53 +221,104 @@ export class WorkOrdersService {
     return entity;
   }
 
-  async findById(
-    id: string,
-    relations?: string[],
-  ): Promise<NullableType<WorkOrderDiagnostic>> {
-    const entity = await this.workOrderDiagnosticsRepository.findOne({
-      where: { id },
-      relations,
-    });
-    return entity ? entity : null;
-  }
+  private validateApprovalPrerequisites(
+    workOrder: WorkOrder | null,
+    userId: string,
+  ): void {
+    if (!workOrder) throw new WorkOrderNotFoundException();
 
-  async approve(id: string, userId: string): Promise<boolean> {
-    const diagnostic = await this.findById(id, ['approversRequired']);
+    // Validar si quiere aprobación
+    if (!workOrder.requiresApproval)
+      throw new WorkOrderAlreadyProcessedException();
 
-    // TODO: should return 409?
-    if (!diagnostic) throw new WorkOrderNotFoundEntityException();
+    // Validar si ya fue aprobada
+    if (workOrder.approvalDate) throw new WorkOrderAlreadyProcessedException();
 
-    const isApprovalRequired = diagnostic.requiresApproval;
-    if (!isApprovalRequired) throw new WorkOrderAlreadyApprovedException();
+    // Validar si hay aprobadores
+    if (!workOrder.approversRequired?.length)
+      throw new NoApproversConfiguredException();
 
-    const isApproved = diagnostic.approvalDate;
-    if (isApproved) throw new WorkOrderAlreadyApprovedException();
+    if (workOrder.minimumApprovalsRequired < 1)
+      throw new NoApproversConfiguredException();
 
-    const approversRequired = diagnostic.approversRequired;
-    if (!approversRequired?.length) throw new NoApproversConfiguredException();
-
-    const isApprover = approversRequired.find(
+    // Validar que el usuario es aprobador
+    const isApprover = workOrder.approversRequired.find(
       (approver) => approver.id === userId,
     );
     if (!isApprover) throw new UserIsNotApproverException();
 
-    const hasApproved = diagnostic.approvedBy?.find(
+    // Validar que no haya aprobado/rechazado previamente
+    const hasApproved = workOrder.approvedBy?.find(
       (approver) => approver.id === userId,
     );
-    const hasRejected = diagnostic.rejectedBy?.find(
+    const hasRejected = workOrder.rejectedBy?.find(
       (approver) => approver.id === userId,
     );
-
     if (hasApproved || hasRejected) throw new UserAlreadyApprovedException();
+  }
 
-    const user = {
-      id: userId,
-    } as User;
-    const users = diagnostic.approversRequired ?? [];
-    diagnostic.approversRequired = [...users, user];
+  async approve(
+    id: string,
+    type: WorkOrderType,
+    userId: string,
+  ): Promise<boolean> {
+    const workOrder = (await this.findById<WorkOrder>(id, type, [
+      'approversRequired',
+      'approvedBy',
+      'rejectedBy',
+    ])) as WorkOrder;
 
-    await this.workOrderDiagnosticsRepository.save(diagnostic);
+    this.validateApprovalPrerequisites(workOrder, userId);
+
+    // Agregar al usuario a la lista de aprobadores
+    const user = { id: userId } as User;
+    const currentApprovers = workOrder.approvedBy ?? [];
+    workOrder.approvedBy = [...currentApprovers, user];
+
+    // Si se alcanzo el mínimo de aprobaciones, marcar como aprobada
+    if (workOrder.approvedBy.length >= workOrder.minimumApprovalsRequired) {
+      workOrder.approvalDate = new Date();
+      workOrder.status = OrderStatus.approved;
+    }
+
+    const repository = this.getRepository(type);
+    await repository.save(workOrder);
+
+    return true;
+  }
+
+  async reject(
+    id: string,
+    type: WorkOrderType,
+    userId: string,
+  ): Promise<boolean> {
+    const workOrder = (await this.findById<WorkOrder>(id, type, [
+      'approversRequired',
+      'approvedBy',
+      'rejectedBy',
+    ])) as WorkOrder;
+
+    this.validateApprovalPrerequisites(workOrder, userId);
+
+    // Agregar al usuario a la lista de rechazadores
+    const user = { id: userId } as User;
+    const currentRejected = workOrder.rejectedBy ?? [];
+    workOrder.rejectedBy = [...currentRejected, user];
+
+    const rejectedLength = workOrder.rejectedBy.length;
+    const approvedLength = workOrder.approvedBy?.length ?? 0;
+    const approversLength = workOrder.approversRequired!.length;
+    const availableLength = approversLength - rejectedLength;
+    const approbationsLeft =
+      workOrder.minimumApprovalsRequired - approvedLength;
+    // Si ya no hay más aprobadores, marcar como rechazada
+    if (approbationsLeft > availableLength) {
+      workOrder.rejectionDate = new Date();
+      workOrder.status = OrderStatus.rejected;
+    }
+
+    const repository = this.getRepository(type);
+    await repository.save(workOrder);
 
     return true;
   }

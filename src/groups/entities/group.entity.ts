@@ -31,7 +31,7 @@ export class Group {
   woDiagnosticApprovers: User[];
 
   @Column({ type: 'int', nullable: false, default: 1 })
-  woDiagnosticMininumApprovalsRequired: number;
+  woDiagnosticMinimumApprovalsRequired: number;
 
   // TODO
   @Column({ type: 'text', nullable: true })

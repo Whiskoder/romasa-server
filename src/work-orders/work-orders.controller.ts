@@ -3,12 +3,14 @@ import {
   Controller,
   Get,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Patch,
 } from '@nestjs/common';
 import { AuthGuard, GetUserId } from 'src/auth/decorators';
 import { ApiResponse } from 'src/core/decorators';
 import { WorkOrdersService } from 'src/work-orders/work-orders.service';
+import { WorkOrderType } from 'src/work-orders/enums';
 
 @Controller({
   version: '1',
@@ -25,13 +27,24 @@ export class WorkOrdersController {
   // // ===== Approval =====
   @ApiResponse(200, 'Orden de trabajo aprobada')
   @AuthGuard()
-  @Patch(':id/approve/diagnostic')
+  @Patch(':id/approve/:type')
   async updateApproval(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Param('type', new ParseEnumPipe(WorkOrderType)) type: WorkOrderType,
     @GetUserId() userId: string,
-    // @Body() dto: ApprovalActionDto,
   ): Promise<boolean> {
-    return await this.workOrdersService.approve(id, userId);
+    return await this.workOrdersService.approve(id, type, userId);
+  }
+
+  @ApiResponse(200, 'Orden de trabajo rechazada')
+  @AuthGuard()
+  @Patch(':id/reject/:type')
+  async reject(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Param('type', new ParseEnumPipe(WorkOrderType)) type: WorkOrderType,
+    @GetUserId() userId: string,
+  ): Promise<boolean> {
+    return await this.workOrdersService.reject(id, type, userId);
   }
 
   // @Get(':id/approval')

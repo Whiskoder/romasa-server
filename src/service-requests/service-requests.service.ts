@@ -106,39 +106,8 @@ export class ServiceRequestsService {
       },
     );
 
+    console.log({ entities });
     const paginationDto = createPagination(total, limit, offset);
     return [entities, paginationDto];
-    // Usar consultas normales y modificar paginationInterceptor
-
-    // const qb = this.serviceRequestsRepository
-    //   .createQueryBuilder('serviceRequest')
-    //   // .where(where, parameters)
-    //   .orderBy(`serviceRequest.${sortBy}`, sortOrder)
-    //   .select([
-    //     'serviceRequest.id',
-    //     'serviceRequest.trackingCode',
-    //     'serviceRequest.priority',
-    //     'serviceRequest.createdAt',
-    //     'serviceRequest.updatedAt',
-    //   ])
-    //   .leftJoin('serviceRequest.diagnostic', 'diagnostic')
-    //   .addSelect('diagnostic')
-    //   .leftJoin('serviceRequest.service', 'service')
-    //   .addSelect('service')
-    //   .leftJoin('serviceRequest.vehicle', 'vehicle')
-    //   .addSelect('vehicle')
-    //   .leftJoin('serviceRequest.createdBy', 'createdBy')
-    //   .addSelect('createdBy')
-    //   .leftJoin('serviceRequest.createdBy.employee', 'createdByEmployee')
-    //   .addSelect('createdByEmployee')
-    //   .leftJoin('serviceRequest.updatedBy', 'updatedBy')
-    //   .addSelect('updatedBy')
-    //   // .leftJoin('serviceRequest.updatedBy.employee', 'updatedByEmployee')
-    //   // .addSelect('updatedByEmployee')
-    //   .leftJoin('serviceRequest.requester', 'requester')
-    //   .addSelect('requester')
-    //   .take(limit)
-    //   .skip(offset)
-    //   .getManyAndCount();
   }
 }
