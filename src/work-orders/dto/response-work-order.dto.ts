@@ -25,7 +25,7 @@ export class ResponseWorkOrderDto {
   };
 
   approvalFlow?: {
-    requiresApproval: boolean;
+    requiresApproval: boolean; // TODO
     approversRequired?: ResponseUserDto[];
     approvedBy?: ResponseUserDto[];
     rejectedBy?: ResponseUserDto[];

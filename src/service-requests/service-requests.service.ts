@@ -7,7 +7,10 @@ import { Query } from 'src/core/interfaces';
 import { CreateServiceRequestDto } from 'src/service-requests/dtos';
 import { CustomersService } from 'src/customers/customers.service';
 import { NullableType } from 'src/core/types';
-import { ServiceRequest } from 'src/service-requests/entities';
+import {
+  ServiceRequest,
+  ServiceRequestView,
+} from 'src/service-requests/entities';
 import { UsersService } from 'src/users/users.service';
 import { uuidPlugin } from 'src/core/plugins';
 import { VehiclesService } from 'src/vehicles/vehicles.service';
@@ -25,6 +28,8 @@ export class ServiceRequestsService {
   constructor(
     @InjectRepository(ServiceRequest)
     private readonly serviceRequestsRepository: Repository<ServiceRequest>,
+    @InjectRepository(ServiceRequestView)
+    private readonly view: Repository<ServiceRequestView>,
     private readonly customersService: CustomersService,
     private readonly vehiclesService: VehiclesService,
     private readonly usersService: UsersService,
@@ -72,41 +77,47 @@ export class ServiceRequestsService {
     relations?: string[],
   ): Promise<NullableType<ServiceRequest>> {
     const entity = await this.serviceRequestsRepository.findOne({
-      where: { id, ...where },
-      relations,
+      where: { id },
+    });
+    return entity ? entity : null;
+  }
+
+  async optimizedFindById(
+    id: string,
+    where?: FindOptionsWhere<ServiceRequestView>,
+    relations?: string[],
+  ): Promise<NullableType<ServiceRequestView>> {
+    const entity = await this.view.findOne({
+      where: { id },
+      // relations,
     });
     return entity ? entity : null;
   }
 
   async findByTrackingCode(
     trackingCode: string,
-    where?: FindOptionsWhere<ServiceRequest>,
+    where?: FindOptionsWhere<ServiceRequestView>,
     relations?: string[],
-  ): Promise<NullableType<ServiceRequest>> {
-    const entity = await this.serviceRequestsRepository.findOne({
-      where: { trackingCode, ...where },
-      relations,
+  ): Promise<NullableType<ServiceRequestView>> {
+    const entity = await this.view.findOne({
+      where: { trackingCode },
+      // relations,
     });
     return entity ? entity : null;
   }
 
   async findAllWithPagination(
-    query: Query<ServiceRequest>,
-  ): Promise<[ServiceRequest[], ResponsePaginationDto]> {
+    query: Query<ServiceRequestView>,
+  ): Promise<[ServiceRequestView[], ResponsePaginationDto]> {
     const { where, relations, pagination } = query;
     const { offset, limit, sortBy, sortOrder } = pagination;
 
-    const [entities, total] = await this.serviceRequestsRepository.findAndCount(
-      {
-        where,
-        relations,
-        order: { [sortBy]: sortOrder },
-        take: limit,
-        skip: offset,
-      },
-    );
+    const [entities, total] = await this.view.findAndCount({
+      order: { [sortBy]: sortOrder },
+      take: limit,
+      skip: offset,
+    });
 
-    console.log({ entities });
     const paginationDto = createPagination(total, limit, offset);
     return [entities, paginationDto];
   }

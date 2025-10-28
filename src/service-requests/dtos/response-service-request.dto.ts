@@ -1,4 +1,3 @@
-import { Exclude, Expose } from 'class-transformer';
 import { ResponseUserDto } from 'src/users/dto';
 import {
   ServiceRequestPriority,
@@ -12,41 +11,23 @@ import {
   ResponseWorkOrderServiceDto,
 } from 'src/work-orders/dto';
 
-@Exclude()
 export class ResponseServiceRequestDto {
-  @Expose()
   id: string;
-
-  @Expose()
   trackingCode: string;
-
-  @Expose()
   priority: ServiceRequestPriority;
-
-  @Expose()
   createdAt: Date;
-
-  @Expose()
   updatedAt: Date;
+  status: ServiceRequestStatus;
 
-  @Expose()
   createdBy?: ResponseUserDto | null;
 
-  @Expose()
   updatedBy?: ResponseUserDto | null;
 
-  @Expose()
   requester?: ResponseCustomerDto | null;
 
-  @Expose()
   vehicle?: ResponseVehicleDto | null;
 
-  @Expose()
   diagnostic?: ResponseWorkOrderDiagnosticDto | null;
 
-  @Expose()
   service?: ResponseWorkOrderServiceDto | null;
-
-  @Expose()
-  status: ServiceRequestStatus;
 }

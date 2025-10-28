@@ -52,16 +52,4 @@ export class User {
     eager: false,
   })
   woDiagnosticApproverGroups: Group[];
-
-  // @ManyToMany(
-  //   () => WorkOrderDiagnostic,
-  //   (workOrder) => workOrder.approversRequired,
-  // )
-  // workOrderDiagnosticApprovers: WorkOrderDiagnostic[];
-
-  // @ManyToMany(() => WorkOrderDiagnostic, (workOrder) => workOrder.approvedBy)
-  // workOrderDiagnosticApprovedBy: WorkOrderDiagnostic[];
-
-  // @ManyToMany(() => WorkOrderDiagnostic, (workOrder) => workOrder.rejectedBy)
-  // workOrderDiagnosticRejectedBy: WorkOrderDiagnostic[];
 }

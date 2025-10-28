@@ -91,17 +91,17 @@ export abstract class WorkOrder {
   minimumApprovalsRequired: number;
 
   // Define los usuarios que deben aprobar la solicitud
-  @ManyToMany(() => User, { eager: true })
+  @ManyToMany(() => User)
   @JoinTable()
   approversRequired?: User[];
 
   // Define los usuarios que han aprobado la solicitud
-  @ManyToMany(() => User, { eager: true })
+  @ManyToMany(() => User)
   @JoinTable()
   approvedBy?: User[];
 
   // Define los usuarios que han rechazado la solicitud
-  @ManyToMany(() => User, { eager: true })
+  @ManyToMany(() => User)
   @JoinTable()
   rejectedBy?: User[];
 

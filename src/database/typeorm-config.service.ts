@@ -28,6 +28,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       autoLoadEntities: true,
       entities: [__dirname + '/../**/*.entity{.ts,.js}'],
       migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
+      // logging: ['query', 'error', 'warn'],
       options: {
         encrypt: this.configService.get<boolean>('database.encrypt', {
           infer: true,

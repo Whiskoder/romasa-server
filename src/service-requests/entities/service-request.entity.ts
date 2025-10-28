@@ -69,14 +69,14 @@ export class ServiceRequest {
 
   // Referencia a las órdenes de trabajo que pertenecen a la solicitud
   @OneToOne(() => WorkOrderService, (workOrder) => workOrder.serviceRequest, {
-    eager: true,
+    eager: false,
   })
   service: WorkOrderService;
 
   @OneToOne(
     () => WorkOrderDiagnostic,
     (workOrder) => workOrder.serviceRequest,
-    { eager: true },
+    { eager: false },
   )
   diagnostic: WorkOrderDiagnostic;
 

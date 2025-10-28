@@ -77,14 +77,14 @@ export class ServiceRequestsController {
       where = { createdBy: { id: userId } };
     }
 
-    const serviceRequest = await this.serviceRequestsService.findById(
+    const serviceRequest = await this.serviceRequestsService.optimizedFindById(
       serviceRequestId,
       where,
       relations,
     );
     if (!serviceRequest) throw new ServiceRequestNotFoundException();
     return {
-      serviceRequest: ServiceRequestMapper.toResponseDto(serviceRequest),
+      serviceRequest: ServiceRequestMapper.viewToResponseDto(serviceRequest),
     };
   }
 
@@ -116,7 +116,7 @@ export class ServiceRequestsController {
     );
     if (!serviceRequest) throw new ServiceRequestNotFoundException();
     return {
-      serviceRequest: ServiceRequestMapper.toResponseDto(serviceRequest),
+      serviceRequest: ServiceRequestMapper.viewToResponseDto(serviceRequest),
     };
   }
 
@@ -145,7 +145,8 @@ export class ServiceRequestsController {
 
     if (!serviceRequests.length) throw new ServiceRequestNotFoundException();
     return {
-      serviceRequests: ServiceRequestMapper.toResponseDtoList(serviceRequests),
+      serviceRequests:
+        ServiceRequestMapper.viewToResponseDtoList(serviceRequests),
       pagination,
     };
   }
