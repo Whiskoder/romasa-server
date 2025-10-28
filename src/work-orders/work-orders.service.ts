@@ -15,6 +15,10 @@ import {
   EmployeeNotFoundException,
   ServiceRequestAlreadyHasAnOrderException,
   NoApproversConfiguredException,
+  WorkOrderNotFoundEntityException,
+  WorkOrderAlreadyApprovedException,
+  UserIsNotApproverException,
+  UserAlreadyApprovedException,
 } from 'src/work-orders/exceptions';
 import { ServiceRequestsService } from 'src/service-requests/service-requests.service';
 import { EmployeesService } from 'src/employees/employees.service';
@@ -29,6 +33,8 @@ import { ServiceRequest } from 'src/service-requests/entities';
 import { User } from 'src/users/entities/user.entity';
 import { Permissions } from 'src/permissions/constants';
 import { GroupsService } from 'src/groups/groups.service';
+import { NullableType } from 'src/core/types';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class WorkOrdersService {
@@ -40,8 +46,8 @@ export class WorkOrdersService {
     private readonly workshopService: WorkshopsService,
     private readonly serviceRequestService: ServiceRequestsService,
     private readonly employeesService: EmployeesService,
-    // private readonly usersService: UsersService,
     private readonly groupsService: GroupsService,
+    private readonly usersService: UsersService,
   ) {}
 
   private async validateWorkOrderPrerequisites(
@@ -138,6 +144,7 @@ export class WorkOrdersService {
       reportedSymptoms: reportedSymptoms.join(','),
       reportedByDriver: employee,
       approversRequired,
+      type: 'diagnostic',
     };
 
     const entity =
@@ -174,4 +181,56 @@ export class WorkOrdersService {
 
     return entity;
   }
+
+  async findById(
+    id: string,
+    relations?: string[],
+  ): Promise<NullableType<WorkOrderDiagnostic>> {
+    const entity = await this.workOrderDiagnosticsRepository.findOne({
+      where: { id },
+      relations,
+    });
+    return entity ? entity : null;
+  }
+
+  async approve(id: string, userId: string): Promise<boolean> {
+    const diagnostic = await this.findById(id, ['approversRequired']);
+
+    // TODO: should return 409?
+    if (!diagnostic) throw new WorkOrderNotFoundEntityException();
+
+    const isApprovalRequired = diagnostic.requiresApproval;
+    if (!isApprovalRequired) throw new WorkOrderAlreadyApprovedException();
+
+    const isApproved = diagnostic.approvalDate;
+    if (isApproved) throw new WorkOrderAlreadyApprovedException();
+
+    const approversRequired = diagnostic.approversRequired;
+    if (!approversRequired?.length) throw new NoApproversConfiguredException();
+
+    const isApprover = approversRequired.find(
+      (approver) => approver.id === userId,
+    );
+    if (!isApprover) throw new UserIsNotApproverException();
+
+    const hasApproved = diagnostic.approvedBy?.find(
+      (approver) => approver.id === userId,
+    );
+    const hasRejected = diagnostic.rejectedBy?.find(
+      (approver) => approver.id === userId,
+    );
+
+    if (hasApproved || hasRejected) throw new UserAlreadyApprovedException();
+
+    const user = {
+      id: userId,
+    } as User;
+    const users = diagnostic.approversRequired ?? [];
+    diagnostic.approversRequired = [...users, user];
+
+    await this.workOrderDiagnosticsRepository.save(diagnostic);
+
+    return true;
+  }
 }
+// Should divide into two services

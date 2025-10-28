@@ -13,12 +13,14 @@ import { EmployeesModule } from 'src/employees/employees.module';
 import { ServiceRequestsModule } from 'src/service-requests/service-requests.module';
 // import { UsersModule } from 'src/users/users.module';
 import { GroupsModule } from 'src/groups/groups.module';
+import { UsersModule } from 'src/users/users.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([WorkOrderDiagnostic, WorkOrderService]),
     forwardRef(() => ServiceRequestsModule),
     WorkshopsModule,
     EmployeesModule,
+    UsersModule,
     GroupsModule,
   ],
   controllers: [WorkOrdersController],

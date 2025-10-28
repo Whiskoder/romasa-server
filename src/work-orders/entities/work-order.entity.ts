@@ -109,4 +109,7 @@ export abstract class WorkOrder {
   /* --- Estado --- */
   @Column({ type: 'nvarchar', length: 25, nullable: false })
   status: OrderStatus;
+
+  @Column({ type: 'nvarchar', length: 25, nullable: false, select: false })
+  type: string;
 }

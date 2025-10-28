@@ -6,6 +6,8 @@ import {
   ParseUUIDPipe,
   Patch,
 } from '@nestjs/common';
+import { AuthGuard, GetUserId } from 'src/auth/decorators';
+import { ApiResponse } from 'src/core/decorators';
 import { WorkOrdersService } from 'src/work-orders/work-orders.service';
 
 @Controller({
@@ -21,12 +23,15 @@ export class WorkOrdersController {
   // }
 
   // // ===== Approval =====
-  @Patch(':id/approval')
+  @ApiResponse(200, 'Orden de trabajo aprobada')
+  @AuthGuard()
+  @Patch(':id/approve/diagnostic')
   async updateApproval(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @GetUserId() userId: string,
     // @Body() dto: ApprovalActionDto,
-  ) {
-    // return await this.workOrdersService.updateApproval(id, dto);
+  ): Promise<boolean> {
+    return await this.workOrdersService.approve(id, userId);
   }
 
   // @Get(':id/approval')
