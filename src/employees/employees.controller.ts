@@ -4,6 +4,7 @@ import { SearchFilterAndPaginationInterceptor } from 'src/core/interceptors';
 import { EmployeesService } from 'src/employees/employees.service';
 import { Permissions } from 'src/permissions/constants';
 import { Employee, EmployeeSearchView } from './entities';
+import { EmployeeDriverView } from './entities/employee-driver-view.entity';
 
 @Controller({
   version: '1',
@@ -11,6 +12,20 @@ import { Employee, EmployeeSearchView } from './entities';
 })
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
+
+  @Get('drivers')
+  @AuthGuard(Permissions.employees.view_all)
+  @UseInterceptors(
+    new SearchFilterAndPaginationInterceptor<EmployeeDriverView>(
+      ['rfc', 'employeeNumber', 'fullName'],
+      [],
+    ),
+  )
+  async findAllWithEmployeeDriver(@Req() request: Request) {
+    const [employees, pagination] =
+      await this.employeesService.driversFindAllWithPagination(request as any);
+    return { employees, pagination };
+  }
 
   @Get()
   @AuthGuard(Permissions.employees.view_all)

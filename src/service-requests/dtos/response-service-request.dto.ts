@@ -7,7 +7,6 @@ import { ResponseCustomerDto } from 'src/customers/dto';
 import { ResponseVehicleDto } from 'src/vehicles/dto';
 import {
   ResponseWorkOrderDiagnosticDto,
-  ResponseWorkOrderDto,
   ResponseWorkOrderServiceDto,
 } from 'src/work-orders/dto';
 

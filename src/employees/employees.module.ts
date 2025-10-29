@@ -6,10 +6,16 @@ import { EmployeesService } from 'src/employees/employees.service';
 import { Employee } from 'src/employees/entities';
 import { EmployeeSearchView } from 'src/employees/entities';
 import { EmployeeDriver } from './entities/employee-driver.entity';
+import { EmployeeDriverView } from './entities/employee-driver-view.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Employee, EmployeeSearchView, EmployeeDriver]),
+    TypeOrmModule.forFeature([
+      Employee,
+      EmployeeSearchView,
+      EmployeeDriver,
+      EmployeeDriverView,
+    ]),
   ],
   controllers: [EmployeesController],
   providers: [EmployeesService],

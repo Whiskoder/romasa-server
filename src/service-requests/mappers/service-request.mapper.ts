@@ -97,6 +97,13 @@ export class ServiceRequestMapper {
                   firstName: entity.diagnostic_reportedByDriver_firstName,
                   fatherName: entity.diagnostic_reportedByDriver_fatherName,
                   motherName: entity.diagnostic_reportedByDriver_motherName,
+                  licenseNumber:
+                    entity.diagnostic_reportedByDriver_licenseNumber,
+                  licenseType: entity.diagnostic_reportedByDriver_licenseType,
+                  licenseIssueDate:
+                    entity.diagnostic_reportedByDriver_licenseIssueDate,
+                  licenseExpiryDate:
+                    entity.diagnostic_reportedByDriver_licenseExpiryDate,
                 } as any)
               : undefined,
             id: entity.diagnostic_id,

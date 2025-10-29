@@ -1,5 +1,6 @@
 import { DataSource, Entity, ViewColumn, ViewEntity } from 'typeorm';
 import { ServiceRequest } from './service-request.entity';
+import { EmployeeDriver } from 'src/employees/entities/employee-driver.entity';
 
 @ViewEntity({
   name: 'service_request_view',
@@ -90,6 +91,11 @@ import { ServiceRequest } from './service-request.entity';
       // Diagnostic base
       .leftJoin('entity.diagnostic', 'diagnostic')
       .leftJoin('diagnostic.reportedByDriver', 'reportedByDriver')
+      .leftJoin(
+        EmployeeDriver,
+        'reportedByDriverLicense',
+        'reportedByDriver.id = reportedByDriverLicense.employeeId',
+      )
       .leftJoin('diagnostic.supervisor', 'supervisor')
       .leftJoin('diagnostic.assignedEmployee', 'assignedEmployee')
       .leftJoin('diagnostic.scheduledBy', 'scheduledBy')
@@ -268,6 +274,22 @@ import { ServiceRequest } from './service-request.entity';
       .addSelect(
         'reportedByDriver.motherName',
         'diagnostic_reportedByDriver_motherName',
+      )
+      .addSelect(
+        'reportedByDriverLicense.licenseNumber',
+        'diagnostic_reportedByDriver_licenseNumber',
+      )
+      .addSelect(
+        'reportedByDriverLicense.licenseType',
+        'diagnostic_reportedByDriver_licenseType',
+      )
+      .addSelect(
+        'reportedByDriverLicense.licenseIssueDate',
+        'diagnostic_reportedByDriver_licenseIssueDate',
+      )
+      .addSelect(
+        'reportedByDriverLicense.licenseExpiryDate',
+        'diagnostic_reportedByDriver_licenseExpiryDate',
       ),
 })
 // TODO: depends on https://typeorm.io/docs/entity/view-entities
@@ -386,4 +408,8 @@ export class ServiceRequestView {
   @ViewColumn() diagnostic_reportedByDriver_firstName: string;
   @ViewColumn() diagnostic_reportedByDriver_fatherName: string;
   @ViewColumn() diagnostic_reportedByDriver_motherName: string;
+  @ViewColumn() diagnostic_reportedByDriver_licenseNumber: string;
+  @ViewColumn() diagnostic_reportedByDriver_licenseType: string;
+  @ViewColumn() diagnostic_reportedByDriver_licenseIssueDate: Date;
+  @ViewColumn() diagnostic_reportedByDriver_licenseExpiryDate: Date;
 }
