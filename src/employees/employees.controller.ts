@@ -3,8 +3,9 @@ import { AuthGuard } from 'src/auth/decorators';
 import { SearchFilterAndPaginationInterceptor } from 'src/core/interceptors';
 import { EmployeesService } from 'src/employees/employees.service';
 import { Permissions } from 'src/permissions/constants';
-import { Employee, EmployeeSearchView } from './entities';
+import { EmployeeSearchView } from './entities';
 import { EmployeeDriverView } from './entities/employee-driver-view.entity';
+import { ApiResponse } from 'src/core/decorators';
 
 @Controller({
   version: '1',
@@ -14,7 +15,8 @@ export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Get('drivers')
-  @AuthGuard(Permissions.employees.view_all)
+  @ApiResponse(200, 'Lista de empleados enconrtada')
+  @AuthGuard(Permissions.employees.view_all, Permissions.employees.view_drivers)
   @UseInterceptors(
     new SearchFilterAndPaginationInterceptor<EmployeeDriverView>(
       ['rfc', 'employeeNumber', 'fullName'],
@@ -28,6 +30,7 @@ export class EmployeesController {
   }
 
   @Get()
+  @ApiResponse(200, 'Lista de empleados enconrtada')
   @AuthGuard(Permissions.employees.view_all)
   @UseInterceptors(
     new SearchFilterAndPaginationInterceptor<EmployeeSearchView>(

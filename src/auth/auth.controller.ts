@@ -27,7 +27,7 @@ export class AuthController {
 
   @Get('me')
   @AuthGuard()
-  @ApiResponse(200, 'User found')
+  @ApiResponse(200, 'Usuario encontrado')
   async meUser(
     @GetUserId() userId: string,
   ): Promise<{ user: ResponseUserDto }> {
@@ -36,7 +36,7 @@ export class AuthController {
   }
 
   @Post('email/login')
-  @ApiResponse(200, 'User logged in')
+  @ApiResponse(200, 'Sesión iniciada')
   async login(
     @Body() loginUserDto: LoginUserDto,
     @Res({ passthrough: true }) res: Response,
@@ -47,7 +47,7 @@ export class AuthController {
 
   @Post('refresh')
   @AuthRefreshToken()
-  @ApiResponse(200, 'User token refreshed')
+  @ApiResponse(200, 'Sesión refrescada')
   async refresh(
     @GetUser() user: User,
     @Res({ passthrough: true }) res: Response,
@@ -57,7 +57,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  @ApiResponse(204, 'User logged out')
+  @ApiResponse(204, 'Sesión terminada')
   async logout(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,

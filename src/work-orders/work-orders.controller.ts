@@ -19,12 +19,7 @@ import { WorkOrderType } from 'src/work-orders/enums';
 export class WorkOrdersController {
   constructor(private readonly workOrdersService: WorkOrdersService) {}
 
-  // @Get(':id')
-  // async findOne(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string,) {
-  //   return await this.workOrdersService.findOne(id);
-  // }
-
-  // // ===== Approval =====
+  // Approval
   @ApiResponse(200, 'Orden de trabajo aprobada')
   @AuthGuard()
   @Patch(':id/approve/:type')
@@ -47,11 +42,6 @@ export class WorkOrdersController {
     return await this.workOrdersService.reject(id, type, userId);
   }
 
-  // @Get(':id/approval')
-  // async getApproval(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string,) {
-  //   return await this.workOrdersService.getApprovalStatus(id);
-  // }
-
   // // ===== Schedule =====
   // @Patch(':id/schedule')
   // async schedule(
@@ -68,11 +58,6 @@ export class WorkOrdersController {
   //   @Body() dto: CompleteDiagnosticDto,
   // ) {
   //   return await this.workOrdersService.completeDiagnostic(id, dto);
-  // }
-
-  // @Get(':id/diagnostic')
-  // async getDiagnostic(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string,) {
-  //   return await this.workOrdersService.getDiagnostic(id);
   // }
 
   // // ===== Service - Reception =====
@@ -96,10 +81,5 @@ export class WorkOrdersController {
   //   @Body() dto: ServiceCompletionDto,
   // ) {
   //   return await this.workOrdersService.completeService(id, dto);
-  // }
-
-  // @Get(':id/service/completion')
-  // async getCompletion(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string,) {
-  //   return await this.workOrdersService.getCompletion(id);
   // }
 }

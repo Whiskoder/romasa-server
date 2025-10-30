@@ -8,31 +8,30 @@ import {
   Heading,
   Text,
   Button,
-  Link,
 } from "@react-email/components";
 
-interface AdminRegistrationEmailProps {
+interface WorkOrderApprovedEmailProps {
   recipientName: string;
   recipientEmail: string;
   reportLink: string;
-  reportCode: string;
+  trackingCode: string;
 }
 
-export const AdminRegistrationEmail = ({
+export const WorkOrderApprovedEmail = ({
   recipientName,
   recipientEmail,
   reportLink,
-  reportCode,
-}: AdminRegistrationEmailProps) => {
+  trackingCode,
+}: WorkOrderApprovedEmailProps) => {
   return (
     <Html>
       <Head />
-      <Preview>Inicia sesión en tu cuenta</Preview>
+      <Preview>Orden de diagnóstico aprobada</Preview>
       <Tailwind>
         <Body className='bg-white font-sans'>
           <Container className='mx-auto my-[40px] max-w-[465px] rounded border border-[#eaeaea] border-solid p-[20px]'>
             <Heading className='text-[#333] text-2xl font-bold my-10'>
-              Se requiere realizar una acción
+              Su orden de diagnóstico ha sido aprobada
             </Heading>
 
             <Text className='text-[#333] text-sm my-6'>
@@ -40,8 +39,8 @@ export const AdminRegistrationEmail = ({
             </Text>
 
             <Text className='text-[#333] text-sm my-6'>
-              Se acaba de crear una nueva orden de diagnóstico y se requiere tu
-              aprobación
+              La orden de diagnóstico que registró fue aprobada. Puede consultar
+              los detalles a continuación.
             </Text>
 
             <Text className='text-[#333] text-sm my-6'>
@@ -49,17 +48,17 @@ export const AdminRegistrationEmail = ({
             </Text>
 
             <Text className='text-[#333] text-sm my-6 bg-zinc-200 p-4 rounded-md'>
-              {reportCode}
+              {trackingCode}
             </Text>
 
             <Button
               className='rounded bg-black px-5 py-3 text-center font-semibold text-sm text-white no-underline'
               href={reportLink}>
-              Ver diagnóstico en linea
+              Ver detalles de la orden
             </Button>
 
             <Text className='text-[#898989] text-xs leading-[22px] mt-9 mb-6'>
-              — Plataforma de taller - Herst
+              — Plataforma de taller | Herst
               <br />
               Este correo fue enviado a <strong>{recipientEmail}</strong> |{" "}
               <strong>{recipientName}</strong>.
@@ -74,11 +73,11 @@ export const AdminRegistrationEmail = ({
 };
 
 // Ejemplo de vista previa
-AdminRegistrationEmail.PreviewProps = {
+WorkOrderApprovedEmail.PreviewProps = {
   recipientName: "Laura Gómez",
   recipientEmail: "laura.gomez@gmail.com",
   reportLink: "https://romasa-taller.mx/service-request/details/nJAYn892",
-  reportCode: "nJAYn892",
-} as AdminRegistrationEmailProps;
+  trackingCode: "nJAYn892",
+} as WorkOrderApprovedEmailProps;
 
-export default AdminRegistrationEmail;
+export default WorkOrderApprovedEmail;

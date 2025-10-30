@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotImplementedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import {
@@ -39,6 +39,31 @@ import { GroupsService } from 'src/groups/groups.service';
 import { NullableType } from 'src/core/types';
 import { UsersService } from 'src/users/users.service';
 import { WorkOrderType } from 'src/work-orders/types';
+import { Employee } from 'src/employees/entities';
+import { ServiceRequestStatus } from 'src/service-requests/enums';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import WorkOrderApprobationRequired from 'src/notifications/emails/work-order-approbation-required';
+import { AllConfigType } from 'src/core/config';
+import { ConfigService } from '@nestjs/config';
+import WorkOrderApprovedEmail from 'src/notifications/emails/work-order-approved';
+
+interface WorkOrderPrerequisites {
+  workshop: Workshop;
+  serviceRequest: ServiceRequest;
+}
+
+interface ApprovalConfiguration {
+  users: User[];
+  minimumApprovalsRequired: number;
+}
+
+interface BaseWorkOrderData {
+  id: string;
+  serviceRequest: ServiceRequest;
+  workshop: Workshop;
+  requiresApproval: boolean;
+  status: OrderStatus;
+}
 
 @Injectable()
 export class WorkOrdersService {
@@ -46,28 +71,21 @@ export class WorkOrdersService {
 
   constructor(
     @InjectRepository(WorkOrderDiagnostic)
-    private readonly workOrderDiagnosticsRepository: Repository<WorkOrderDiagnostic>,
+    private readonly diagnosticRepository: Repository<WorkOrderDiagnostic>,
     @InjectRepository(WorkOrderService)
-    private readonly workOrderServicesRepository: Repository<WorkOrderService>,
+    private readonly serviceRepository: Repository<WorkOrderService>,
     private readonly workshopService: WorkshopsService,
     private readonly serviceRequestService: ServiceRequestsService,
     private readonly employeesService: EmployeesService,
     private readonly groupsService: GroupsService,
     private readonly usersService: UsersService,
+    private readonly notificationsService: NotificationsService,
+    private readonly configService: ConfigService<AllConfigType, true>,
   ) {
     this.repositoryMap = new Map([
-      [
-        'diagnostic',
-        this.workOrderDiagnosticsRepository as Repository<WorkOrder>,
-      ],
-      ['service', this.workOrderServicesRepository as Repository<WorkOrder>],
+      ['diagnostic', this.diagnosticRepository as Repository<WorkOrder>],
+      ['service', this.serviceRepository as Repository<WorkOrder>],
     ]);
-  }
-
-  private getRepository(type: WorkOrderType): Repository<WorkOrder> {
-    const repository = this.repositoryMap.get(type);
-    if (!repository) throw new InvalidWorkOrderTypeException(type);
-    return repository;
   }
 
   async findById<T extends WorkOrder>(
@@ -83,113 +101,85 @@ export class WorkOrdersService {
     return entity ? (entity as T) : null;
   }
 
-  private async validateWorkOrderPrerequisites(
-    workshopId: string,
-    serviceRequestId: string,
-    type: 'service' | 'diagnostic',
-  ): Promise<{ workshop: Workshop; serviceRequest: ServiceRequest }> {
-    const workshop = await this.workshopService.findById(workshopId);
-    if (!workshop) throw new WorkshopNotFoundException();
-
-    const serviceRequest =
-      await this.serviceRequestService.findById(serviceRequestId);
-
-    if (!serviceRequest) throw new ServiceRequestNotFoundException();
-
-    const existingOrder =
-      type === 'service' ? serviceRequest.service : serviceRequest.diagnostic;
-
-    if (existingOrder) throw new ServiceRequestAlreadyHasAnOrderException();
-
-    return { workshop, serviceRequest };
-  }
-
-  private createBaseWorkOrder(
-    workshop: Workshop,
-    serviceRequest: ServiceRequest,
-    requiresApproval: boolean,
-  ) {
-    return {
-      id: uuidPlugin.v7(),
-      serviceRequest,
-      workshop,
-      requiresApproval,
-      status: requiresApproval
-        ? OrderStatus.pending_approval
-        : OrderStatus.scheduled,
-    };
-  }
-
-  private async determineDefaultApprovers(
-    userGroupId: string,
-  ): Promise<{ users: User[]; minimumApprovalsRequired: number }> {
-    const group = await this.groupsService.findById(userGroupId, [
-      'woDiagnosticApprovers',
-    ]);
-    const minimumApprovalsRequired =
-      group?.woDiagnosticMinimumApprovalsRequired;
-    if (!minimumApprovalsRequired) throw new NoApproversConfiguredException();
-    const users = group?.woDiagnosticApprovers;
-    if (!users?.length) throw new NoApproversConfiguredException();
-    return { users, minimumApprovalsRequired };
-  }
-
   async createDiagnosticWorkOrder(
     serviceRequestId: string,
     createDiagnosticWorkOrderDto: CreateWorkOrderDiagnosticDto,
     userGroupId: string,
     userPermissions: Set<string>,
   ): Promise<WorkOrderDiagnostic> {
-    const { workshopId, reportedByDriverId, reportedSymptoms, ...rest } =
-      createDiagnosticWorkOrderDto;
+    const {
+      workshopId,
+      reportedByDriverId,
+      reportedSymptoms,
+      ...additionalData
+    } = createDiagnosticWorkOrderDto;
 
-    let requiresApproval = true;
-    if (
-      userPermissions.has(
-        Permissions.diagnostic_work_orders.create_without_approval,
-      )
-    ) {
-      requiresApproval = false;
-    }
+    const requiresApproval = this.shouldRequireApproval(userPermissions);
 
-    let approversRequired: User[] = [];
-    let minimumApprovalsRequired: number = 1;
-    if (requiresApproval) {
-      const res = await this.determineDefaultApprovers(userGroupId);
-      approversRequired = res.users;
-      minimumApprovalsRequired = res.minimumApprovalsRequired;
-    }
+    const approvalConfig = requiresApproval
+      ? await this.getApprovalConfiguration(userGroupId)
+      : this.getDefaultApprovalConfig();
 
-    const { workshop, serviceRequest } =
-      await this.validateWorkOrderPrerequisites(
-        workshopId,
-        serviceRequestId,
-        'diagnostic',
-      );
+    const prerequisites = await this.validateWorkOrderPrerequisites(
+      workshopId,
+      serviceRequestId,
+      'diagnostic',
+    );
 
-    const employee = await this.employeesService.findById(reportedByDriverId);
-    if (!employee) throw new EmployeeNotFoundException();
+    const reportedByDriver = await this.validateEmployee(reportedByDriverId);
 
-    const workOrderBase = this.createBaseWorkOrder(
-      workshop,
-      serviceRequest,
+    const baseWorkOrder = this.createBaseWorkOrderData(
+      prerequisites.workshop,
+      prerequisites.serviceRequest,
       requiresApproval,
     );
 
-    const workOrderDiagnostic = {
-      ...rest,
-      ...workOrderBase,
-      reportedSymptoms: reportedSymptoms.join(','),
-      reportedByDriver: employee,
-      approversRequired,
-      minimumApprovalsRequired,
-      type: 'diagnostic',
-    };
+    const diagnosticWorkOrder = this.buildDiagnosticWorkOrder(
+      baseWorkOrder,
+      reportedByDriver,
+      reportedSymptoms,
+      approvalConfig,
+      additionalData,
+    );
 
-    const entity =
-      this.workOrderDiagnosticsRepository.create(workOrderDiagnostic);
+    const entity = this.diagnosticRepository.create(diagnosticWorkOrder);
+    await this.diagnosticRepository.save(entity);
 
-    await this.workOrderDiagnosticsRepository.save(entity);
+    await this.serviceRequestService.updateStatus(
+      serviceRequestId,
+      requiresApproval
+        ? ServiceRequestStatus.diagnostic_pending_approval
+        : ServiceRequestStatus.diagnostic_approved,
+    );
+
+    if (requiresApproval) {
+      const trackingCode = prerequisites.serviceRequest.trackingCode;
+      const domain = this.configService.get<string>('app.frontendDomain', {
+        infer: true,
+      });
+      const reportLink = `${domain}/service-request/details/${trackingCode}`;
+      const users = approvalConfig.users;
+
+      const notifications = users.map((user) => {
+        const employee = user.employee;
+        // TODO: move fullname to users
+        const recipientName = `${employee.firstName} ${employee.fatherName}`;
+        const message = WorkOrderApprobationRequired({
+          recipientName,
+          recipientEmail: user.email,
+          reportLink,
+          trackingCode,
+        });
+
+        return {
+          to: user.email,
+          subject: 'Revisión y aprobación de orden de diagnóstico',
+          message,
+        };
+      });
+
+      await this.notificationsService.batchNotify(notifications);
+    }
 
     return entity;
   }
@@ -197,28 +187,32 @@ export class WorkOrdersService {
   async createServiceWorkOrder(
     serviceRequestId: string,
     createServiceWorkOrderDto: CreateWorkOrderServiceDto,
-    requiresApproval: boolean,
+    userGroupId: string,
+    userPermissions: Set<string>,
   ): Promise<WorkOrderService> {
-    const { workshopId } = createServiceWorkOrderDto;
+    throw new NotImplementedException();
+    // const { workshopId, ...additionalData } = createServiceWorkOrderDto;
 
-    const { workshop, serviceRequest } =
-      await this.validateWorkOrderPrerequisites(
-        workshopId,
-        serviceRequestId,
-        'service',
-      );
+    // const prerequisites = await this.validateWorkOrderPrerequisites(
+    //   workshopId,
+    //   serviceRequestId,
+    //   'service',
+    // );
 
-    const workOrderService = this.createBaseWorkOrder(
-      workshop,
-      serviceRequest,
-      requiresApproval,
-    );
+    // const baseWorkOrder = this.createBaseWorkOrderData(
+    //   prerequisites.workshop,
+    //   prerequisites.serviceRequest,
+    //   requiresApproval,
+    // );
 
-    const entity = this.workOrderServicesRepository.create(workOrderService);
+    // const serviceWorkOrder = this.buildServiceWorkOrder(
+    //   baseWorkOrder,
+    //   additionalData,
+    // );
 
-    await this.workOrderServicesRepository.save(entity);
-
-    return entity;
+    // const entity = this.serviceRepository.create(serviceWorkOrder);
+    // await this.serviceRepository.save(entity);
+    // return entity;
   }
 
   private validateApprovalPrerequisites(
@@ -266,6 +260,7 @@ export class WorkOrdersService {
       'approversRequired',
       'approvedBy',
       'rejectedBy',
+      'serviceRequest',
     ])) as WorkOrder;
 
     this.validateApprovalPrerequisites(workOrder, userId);
@@ -279,6 +274,40 @@ export class WorkOrdersService {
     if (workOrder.approvedBy.length >= workOrder.minimumApprovalsRequired) {
       workOrder.approvalDate = new Date();
       workOrder.status = OrderStatus.approved;
+
+      // Notify to creator & taller
+      // const wo = workOrder as any;
+      // const serviceRequest = await this.serviceRequestService.findById({
+      //   id: wo.serviceRequest.id,
+      // });
+      // if (serviceRequest) {
+      //   const trackingCode = serviceRequest.trackingCode;
+      //   const domain = this.configService.get<string>('app.frontendDomain', {
+      //     infer: true,
+      //   });
+      //   const reportLink = `${domain}/service-request/details/${trackingCode}`;
+      //   const users = [serviceRequest.createdBy];
+
+      //   const notifications = users.map((user) => {
+      //     // const employee = user.employee;
+      //     // TODO: move fullname to users
+      //     // const recipientName = `${employee.firstName} ${employee.fatherName}`;
+      //     const message = WorkOrderApprovedEmail({
+      //       recipientName: user.email,
+      //       recipientEmail: user.email,
+      //       reportLink,
+      //       trackingCode,
+      //     });
+
+      //     return {
+      //       to: user.email,
+      //       subject: 'Orden de diagnóstico aprobada',
+      //       message,
+      //     };
+      //   });
+
+      //   await this.notificationsService.batchNotify(notifications);
+      // }
     }
 
     const repository = this.getRepository(type);
@@ -322,5 +351,137 @@ export class WorkOrdersService {
 
     return true;
   }
+
+  private getRepository(type: WorkOrderType): Repository<WorkOrder> {
+    const repository = this.repositoryMap.get(type);
+    if (!repository) throw new InvalidWorkOrderTypeException(type);
+    return repository;
+  }
+
+  private async validateWorkOrderPrerequisites(
+    workshopId: string,
+    serviceRequestId: string,
+    type: 'service' | 'diagnostic',
+  ): Promise<WorkOrderPrerequisites> {
+    const workshop = await this.validateWorkshop(workshopId);
+    const serviceRequest = await this.validateServiceRequest(
+      serviceRequestId,
+      type,
+    );
+
+    return { workshop, serviceRequest };
+  }
+
+  private async validateWorkshop(workshopId: string): Promise<Workshop> {
+    const workshop = await this.workshopService.findById(workshopId);
+    if (!workshop) throw new WorkshopNotFoundException();
+    return workshop;
+  }
+
+  private async validateServiceRequest(
+    id: string,
+    type: 'service' | 'diagnostic',
+  ): Promise<ServiceRequest> {
+    const serviceRequest = await this.serviceRequestService.findById({
+      id,
+      relations: [type],
+    });
+
+    if (!serviceRequest) throw new ServiceRequestNotFoundException();
+
+    const existingOrder =
+      type === 'service' ? serviceRequest.service : serviceRequest.diagnostic;
+
+    if (existingOrder) throw new ServiceRequestAlreadyHasAnOrderException();
+
+    return serviceRequest;
+  }
+
+  private async validateEmployee(employeeId: number): Promise<Employee> {
+    const employee = await this.employeesService.findById(employeeId);
+    if (!employee) throw new EmployeeNotFoundException();
+    return employee;
+  }
+
+  private shouldRequireApproval(userPermissions: Set<string>): boolean {
+    return !userPermissions.has(
+      Permissions.work_orders.create_without_approval,
+    );
+  }
+
+  private async getApprovalConfiguration(
+    userGroupId: string,
+  ): Promise<ApprovalConfiguration> {
+    const group = await this.groupsService.findById(userGroupId, [
+      'woDiagnosticApprovers',
+    ]);
+
+    const minimumApprovalsRequired =
+      group?.woDiagnosticMinimumApprovalsRequired;
+    const users = group?.woDiagnosticApprovers;
+
+    if (!minimumApprovalsRequired || !users?.length)
+      throw new NoApproversConfiguredException();
+
+    return { minimumApprovalsRequired, users };
+  }
+
+  private getDefaultApprovalConfig(): ApprovalConfiguration {
+    return {
+      users: [],
+      minimumApprovalsRequired: 1,
+    };
+  }
+
+  private createBaseWorkOrderData(
+    workshop: Workshop,
+    serviceRequest: ServiceRequest,
+    requiresApproval: boolean,
+  ): BaseWorkOrderData {
+    return {
+      id: uuidPlugin.v7(),
+      serviceRequest,
+      workshop,
+      requiresApproval,
+      status: this.determineInitialStatus(requiresApproval),
+    };
+  }
+
+  private determineInitialStatus(requiresApproval: boolean): OrderStatus {
+    return requiresApproval
+      ? OrderStatus.pending_approval
+      : OrderStatus.approved;
+  }
+
+  private buildDiagnosticWorkOrder(
+    baseWorkOrder: BaseWorkOrderData,
+    reportedByDriver: Employee,
+    reportedSymptoms: string[],
+    approvalConfig: ApprovalConfiguration,
+    additionalData: Record<string, any>,
+  ): Partial<WorkOrderDiagnostic> {
+    return {
+      ...baseWorkOrder,
+      ...additionalData,
+      type: 'diagnostic',
+      reportedByDriver,
+      reportedSymptoms: reportedSymptoms.join(','),
+      approversRequired: approvalConfig.users,
+      minimumApprovalsRequired: approvalConfig.minimumApprovalsRequired,
+    };
+  }
+
+  private buildServiceWorkOrder(
+    baseWorkOrder: BaseWorkOrderData,
+    approvalConfig: ApprovalConfiguration,
+    additionalData: Record<string, any>,
+  ): Partial<WorkOrderService> {
+    return {
+      ...baseWorkOrder,
+      ...additionalData,
+      type: 'service',
+      approversRequired: approvalConfig.users,
+      minimumApprovalsRequired: approvalConfig.minimumApprovalsRequired,
+    };
+  }
 }
-// Should divide into two services

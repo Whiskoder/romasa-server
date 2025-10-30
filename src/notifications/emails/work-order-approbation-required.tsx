@@ -8,31 +8,30 @@ import {
   Heading,
   Text,
   Button,
-  Link,
 } from "@react-email/components";
 
-interface WorkOrderAppoinmentProps {
+interface WorkOrderApprobationRequiredProps {
   recipientName: string;
   recipientEmail: string;
   reportLink: string;
   trackingCode: string;
 }
 
-export const WorkOrderAppoinment = ({
+export const WorkOrderApprobationRequired = ({
   recipientName,
   recipientEmail,
   reportLink,
   trackingCode,
-}: WorkOrderAppoinmentProps) => {
+}: WorkOrderApprobationRequiredProps) => {
   return (
     <Html>
       <Head />
-      <Preview>Programación de cita para orden de diagnóstico</Preview>
+      <Preview>Revisión y aprobación de orden de diagnóstico</Preview>
       <Tailwind>
         <Body className='bg-white font-sans'>
           <Container className='mx-auto my-[40px] max-w-[465px] rounded border border-[#eaeaea] border-solid p-[20px]'>
             <Heading className='text-[#333] text-2xl font-bold my-10'>
-              Se requiere su acción
+              Revisión y aprobación requerida
             </Heading>
 
             <Text className='text-[#333] text-sm my-6'>
@@ -40,13 +39,13 @@ export const WorkOrderAppoinment = ({
             </Text>
 
             <Text className='text-[#333] text-sm my-6'>
-              Se ha recibido una nueva orden de diagnóstico. Para continuar con
-              el proceso, por favor programe una cita a fin de inspeccionar el
-              vehículo y determinar la causa de la falla
+              Se ha generado una nueva orden de diagnóstico en la plataforma.
+              Para continuar con el proceso, le solicitamos revisar los detalles
+              y registrar su aprobación
             </Text>
 
             <Text className='text-[#333] text-sm my-6'>
-              Código de seguimiento:
+              Código de seguimiento de la orden:
             </Text>
 
             <Text className='text-[#333] text-sm my-6 bg-zinc-200 p-4 rounded-md'>
@@ -56,7 +55,7 @@ export const WorkOrderAppoinment = ({
             <Button
               className='rounded bg-black px-5 py-3 text-center font-semibold text-sm text-white no-underline'
               href={reportLink}>
-              Agendar diagnóstico
+              Revisar y aprobar orden
             </Button>
 
             <Text className='text-[#898989] text-xs leading-[22px] mt-9 mb-6'>
@@ -74,12 +73,11 @@ export const WorkOrderAppoinment = ({
   );
 };
 
-// Ejemplo de vista previa
-WorkOrderAppoinment.PreviewProps = {
+WorkOrderApprobationRequired.PreviewProps = {
   recipientName: "Laura Gómez",
   recipientEmail: "laura.gomez@gmail.com",
   reportLink: "https://romasa-taller.mx/service-request/details/nJAYn892",
   trackingCode: "nJAYn892",
-} as WorkOrderAppoinmentProps;
+} as WorkOrderApprobationRequiredProps;
 
-export default WorkOrderAppoinment;
+export default WorkOrderApprobationRequired;

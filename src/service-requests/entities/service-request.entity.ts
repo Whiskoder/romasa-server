@@ -27,7 +27,7 @@ export class ServiceRequest {
   id: string;
 
   // Identificador único para seguimiento
-  @Column({ type: 'nvarchar', length: 10, nullable: false })
+  @Column({ type: 'nvarchar', length: 12, nullable: false })
   trackingCode: string;
 
   // Nivel de urgencia (baja, media, alta)

@@ -6,13 +6,14 @@ export enum ServiceRequestStatus {
   diagnostic_scheduled = 'diagnostic_scheduled',
   diagnostic_in_progress = 'diagnostic_in_progress',
   diagnostic_completed = 'diagnostic_completed',
-  service_pending_approval = 'service_pending_approval',
-  service_approved = 'service_approved',
-  service_rejected = 'service_rejected',
-  service_scheduled = 'service_scheduled',
-  service_in_progress = 'service_in_progress',
-  service_completed = 'service_completed',
 }
+
+// service_pending_approval = 'service_pending_approval',
+// service_approved = 'service_approved',
+// service_rejected = 'service_rejected',
+// service_scheduled = 'service_scheduled',
+// service_in_progress = 'service_in_progress',
+// service_completed = 'service_completed',
 
 // pending_approval = 'pending_approval',
 // approved = 'approved',

@@ -14,6 +14,7 @@ import { ServiceRequestsModule } from 'src/service-requests/service-requests.mod
 // import { UsersModule } from 'src/users/users.module';
 import { GroupsModule } from 'src/groups/groups.module';
 import { UsersModule } from 'src/users/users.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([WorkOrderDiagnostic, WorkOrderService]),
@@ -22,6 +23,7 @@ import { UsersModule } from 'src/users/users.module';
     EmployeesModule,
     UsersModule,
     GroupsModule,
+    NotificationsModule,
   ],
   controllers: [WorkOrdersController],
   providers: [WorkOrdersService],

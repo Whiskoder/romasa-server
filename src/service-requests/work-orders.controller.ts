@@ -20,17 +20,17 @@ export class ServiceRequestWorkOrdersController {
   constructor(private readonly workOrdersService: WorkOrdersService) {}
 
   @Post('diagnostics')
-  @ApiResponse(200, 'Diagnostic work order created')
+  @ApiResponse(200, 'Orden de diagnóstico creada')
   @AuthGuard(
-    Permissions.diagnostic_work_orders.create_with_required_approval,
-    Permissions.diagnostic_work_orders.create_without_approval,
+    Permissions.work_orders.create_with_required_approval,
+    Permissions.work_orders.create_without_approval,
   )
   async createDiagnosticWorkOrder(
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
-    @Body() createDiagnosticWorkOrderDto: CreateWorkOrderDiagnosticDto,
     @GetUserGroupId() userGroupId: string,
     @GetUserPermissions() userPermissions: Set<string>,
+    @Body() createDiagnosticWorkOrderDto: CreateWorkOrderDiagnosticDto,
   ): Promise<{ workOrder: ResponseWorkOrderDto }> {
     const workOrder = await this.workOrdersService.createDiagnosticWorkOrder(
       serviceRequestId,
@@ -44,30 +44,23 @@ export class ServiceRequestWorkOrdersController {
   }
 
   @Post('services')
-  @ApiResponse(200, 'Service work order created')
+  @ApiResponse(200, 'Orden de servicio creada')
   @AuthGuard(
-    Permissions.service_work_orders.create_with_required_approval,
-    Permissions.service_work_orders.create_without_approval,
+    Permissions.work_orders.create_with_required_approval,
+    Permissions.work_orders.create_without_approval,
   )
   async createServiceWorkOrder(
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
+    @GetUserGroupId() userGroupId: string,
+    @GetUserPermissions() userPermissions: Set<string>,
     @Body() createServiceWorkOrderDto: CreateWorkOrderServiceDto,
-    @GetUserPermissions() userPermissions: string[],
   ): Promise<{ workOrder: ResponseWorkOrderDto }> {
-    let approvalRequired = true;
-    if (
-      userPermissions.includes(
-        Permissions.service_work_orders.create_without_approval,
-      )
-    ) {
-      approvalRequired = false;
-    }
-
     const workOrder = await this.workOrdersService.createServiceWorkOrder(
       serviceRequestId,
       createServiceWorkOrderDto,
-      approvalRequired,
+      userGroupId,
+      userPermissions,
     );
     return { workOrder: WorkOrderMapper.serviceToResponseDto(workOrder) };
   }
