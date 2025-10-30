@@ -11,7 +11,7 @@ import { extractTokenFromCookie, validatePayload } from 'src/core/utils';
 import { InvalidTokenException } from 'src/auth/exceptions';
 import { JwtPayload } from 'src/core/interfaces';
 import { TokenType } from 'src/auth/enum';
-import { User } from 'src/users/entities';
+import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()

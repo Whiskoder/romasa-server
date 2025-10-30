@@ -3,12 +3,14 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-import { User } from 'src/users/entities';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 export class Group {
@@ -23,6 +25,13 @@ export class Group {
 
   @OneToMany(() => User, (user) => user.group)
   users: User[];
+
+  @ManyToMany(() => User, (user) => user.woDiagnosticApproverGroups)
+  @JoinTable()
+  woDiagnosticApprovers: User[];
+
+  @Column({ type: 'int', nullable: false, default: 1 })
+  woDiagnosticMinimumApprovalsRequired: number;
 
   // TODO
   @Column({ type: 'text', nullable: true })

@@ -3,20 +3,11 @@ export const Permissions = {
     view_all: 'service_requests:view:all',
     view_own: 'service_requests:view:own',
     view_branch: 'service_requests:view:branch',
-    create: 'service_requests:create',
-    approve: 'service_requests:approve',
-    reject: 'service_requests:reject',
-    schedule: 'service_requests:schedule',
   },
-  diagnostic_work_orders: {
-    create_without_approval: 'diagnostic_work_orders:create:without_approval',
-    create_with_required_approval:
-      'diagnostic_work_orders:create:with_required_approval',
-  },
-  service_work_orders: {
-    create_without_approval: 'service_work_orders:create:without_approval',
-    create_with_required_approval:
-      'service_work_orders:create:with_required_approval',
+  work_orders: {
+    schedule: 'work_orders:schedule',
+    create_without_approval: 'work_orders:create:without_approval',
+    create_with_required_approval: 'work_orders:create:with_required_approval',
   },
   users: {
     view_all: 'users:view:all',
@@ -30,9 +21,12 @@ export const Permissions = {
     delete: 'groups:delete',
     manage_permissions: 'groups:manage:permissions',
     manage_users: 'groups:manage:users',
+    manage_work_order_diagnostic_approvers:
+      'groups:manage:work-order-diagnostic:approvers',
   },
   employees: {
     view_all: 'employees:view:all',
+    view_drivers: 'employees:view:drivers',
   },
   workshops: {
     create: 'workshops:create',

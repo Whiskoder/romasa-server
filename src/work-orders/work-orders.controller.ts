@@ -3,10 +3,14 @@ import {
   Controller,
   Get,
   Param,
+  ParseEnumPipe,
   ParseUUIDPipe,
   Patch,
 } from '@nestjs/common';
+import { AuthGuard, GetUserId } from 'src/auth/decorators';
+import { ApiResponse } from 'src/core/decorators';
 import { WorkOrdersService } from 'src/work-orders/work-orders.service';
+import { WorkOrderType } from 'src/work-orders/enums';
 
 @Controller({
   version: '1',
@@ -15,24 +19,28 @@ import { WorkOrdersService } from 'src/work-orders/work-orders.service';
 export class WorkOrdersController {
   constructor(private readonly workOrdersService: WorkOrdersService) {}
 
-  // @Get(':id')
-  // async findOne(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string,) {
-  //   return await this.workOrdersService.findOne(id);
-  // }
-
-  // // ===== Approval =====
-  @Patch(':id/approval')
+  // Approval
+  @ApiResponse(200, 'Orden de trabajo aprobada')
+  @AuthGuard()
+  @Patch(':id/approve/:type')
   async updateApproval(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
-    // @Body() dto: ApprovalActionDto,
-  ) {
-    // return await this.workOrdersService.updateApproval(id, dto);
+    @Param('type', new ParseEnumPipe(WorkOrderType)) type: WorkOrderType,
+    @GetUserId() userId: string,
+  ): Promise<boolean> {
+    return await this.workOrdersService.approve(id, type, userId);
   }
 
-  // @Get(':id/approval')
-  // async getApproval(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string,) {
-  //   return await this.workOrdersService.getApprovalStatus(id);
-  // }
+  @ApiResponse(200, 'Orden de trabajo rechazada')
+  @AuthGuard()
+  @Patch(':id/reject/:type')
+  async reject(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Param('type', new ParseEnumPipe(WorkOrderType)) type: WorkOrderType,
+    @GetUserId() userId: string,
+  ): Promise<boolean> {
+    return await this.workOrdersService.reject(id, type, userId);
+  }
 
   // // ===== Schedule =====
   // @Patch(':id/schedule')
@@ -50,11 +58,6 @@ export class WorkOrdersController {
   //   @Body() dto: CompleteDiagnosticDto,
   // ) {
   //   return await this.workOrdersService.completeDiagnostic(id, dto);
-  // }
-
-  // @Get(':id/diagnostic')
-  // async getDiagnostic(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string,) {
-  //   return await this.workOrdersService.getDiagnostic(id);
   // }
 
   // // ===== Service - Reception =====
@@ -78,10 +81,5 @@ export class WorkOrdersController {
   //   @Body() dto: ServiceCompletionDto,
   // ) {
   //   return await this.workOrdersService.completeService(id, dto);
-  // }
-
-  // @Get(':id/service/completion')
-  // async getCompletion(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string,) {
-  //   return await this.workOrdersService.getCompletion(id);
   // }
 }

@@ -1,4 +1,4 @@
-import { FindOptionsWhere, Repository } from 'typeorm';
+import { FindOptionsSelect, FindOptionsWhere, Not, Repository } from 'typeorm';
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,7 +7,10 @@ import { Query } from 'src/core/interfaces';
 import { CreateServiceRequestDto } from 'src/service-requests/dtos';
 import { CustomersService } from 'src/customers/customers.service';
 import { NullableType } from 'src/core/types';
-import { ServiceRequest } from 'src/service-requests/entities';
+import {
+  ServiceRequest,
+  ServiceRequestView,
+} from 'src/service-requests/entities';
 import { UsersService } from 'src/users/users.service';
 import { uuidPlugin } from 'src/core/plugins';
 import { VehiclesService } from 'src/vehicles/vehicles.service';
@@ -25,6 +28,8 @@ export class ServiceRequestsService {
   constructor(
     @InjectRepository(ServiceRequest)
     private readonly serviceRequestsRepository: Repository<ServiceRequest>,
+    @InjectRepository(ServiceRequestView)
+    private readonly view: Repository<ServiceRequestView>,
     private readonly customersService: CustomersService,
     private readonly vehiclesService: VehiclesService,
     private readonly usersService: UsersService,
@@ -45,8 +50,10 @@ export class ServiceRequestsService {
     const user = await this.usersService.findById(userId);
     if (!user) throw new UserNotFoundException();
 
-    // TODO: Implement tracking code
-    const trackingCode = uuidPlugin.short();
+    const now = new Date();
+    const day = now.getDate().toString().padStart(2, '0');
+    const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    const trackingCode = `F${day}${month}-${uuidPlugin.short()}`;
 
     const serviceRequest = {
       id: uuidPlugin.v7(),
@@ -66,79 +73,75 @@ export class ServiceRequestsService {
     return entity;
   }
 
-  async findById(
-    id: string,
-    where?: FindOptionsWhere<ServiceRequest>,
-    relations?: string[],
-  ): Promise<NullableType<ServiceRequest>> {
+  async findById(findOpts: {
+    id: string;
+    where?: FindOptionsWhere<ServiceRequest>;
+    relations?: string[];
+    select?: FindOptionsSelect<ServiceRequest>;
+  }): Promise<NullableType<ServiceRequest>> {
+    const { id, where, relations, select } = findOpts;
     const entity = await this.serviceRequestsRepository.findOne({
       where: { id, ...where },
       relations,
+      select: select,
     });
     return entity ? entity : null;
   }
 
-  async findByTrackingCode(
+  async optimizedFindById(
+    id: string,
+    where?: FindOptionsWhere<ServiceRequestView>,
+  ): Promise<NullableType<ServiceRequestView>> {
+    const entity = await this.view.findOne({
+      where: {
+        id,
+        status: Not(ServiceRequestStatus.draft),
+        ...where,
+      },
+    });
+    return entity ? entity : null;
+  }
+
+  async optimizedFindByTrackingCode(
     trackingCode: string,
-    where?: FindOptionsWhere<ServiceRequest>,
-    relations?: string[],
-  ): Promise<NullableType<ServiceRequest>> {
-    const entity = await this.serviceRequestsRepository.findOne({
-      where: { trackingCode, ...where },
-      relations,
+    where?: FindOptionsWhere<ServiceRequestView>,
+  ): Promise<NullableType<ServiceRequestView>> {
+    const entity = await this.view.findOne({
+      where: {
+        trackingCode,
+        status: Not(ServiceRequestStatus.draft),
+        ...where,
+      },
     });
     return entity ? entity : null;
   }
 
   async findAllWithPagination(
-    query: Query<ServiceRequest>,
-  ): Promise<[ServiceRequest[], ResponsePaginationDto]> {
-    const { where, relations, pagination } = query;
+    query: Query<ServiceRequestView>,
+  ): Promise<[ServiceRequestView[], ResponsePaginationDto]> {
+    const { where, pagination } = query;
     const { offset, limit, sortBy, sortOrder } = pagination;
 
-    const [entities, total] = await this.serviceRequestsRepository.findAndCount(
-      {
-        where,
-        relations,
-        order: { [sortBy]: sortOrder },
-        take: limit,
-        skip: offset,
+    const [entities, total] = await this.view.findAndCount({
+      where: {
+        status: Not(ServiceRequestStatus.draft),
+        ...where,
       },
-    );
+      order: { [sortBy]: sortOrder },
+      take: limit,
+      skip: offset,
+    });
 
     const paginationDto = createPagination(total, limit, offset);
     return [entities, paginationDto];
-    // Usar consultas normales y modificar paginationInterceptor
+  }
 
-    // const qb = this.serviceRequestsRepository
-    //   .createQueryBuilder('serviceRequest')
-    //   // .where(where, parameters)
-    //   .orderBy(`serviceRequest.${sortBy}`, sortOrder)
-    //   .select([
-    //     'serviceRequest.id',
-    //     'serviceRequest.trackingCode',
-    //     'serviceRequest.priority',
-    //     'serviceRequest.createdAt',
-    //     'serviceRequest.updatedAt',
-    //   ])
-    //   .leftJoin('serviceRequest.diagnostic', 'diagnostic')
-    //   .addSelect('diagnostic')
-    //   .leftJoin('serviceRequest.service', 'service')
-    //   .addSelect('service')
-    //   .leftJoin('serviceRequest.vehicle', 'vehicle')
-    //   .addSelect('vehicle')
-    //   .leftJoin('serviceRequest.createdBy', 'createdBy')
-    //   .addSelect('createdBy')
-    //   .leftJoin('serviceRequest.createdBy.employee', 'createdByEmployee')
-    //   .addSelect('createdByEmployee')
-    //   .leftJoin('serviceRequest.updatedBy', 'updatedBy')
-    //   .addSelect('updatedBy')
-    //   // .leftJoin('serviceRequest.updatedBy.employee', 'updatedByEmployee')
-    //   // .addSelect('updatedByEmployee')
-    //   .leftJoin('serviceRequest.requester', 'requester')
-    //   .addSelect('requester')
-    //   .take(limit)
-    //   .skip(offset)
-    //   .getManyAndCount();
+  async updateStatus(
+    id: string,
+    status: ServiceRequestStatus,
+  ): Promise<boolean> {
+    await this.serviceRequestsRepository.update({ id }, { status });
+
+    return true;
   }
 }

@@ -28,6 +28,7 @@ export class UserPermissionGuard implements CanActivate {
       string[]
     >(META_PERMISSION, [context.getHandler(), context.getClass()]);
 
+    // !warn: Aqui no asignas userPermissions
     if (!requiredPermissions) return true;
     if (!requiredPermissions.length) return true;
 

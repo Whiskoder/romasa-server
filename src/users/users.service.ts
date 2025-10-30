@@ -12,10 +12,14 @@ import {
 } from 'src/users/exceptions';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { EmployeesService } from 'src/employees/employees.service';
-import { User } from 'src/users/entities';
+import { User } from 'src/users/entities/user.entity';
 import { Query } from 'src/core/interfaces';
 import { ResponsePaginationDto } from 'src/core/dto';
 import { createPagination } from 'src/core/utils';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { SendUserPasswordEmail } from 'src/notifications/emails/send-user-password';
+import { AllConfigType } from 'src/core/config';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
@@ -24,6 +28,8 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     private readonly employeeService: EmployeesService,
     private readonly cryptoService: CryptoService,
+    private readonly notificationsService: NotificationsService,
+    private readonly configService: ConfigService<AllConfigType>,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -35,9 +41,7 @@ export class UsersService {
     const employeeEntity = await this.employeeService.findById(employeeId);
     if (!employeeEntity) throw new UserEmployeeNotFoundException();
 
-    // Send temporal password via email
     const password = uuidPlugin.short();
-    console.log(password);
 
     const hashedPassword = bcryptPlugin.hash(password);
     const encryptedTokenSecret = this.cryptoService.generateSecret();
@@ -52,6 +56,25 @@ export class UsersService {
     const entity = this.usersRepository.create(user);
 
     await this.usersRepository.save(entity);
+
+    const domain = this.configService.get<string>('app.frontendDomain', {
+      infer: true,
+    });
+
+    const message = SendUserPasswordEmail({
+      recipientName: `${employeeEntity.firstName} ${employeeEntity.fatherName}`,
+      recipientEmail: email,
+      loginLink: `${domain}/auth/login?password=${password}`,
+      password,
+    });
+
+    const notificationsDto = {
+      to: email,
+      subject: 'Inicia sesión en tu cuenta',
+      message,
+    };
+
+    await this.notificationsService.notify(notificationsDto);
 
     return entity;
   }

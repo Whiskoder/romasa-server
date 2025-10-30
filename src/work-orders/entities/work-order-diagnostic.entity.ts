@@ -1,8 +1,17 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 
 import { Employee } from 'src/employees/entities';
-import { WorkOrder } from './work-order.entity';
-import { ServiceRequest } from '../../service-requests/entities/service-request.entity';
+import { WorkOrder } from 'src/work-orders/entities/work-order.entity';
+import { ServiceRequest } from 'src/service-requests/entities/service-request.entity';
 
 /**
  * Evaluación técnica inicial del vehículo para identificar fallas,

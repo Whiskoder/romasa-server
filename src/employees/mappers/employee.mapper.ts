@@ -4,7 +4,7 @@ import { Employee } from 'src/employees/entities';
 import { ResponseEmployeeDto } from 'src/employees/dto';
 
 export class EmployeeMapper {
-  static toResponseDto(entity: Employee): ResponseEmployeeDto {
+  static toResponseDto(entity: Employee | any): ResponseEmployeeDto {
     const dto = plainToInstance(ResponseEmployeeDto, {
       id: entity.id,
       employeeNumber: entity.employeeNumber,
@@ -12,6 +12,10 @@ export class EmployeeMapper {
       firstName: entity.firstName,
       fatherName: entity.fatherName,
       motherName: entity.motherName,
+      licenseNumber: entity.licenseNumber,
+      licenseType: entity.licenseType,
+      licenseIssueDate: entity.licenseIssueDate,
+      licenseExpiryDate: entity.licenseExpiryDate,
     });
 
     return dto;

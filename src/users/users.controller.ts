@@ -14,7 +14,7 @@ import { AuthGuard } from 'src/auth/decorators';
 import { Permissions } from 'src/permissions/constants';
 import { ResponsePaginationDto } from 'src/core/dto';
 import { SearchFilterAndPaginationInterceptor } from 'src/core/interceptors';
-import { User } from './entities';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller({
   version: '1',
@@ -24,8 +24,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  // @AuthGuard(Permissions.users.create)
-  @ApiResponse(201, 'User created')
+  @AuthGuard(Permissions.users.create)
+  @ApiResponse(201, 'Usuario creado')
   async create(
     @Body() createUserDto: CreateUserDto,
   ): Promise<{ user: ResponseUserDto }> {
@@ -42,7 +42,7 @@ export class UsersController {
       ['employee', 'group'],
     ),
   )
-  @ApiResponse(200, 'Users found')
+  @ApiResponse(200, 'Usuarios encontrados')
   async findAll(
     @Req() request: Request,
   ): Promise<{ users: ResponseUserDto[]; pagination: ResponsePaginationDto }> {

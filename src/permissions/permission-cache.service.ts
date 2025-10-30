@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { uuidPlugin } from 'src/core/plugins';
-import { Group } from 'src/groups/entities';
+import { Group } from 'src/groups/entities/group.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

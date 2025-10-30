@@ -41,6 +41,18 @@ export class WorkOrderMapper {
       requiredMaterials: entity.requiredMaterials
         ? entity.requiredMaterials.split(',')
         : undefined,
+      approvalFlow: {
+        approversRequired: entity.approversRequired?.map((user) =>
+          UserMapper.toResponseDto(user),
+        ),
+        approvedBy: entity.approvedBy?.map((user) =>
+          UserMapper.toResponseDto(user),
+        ),
+        rejectedBy: entity.rejectedBy?.map((user) =>
+          UserMapper.toResponseDto(user),
+        ),
+        approvalDate: entity.approvalDate,
+      },
     });
 
     return dto;
@@ -115,18 +127,18 @@ export class WorkOrderMapper {
           : undefined,
       },
 
-      approvalFlow: {
-        approversRequired: entity.approversRequired?.map((user) =>
-          UserMapper.toResponseDto(user),
-        ),
-        approvedBy: entity.approvedBy?.map((user) =>
-          UserMapper.toResponseDto(user),
-        ),
-        rejectedBy: entity.rejectedBy?.map((user) =>
-          UserMapper.toResponseDto(user),
-        ),
-        approvalDate: entity.approvalDate,
-      },
+      // approvalFlow: {
+      //   approversRequired: entity.approversRequired?.map((user) =>
+      //     UserMapper.toResponseDto(user),
+      //   ),
+      //   approvedBy: entity.approvedBy?.map((user) =>
+      //     UserMapper.toResponseDto(user),
+      //   ),
+      //   rejectedBy: entity.rejectedBy?.map((user) =>
+      //     UserMapper.toResponseDto(user),
+      //   ),
+      //   approvalDate: entity.approvalDate,
+      // },
     });
 
     return dto;

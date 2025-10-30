@@ -26,7 +26,10 @@ import { ServiceRequestMapper } from 'src/service-requests/mappers';
 import { ApiResponse } from 'src/core/decorators';
 import { ServiceRequestNotFoundException } from 'src/service-requests/exceptions';
 import { SearchFilterAndPaginationInterceptor } from 'src/core/interceptors';
-import { ServiceRequest } from 'src/service-requests/entities';
+import {
+  ServiceRequest,
+  ServiceRequestView,
+} from 'src/service-requests/entities';
 import { Permissions } from 'src/permissions/constants';
 import { FindOptionsWhere } from 'typeorm';
 import { ResponsePaginationDto } from 'src/core/dto';
@@ -41,8 +44,11 @@ export class ServiceRequestsController {
   ) {}
 
   @Post()
-  @AuthGuard(Permissions.service_requests.create)
-  @ApiResponse(201, 'ServiceRequest created')
+  @AuthGuard(
+    Permissions.work_orders.create_with_required_approval,
+    Permissions.work_orders.create_without_approval,
+  )
+  @ApiResponse(201, 'Solicitud de servicio creada')
   async create(
     @Body()
     createServiceRequest: CreateServiceRequestDto,
@@ -62,29 +68,27 @@ export class ServiceRequestsController {
     Permissions.service_requests.view_all,
     Permissions.service_requests.view_own,
   )
-  @ApiResponse(200, 'ServiceRequest found')
+  @ApiResponse(200, 'Solicitud de servicio encontrada')
   async findById(
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
-    @Query('relations') relations: string[],
-    @GetUserPermissions() userPermissions: string[],
+    @GetUserPermissions() userPermissions: Set<string>,
     @GetUserId() userId: string,
   ): Promise<{ serviceRequest: ResponseServiceRequestDto }> {
-    let where: FindOptionsWhere<ServiceRequest> = {};
+    let where: FindOptionsWhere<ServiceRequestView> = {};
 
     // TODO, solo si incluye este campo, sin incluye mas deberia se un error
-    if (userPermissions.includes(Permissions.service_requests.view_own)) {
-      where = { createdBy: { id: userId } };
+    if (userPermissions.has(Permissions.service_requests.view_own)) {
+      where = { createdBy_id: userId };
     }
 
-    const serviceRequest = await this.serviceRequestsService.findById(
+    const serviceRequest = await this.serviceRequestsService.optimizedFindById(
       serviceRequestId,
       where,
-      relations,
     );
     if (!serviceRequest) throw new ServiceRequestNotFoundException();
     return {
-      serviceRequest: ServiceRequestMapper.toResponseDto(serviceRequest),
+      serviceRequest: ServiceRequestMapper.viewToResponseDto(serviceRequest),
     };
   }
 
@@ -93,49 +97,41 @@ export class ServiceRequestsController {
     Permissions.service_requests.view_all,
     Permissions.service_requests.view_own,
   )
-  @ApiResponse(200, 'ServiceRequest found')
+  @ApiResponse(200, 'Solicitud de servicio encontrada')
   async findByTrackingCode(
-    @Query('relations') relations: string,
     @Param('trackingCode') trackingCode: string,
-    @GetUserPermissions() userPermissions: string[],
+    @GetUserPermissions() userPermissions: Set<string>,
     @GetUserId() userId: string,
   ): Promise<{ serviceRequest: ResponseServiceRequestDto }> {
-    let where: FindOptionsWhere<ServiceRequest> = {};
+    let where: FindOptionsWhere<ServiceRequestView> = {};
 
     if (
-      !userPermissions.includes(Permissions.service_requests.view_all) &&
-      userPermissions.includes(Permissions.service_requests.view_own)
+      !userPermissions.has(Permissions.service_requests.view_all) &&
+      userPermissions.has(Permissions.service_requests.view_own)
     ) {
-      where = { createdBy: { id: userId } };
+      where = { createdBy_id: userId };
     }
 
-    const serviceRequest = await this.serviceRequestsService.findByTrackingCode(
-      trackingCode,
-      where,
-      relations.split(','),
-    );
+    const serviceRequest =
+      await this.serviceRequestsService.optimizedFindByTrackingCode(
+        trackingCode,
+        where,
+      );
     if (!serviceRequest) throw new ServiceRequestNotFoundException();
     return {
-      serviceRequest: ServiceRequestMapper.toResponseDto(serviceRequest),
+      serviceRequest: ServiceRequestMapper.viewToResponseDto(serviceRequest),
     };
   }
 
   @Get()
   @AuthGuard(Permissions.service_requests.view_all)
   @UseInterceptors(
-    new SearchFilterAndPaginationInterceptor<ServiceRequest>(
+    new SearchFilterAndPaginationInterceptor<ServiceRequestView>(
       ['trackingCode', 'status'],
-      [
-        'vehicle',
-        'diagnostic',
-        'service',
-        'requester',
-        'createdBy',
-        'updatedBy',
-      ],
+      [],
     ),
   )
-  @ApiResponse(200, 'ServiceRequests found')
+  @ApiResponse(200, 'Solicitudes de servicio encontradas')
   async findAll(@Req() req: Request): Promise<{
     serviceRequests: ResponseServiceRequestDto[];
     pagination: ResponsePaginationDto;
@@ -145,7 +141,8 @@ export class ServiceRequestsController {
 
     if (!serviceRequests.length) throw new ServiceRequestNotFoundException();
     return {
-      serviceRequests: ServiceRequestMapper.toResponseDtoList(serviceRequests),
+      serviceRequests:
+        ServiceRequestMapper.viewToResponseDtoList(serviceRequests),
       pagination,
     };
   }

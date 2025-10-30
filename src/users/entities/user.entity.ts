@@ -3,13 +3,16 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToMany,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-import { Employee } from 'src/employees/entities';
-import { Group } from 'src/groups/entities';
+import { Employee } from 'src/employees/entities/employee.entity';
+import { Group } from 'src/groups/entities/group.entity';
+import { WorkOrderDiagnostic } from 'src/work-orders/entities/work-order-diagnostic.entity';
+// import { WorkOrder } from 'src/work-orders/entities';
 
 @Entity()
 export class User {
@@ -26,7 +29,7 @@ export class User {
   @ManyToOne(() => Employee, (employee) => employee.id, { eager: true })
   employee: Employee;
 
-  @ManyToOne(() => Group, (group) => group.users)
+  @ManyToOne(() => Group, (group) => group.users, { eager: false })
   @JoinColumn()
   group?: Group;
 
@@ -44,4 +47,9 @@ export class User {
 
   @UpdateDateColumn({ type: 'datetime' })
   updatedAt: Date;
+
+  @ManyToMany(() => Group, (group) => group.woDiagnosticApprovers, {
+    eager: false,
+  })
+  woDiagnosticApproverGroups: Group[];
 }

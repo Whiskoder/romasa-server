@@ -1,6 +1,6 @@
-import { Customer } from 'src/customers/entities';
-import { User } from 'src/users/entities';
-import { Vehicle } from 'src/vehicles/entities';
+import { Customer } from 'src/customers/entities/customer.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Vehicle } from 'src/vehicles/entities/vehicle.entity';
 import {
   Column,
   CreateDateColumn,
@@ -27,7 +27,7 @@ export class ServiceRequest {
   id: string;
 
   // Identificador único para seguimiento
-  @Column({ type: 'nvarchar', length: 10, nullable: false })
+  @Column({ type: 'nvarchar', length: 12, nullable: false })
   trackingCode: string;
 
   // Nivel de urgencia (baja, media, alta)
@@ -69,14 +69,14 @@ export class ServiceRequest {
 
   // Referencia a las órdenes de trabajo que pertenecen a la solicitud
   @OneToOne(() => WorkOrderService, (workOrder) => workOrder.serviceRequest, {
-    eager: true,
+    eager: false,
   })
   service: WorkOrderService;
 
   @OneToOne(
     () => WorkOrderDiagnostic,
     (workOrder) => workOrder.serviceRequest,
-    { eager: true },
+    { eager: false },
   )
   diagnostic: WorkOrderDiagnostic;
 

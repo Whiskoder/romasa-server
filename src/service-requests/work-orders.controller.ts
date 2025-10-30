@@ -1,6 +1,6 @@
 import { Body, Controller, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 
-import { AuthGuard, GetUserPermissions } from 'src/auth/decorators';
+import { AuthGuard, GetUserId, GetUserPermissions } from 'src/auth/decorators';
 import { ApiResponse } from 'src/core/decorators';
 import {
   CreateWorkOrderDiagnosticDto,
@@ -10,6 +10,7 @@ import {
 import { WorkOrderMapper } from 'src/work-orders/mappers';
 import { WorkOrdersService } from 'src/work-orders/work-orders.service';
 import { Permissions } from 'src/permissions/constants';
+import { GetUserGroupId } from 'src/auth/decorators/get-user-group-id.decorator';
 
 @Controller({
   version: '1',
@@ -19,30 +20,23 @@ export class ServiceRequestWorkOrdersController {
   constructor(private readonly workOrdersService: WorkOrdersService) {}
 
   @Post('diagnostics')
-  @ApiResponse(200, 'Diagnostic work order created')
+  @ApiResponse(200, 'Orden de diagnóstico creada')
   @AuthGuard(
-    Permissions.diagnostic_work_orders.create_with_required_approval,
-    Permissions.diagnostic_work_orders.create_without_approval,
+    Permissions.work_orders.create_with_required_approval,
+    Permissions.work_orders.create_without_approval,
   )
   async createDiagnosticWorkOrder(
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
+    @GetUserGroupId() userGroupId: string,
+    @GetUserPermissions() userPermissions: Set<string>,
     @Body() createDiagnosticWorkOrderDto: CreateWorkOrderDiagnosticDto,
-    @GetUserPermissions() userPermissions: string[],
   ): Promise<{ workOrder: ResponseWorkOrderDto }> {
-    let approvalRequired = true;
-    if (
-      userPermissions.includes(
-        Permissions.diagnostic_work_orders.create_without_approval,
-      )
-    ) {
-      approvalRequired = false;
-    }
-
     const workOrder = await this.workOrdersService.createDiagnosticWorkOrder(
       serviceRequestId,
       createDiagnosticWorkOrderDto,
-      approvalRequired,
+      userGroupId,
+      userPermissions,
     );
     return {
       workOrder: WorkOrderMapper.diagnosticToResponseDto(workOrder),
@@ -50,30 +44,23 @@ export class ServiceRequestWorkOrdersController {
   }
 
   @Post('services')
-  @ApiResponse(200, 'Service work order created')
+  @ApiResponse(200, 'Orden de servicio creada')
   @AuthGuard(
-    Permissions.service_work_orders.create_with_required_approval,
-    Permissions.service_work_orders.create_without_approval,
+    Permissions.work_orders.create_with_required_approval,
+    Permissions.work_orders.create_without_approval,
   )
   async createServiceWorkOrder(
     @Param('serviceRequestId', new ParseUUIDPipe({ version: '7' }))
     serviceRequestId: string,
+    @GetUserGroupId() userGroupId: string,
+    @GetUserPermissions() userPermissions: Set<string>,
     @Body() createServiceWorkOrderDto: CreateWorkOrderServiceDto,
-    @GetUserPermissions() userPermissions: string[],
   ): Promise<{ workOrder: ResponseWorkOrderDto }> {
-    let approvalRequired = true;
-    if (
-      userPermissions.includes(
-        Permissions.service_work_orders.create_without_approval,
-      )
-    ) {
-      approvalRequired = false;
-    }
-
     const workOrder = await this.workOrdersService.createServiceWorkOrder(
       serviceRequestId,
       createServiceWorkOrderDto,
-      approvalRequired,
+      userGroupId,
+      userPermissions,
     );
     return { workOrder: WorkOrderMapper.serviceToResponseDto(workOrder) };
   }

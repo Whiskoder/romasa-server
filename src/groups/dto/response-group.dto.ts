@@ -1,4 +1,4 @@
-import { User } from 'src/users/entities';
+import { User } from 'src/users/entities/user.entity';
 
 export class ResponseGroupDto {
   id: string;
@@ -8,4 +8,5 @@ export class ResponseGroupDto {
   users: User[];
   createdAt: Date;
   updatedAt: Date;
+  workOrderDiagnosticApprovers: User[];
 }

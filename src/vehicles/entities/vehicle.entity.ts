@@ -26,7 +26,7 @@ export class Vehicle {
   @Column({ name: 'STRNSRTRN', type: 'nvarchar', length: 20, nullable: true })
   verificationNumber?: string;
 
-  @Column({ name: 'DCMPBRTRN', type: 'float', nullable: true })
+  @Column({ name: 'DCMPBRTRN', type: 'int', nullable: true })
   grossWeight?: number;
 
   @Column({ name: 'STRPLCTRN', type: 'nvarchar', length: 7, nullable: true })

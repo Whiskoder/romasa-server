@@ -39,3 +39,14 @@ export class InvalidPermissionsValueException extends BadRequestException {
     super({ message, errorCode: 'PERMISSIONS_ERR_DOES_NOT_EXIST' });
   }
 }
+
+export class GroupWorkOrderDiagnosticApproversNotFoundEntityException extends UnprocessableEntityException {
+  constructor(
+    message = 'No hay aprobadores de los trabajos de diagnóstico configurados',
+  ) {
+    super({
+      message,
+      errorCode: 'GRP_ERR_WORK_ORDER_DIAGNOSTIC_APPROVERS_NOT_FOUND',
+    });
+  }
+}
