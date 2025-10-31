@@ -20,6 +20,8 @@ import { NotificationsService } from 'src/notifications/notifications.service';
 import { SendUserPasswordEmail } from 'src/notifications/emails/send-user-password';
 import { AllConfigType } from 'src/core/config';
 import { ConfigService } from '@nestjs/config';
+import { GroupsService } from 'src/groups/groups.service';
+import { group } from 'console';
 
 @Injectable()
 export class UsersService {
@@ -52,6 +54,7 @@ export class UsersService {
       email,
       employee: employeeEntity,
       encryptedTokenSecret,
+      // group: { id: '0199f813-6a90-745b-82c7-1890f049ffd2' },
     };
     const entity = this.usersRepository.create(user);
 

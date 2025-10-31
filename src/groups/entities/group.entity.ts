@@ -26,7 +26,9 @@ export class Group {
   @OneToMany(() => User, (user) => user.group)
   users: User[];
 
-  @ManyToMany(() => User, (user) => user.woDiagnosticApproverGroups)
+  @ManyToMany(() => User, (user) => user.woDiagnosticApproverGroups, {
+    cascade: true,
+  })
   @JoinTable()
   woDiagnosticApprovers: User[];
 

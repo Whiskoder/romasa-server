@@ -8,7 +8,7 @@ import { UsersModule } from 'src/users/users.module';
 import { PermissionsModule } from 'src/permissions/permissions.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Group]), UsersModule, PermissionsModule],
+  imports: [TypeOrmModule.forFeature([Group]), PermissionsModule, UsersModule],
   controllers: [GroupsController],
   providers: [GroupsService],
   exports: [GroupsService, TypeOrmModule],

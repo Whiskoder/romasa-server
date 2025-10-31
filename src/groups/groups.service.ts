@@ -29,6 +29,7 @@ export class GroupsService {
   constructor(
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
+
     private readonly usersService: UsersService,
     private readonly permissionCacheService: PermissionCacheService,
   ) {}
@@ -107,8 +108,11 @@ export class GroupsService {
     const entity = await this.groupRepository.findOne({ where: { id } });
     if (!entity) throw new GroupNotFoundEntityException();
 
-    this.permissionCacheService.deleteGroup(id);
+    entity.users = [];
+    await this.groupRepository.save(entity);
     await this.groupRepository.delete({ id });
+
+    this.permissionCacheService.deleteGroup(id);
   }
 
   async addPermissions(groupId: string, permissions: string[]): Promise<Group> {

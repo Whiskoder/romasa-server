@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UsersController } from 'src/users/users.controller';
@@ -8,6 +8,7 @@ import { User } from 'src/users/entities/user.entity';
 import { CryptoModule } from 'src/crypto/crypto.module';
 import { EmployeesModule } from 'src/employees/employees.module';
 import { NotificationsModule } from 'src/notifications/notifications.module';
+import { GroupsModule } from 'src/groups/groups.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { NotificationsModule } from 'src/notifications/notifications.module';
     CryptoModule,
     EmployeesModule,
     NotificationsModule,
+    // GroupsModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],
