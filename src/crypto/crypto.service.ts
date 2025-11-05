@@ -82,6 +82,10 @@ export class CryptoService implements OnModuleInit {
     }
   }
 
+  generateNonce(): Buffer {
+    return randomBytes(16);
+  }
+
   generateSecret(): Buffer {
     const salt = randomBytes(16);
     const secret = randomBytes(32);

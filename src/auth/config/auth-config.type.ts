@@ -1,9 +1,11 @@
 export type AuthConfig = {
-  refreshTokenExpiresIn?: number;
-  refreshTokenSecret?: string;
   accessTokenExpiresIn?: number;
   accessTokenSecret?: string;
   cookiesHttpOnly?: boolean;
-  cookiesSecure?: boolean;
   cookiesSameSite?: 'strict' | 'lax' | 'none';
+  cookiesSecure?: boolean;
+  refreshTokenExpiresIn?: number;
+  registerNonceExpiresIn?: number;
+  registerTokenExpiresIn?: number;
+  registerTokenSecret?: string;
 };

@@ -61,4 +61,26 @@ export class TokenService {
 
     return this.jwtService.signAsync(payload, { jwtid, secret, expiresIn });
   }
+
+  async generateRegisterToken(
+    employeeId: number,
+    email: string,
+  ): Promise<string> {
+    const payload = {
+      employeeId,
+      email,
+      type: TokenType.register_token,
+    };
+
+    const jwtid = uuidPlugin.v7();
+    const secret = this.configService.get<string>('auth.registerTokenSecret', {
+      infer: true,
+    });
+
+    const expiresIn = this.configService.get('auth.registerTokenExpiresIn', {
+      infer: true,
+    });
+
+    return this.jwtService.signAsync(payload, { jwtid, secret, expiresIn });
+  }
 }

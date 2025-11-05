@@ -3,7 +3,7 @@ import { applyDecorators, UseGuards } from '@nestjs/common';
 import {
   AccessTokenGuard,
   RefreshTokenGuard,
-  OneTimeTokenGuard,
+  RegisterTokenGuard,
   UserPermissionGuard,
 } from 'src/auth/guards';
 import { PermissionProtected } from 'src/auth/decorators';
@@ -19,6 +19,6 @@ export function AuthRefreshToken() {
   return applyDecorators(UseGuards(RefreshTokenGuard));
 }
 
-export function AuthOneTimeToken() {
-  return applyDecorators(UseGuards(OneTimeTokenGuard));
+export function AuthRegisterToken() {
+  return applyDecorators(UseGuards(RegisterTokenGuard));
 }

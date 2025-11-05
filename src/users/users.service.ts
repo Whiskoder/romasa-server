@@ -17,11 +17,8 @@ import { Query } from 'src/core/interfaces';
 import { ResponsePaginationDto } from 'src/core/dto';
 import { createPagination } from 'src/core/utils';
 import { NotificationsService } from 'src/notifications/notifications.service';
-import { SendUserPasswordEmail } from 'src/notifications/emails/send-user-password';
 import { AllConfigType } from 'src/core/config';
 import { ConfigService } from '@nestjs/config';
-import { GroupsService } from 'src/groups/groups.service';
-import { group } from 'console';
 
 @Injectable()
 export class UsersService {
@@ -34,7 +31,11 @@ export class UsersService {
     private readonly configService: ConfigService<AllConfigType>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: {
+    password: string;
+    email: string;
+    employeeId: number;
+  }): Promise<User> {
     const { email, employeeId } = createUserDto;
 
     const existingUser = await this.findByEmail(email);
@@ -54,30 +55,10 @@ export class UsersService {
       email,
       employee: employeeEntity,
       encryptedTokenSecret,
-      // group: { id: '0199f813-6a90-745b-82c7-1890f049ffd2' },
     };
     const entity = this.usersRepository.create(user);
 
     await this.usersRepository.save(entity);
-
-    const domain = this.configService.get<string>('app.frontendDomain', {
-      infer: true,
-    });
-
-    const message = SendUserPasswordEmail({
-      recipientName: `${employeeEntity.firstName} ${employeeEntity.fatherName}`,
-      recipientEmail: email,
-      loginLink: `${domain}/auth/login?password=${password}`,
-      password,
-    });
-
-    const notificationsDto = {
-      to: email,
-      subject: 'Inicia sesión en tu cuenta',
-      message,
-    };
-
-    await this.notificationsService.notify(notificationsDto);
 
     return entity;
   }

@@ -1,4 +1,8 @@
-import { ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 export class InvalidCredentialsException extends UnauthorizedException {
   constructor(message = 'Credenciales incorrectas') {
@@ -23,6 +27,22 @@ export class UserNotInRequestException extends UnauthorizedException {
     message = 'No se encontró el usuario en la solicitud. ¿Falta un guard de autenticación?',
   ) {
     super({ message, errorCode: 'AUTH_ERR_USER_MISSING' });
+  }
+}
+
+export class EmployeeNotInRequestException extends UnauthorizedException {
+  constructor(
+    message = 'No se encontró el empleado en la solicitud. ¿Falta un guard de autenticación?',
+  ) {
+    super({ message, errorCode: 'AUTH_ERR_EMPLOYEE_MISSING' });
+  }
+}
+
+export class EmailNotInRequestException extends UnauthorizedException {
+  constructor(
+    message = 'No se encontró el email en la solicitud. ¿Falta un guard de autenticación?',
+  ) {
+    super({ message, errorCode: 'AUTH_ERR_EMAIL_MISSING' });
   }
 }
 
@@ -57,5 +77,23 @@ export class UserForbiddenException extends ForbiddenException {
 export class UserPermissionsExpiredException extends UnauthorizedException {
   constructor(message = 'Permisos expirados, actualice su sesión') {
     super({ message, errorCode: 'AUTH_ERR_USER_PERMISSIONS_EXPIRED' });
+  }
+}
+
+export class OneTimeTokenNotFoundException extends UnauthorizedException {
+  constructor(message = 'Token de un solo uso no encontrado') {
+    super({ message, errorCode: 'AUTH_ERR_ONE_TIME_TOKEN_NOT_FOUND' });
+  }
+}
+
+export class InvalidNonceException extends BadRequestException {
+  constructor(message = 'Formato de Nonce no válido') {
+    super({ message, errorCode: 'AUTH_ERR_INVALID_NONCE' });
+  }
+}
+
+export class NonceNotInHeaderException extends BadRequestException {
+  constructor(message = 'No se encontro el header x-auth-nonce') {
+    super({ message, errorCode: 'AUTH_ERR_NONCE_NOT_IN_HEADER' });
   }
 }

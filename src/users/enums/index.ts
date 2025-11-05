@@ -1,1 +1,1 @@
-export * from './one-time-token-type.enum';
+export * from '../../auth/enum/one-time-token-type.enum';

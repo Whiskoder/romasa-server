@@ -33,7 +33,7 @@ export class User {
   @JoinColumn()
   group?: Group;
 
-  @Column({ type: 'bit', nullable: false, default: true })
+  @Column({ type: 'bit', nullable: false, default: false })
   isActive: boolean;
 
   @Column({ type: 'bit', nullable: false, default: false })

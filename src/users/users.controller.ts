@@ -10,7 +10,12 @@ import { ApiResponse } from 'src/core/decorators';
 import { UsersService } from 'src/users/users.service';
 import { CreateUserDto, ResponseUserDto } from 'src/users/dto';
 import { UserMapper } from 'src/users/mappers';
-import { AuthGuard } from 'src/auth/decorators';
+import {
+  AuthGuard,
+  AuthRegisterToken,
+  GetEmail,
+  GetEmployeeId,
+} from 'src/auth/decorators';
 import { Permissions } from 'src/permissions/constants';
 import { ResponsePaginationDto } from 'src/core/dto';
 import { SearchFilterAndPaginationInterceptor } from 'src/core/interceptors';
@@ -23,16 +28,23 @@ import { User } from 'src/users/entities/user.entity';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  @AuthGuard(Permissions.users.create)
-  @ApiResponse(201, 'Usuario creado')
-  async create(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<{ user: ResponseUserDto }> {
-    const userObject = await this.usersService.create(createUserDto);
-    const userDto = UserMapper.toResponseDto(userObject);
-    return { user: userDto };
-  }
+  // @Post()
+  // @AuthGuard(Permissions.users.create)
+  // @AuthRegisterToken()
+  // @ApiResponse(201, 'Usuario creado')
+  // async create(
+  //   @Body() createUserDto: CreateUserDto,
+
+  // ): Promise<{ user: ResponseUserDto }> {
+  //   const { password } = createUserDto;
+  //   const userObject = await this.usersService.create({
+  //     password,
+  //     email,
+  //     employeeId,
+  //   });
+  //   const userDto = UserMapper.toResponseDto(userObject);
+  //   return { user: userDto };
+  // }
 
   @Get()
   @AuthGuard(Permissions.users.view_all)

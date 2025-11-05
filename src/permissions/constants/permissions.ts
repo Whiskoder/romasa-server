@@ -38,6 +38,9 @@ export const Permissions = {
   vehicles: {
     view_all: 'vehicles:view:all',
   },
+  auth: {
+    send_register_link: 'auth:send:register_link',
+  },
 } as const;
 
 export const ALL_PERMISSIONS_VALUES = Object.values(Permissions)

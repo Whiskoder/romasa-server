@@ -17,6 +17,7 @@ export class CookieService {
   async clearAuthCookies(res: Response) {
     res.clearCookie(TokenType.access_token);
     res.clearCookie(TokenType.refresh_token);
+    res.clearCookie(TokenType.register_token);
   }
 
   async setTokenCookie(res: Response, token: string) {

@@ -16,6 +16,7 @@ import { GroupsModule } from 'src/groups/groups.module';
     CryptoModule,
     EmployeesModule,
     NotificationsModule,
+
     // GroupsModule,
   ],
   controllers: [UsersController],
