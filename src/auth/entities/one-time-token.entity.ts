@@ -26,7 +26,7 @@ export class OneTimeToken {
   tokenType: OneTimeTokenType;
 
   @Column({ type: 'binary', length: 255 })
-  nonce: Buffer;
+  nonce: Buffer; // hash nonce
 
   @Column({ type: 'bit', nullable: false, default: false })
   isExpired: boolean;

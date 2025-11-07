@@ -36,15 +36,13 @@ export class UsersService {
     email: string;
     employeeId: number;
   }): Promise<User> {
-    const { email, employeeId } = createUserDto;
+    const { email, employeeId, password } = createUserDto;
 
     const existingUser = await this.findByEmail(email);
     if (existingUser) throw new UserAlreadyExistsException();
 
     const employeeEntity = await this.employeeService.findById(employeeId);
     if (!employeeEntity) throw new UserEmployeeNotFoundException();
-
-    const password = uuidPlugin.short();
 
     const hashedPassword = bcryptPlugin.hash(password);
     const encryptedTokenSecret = this.cryptoService.generateSecret();

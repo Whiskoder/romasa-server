@@ -195,6 +195,8 @@ export class AuthService {
       where: { nonce, isExpired: false },
     });
 
+    // validate expires at
+
     if (!oneTimeToken) throw new OneTimeTokenNotFoundException();
 
     await this.setRegisterCookies(
