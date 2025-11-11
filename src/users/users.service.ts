@@ -91,6 +91,14 @@ export class UsersService {
     return entity ? entity : null;
   }
 
+  async findByEmails(emails: string[], relations?: string[]): Promise<User[]> {
+    const entities = await this.usersRepository.find({
+      where: { email: In(emails) },
+      relations,
+    });
+    return entities ? entities : [];
+  }
+
   async findById(
     id: string,
     relations?: string[],

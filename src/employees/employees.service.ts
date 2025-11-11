@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -24,6 +24,13 @@ export class EmployeesService {
   async findById(id: number): Promise<NullableType<Employee>> {
     const entity = await this.employeesRepository.findOne({ where: { id } });
     return entity ? entity : null;
+  }
+
+  async findByIds(ids: number[]): Promise<Employee[]> {
+    const entities = await this.employeesRepository.find({
+      where: { id: In(ids) },
+    });
+    return entities ? entities : [];
   }
 
   async driversFindAllWithPagination(

@@ -27,6 +27,8 @@ import { OneTimeTokenType } from './enum';
 import MagicLinkEmail from 'src/notifications/emails/magic-link-email';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { UserAlreadyExistsException } from 'src/users/exceptions';
+import { Employee } from 'src/employees/entities';
+import { NotificationDto } from 'src/notifications/dto';
 
 @Injectable()
 export class AuthService {
@@ -139,14 +141,20 @@ export class AuthService {
   async sendRegisterLink(
     sendRegisterLinkDto: SendRegisterLinkDto,
   ): Promise<void> {
-    const { email, employeeId } = sendRegisterLinkDto;
-    const employee = await this.employeeService.findById(employeeId);
-    if (!employee) throw new EmployeeNotFoundException();
+    const { members } = sendRegisterLinkDto;
 
-    const existingUser = await this.usersService.findByEmail(email);
-    if (existingUser) throw new UserAlreadyExistsException();
+    const employeeIds = members.map((m) => m.employeeId);
+    const emails = members.map((m) => m.email);
+    const employees = await this.employeeService.findByIds(employeeIds);
+    if (employees.length !== members.length)
+      throw new EmployeeNotFoundException();
 
-    const nonce = this.cryptoService.generateNonce();
+    const existingUsers = await this.usersService.findByEmails(emails);
+    if (existingUsers.length > 0) throw new UserAlreadyExistsException();
+
+    const nonces = Array.from({ length: members.length }).map(() =>
+      this.cryptoService.generateNonce(),
+    );
     const expiresIn = this.configService.get<number>(
       'auth.registerNonceExpiresIn',
       { infer: true },
@@ -154,35 +162,51 @@ export class AuthService {
     const expiresAt = new Date();
     expiresAt.setSeconds(expiresAt.getSeconds() + expiresIn);
 
-    const oneTimeToken = this.oneTimeTokensRepository.create({
-      id: uuidPlugin.v7(),
-      employeeId: employee.id,
-      tokenType: OneTimeTokenType.register_token,
-      nonce,
-      email,
-      expiresAt,
+    const oneTimeTokens: OneTimeToken[] = [];
+
+    members.forEach((member, index) => {
+      const employee = employees.find(
+        (e) => e.id === member.employeeId,
+      ) as Employee;
+
+      const oneTimeToken = this.oneTimeTokensRepository.create({
+        id: uuidPlugin.v7(),
+        employeeId: employee.id,
+        tokenType: OneTimeTokenType.register_token,
+        nonce: nonces[index],
+        email: member.email,
+        expiresAt,
+      });
+      oneTimeTokens.push(oneTimeToken);
     });
 
-    await this.oneTimeTokensRepository.save(oneTimeToken);
+    await this.oneTimeTokensRepository.save(oneTimeTokens);
 
     const domain = this.configService.get<string>('app.frontendDomain', {
       infer: true,
     });
 
-    const strNonce = nonce.toString('hex');
-    const message = MagicLinkEmail({
-      recipientName: `${employee.firstName} ${employee.fatherName}`,
-      recipientEmail: email,
-      magicLink: `${domain}/auth/register?magic-link=${strNonce}`,
+    let notificationsDto: NotificationDto[] = [];
+    oneTimeTokens.forEach((token, index) => {
+      const { email, nonce, employeeId } = token;
+
+      const employee = employees.find((e) => e.id === employeeId) as Employee;
+
+      const strNonce = nonce.toString('hex');
+      const message = MagicLinkEmail({
+        recipientName: `${employee.firstName} ${employee.fatherName} ${employee.motherName}`,
+        recipientEmail: email,
+        magicLink: `${domain}/auth/register?magic-link=${strNonce}`,
+      });
+
+      notificationsDto.push({
+        to: email,
+        subject: 'Enlace seguro para crear tu cuenta en Romasa Taller',
+        message,
+      });
     });
 
-    const notificationsDto = {
-      to: email,
-      subject: 'Enlace seguro para crear tu cuenta en Romasa Taller',
-      message,
-    };
-
-    await this.notificationsService.notify(notificationsDto);
+    await this.notificationsService.batchNotify(notificationsDto);
   }
 
   async exchangeNonceForToken(
