@@ -115,52 +115,20 @@ export class GroupsService {
     this.permissionCacheService.deleteGroup(id);
   }
 
-  async addPermissions(groupId: string, permissions: string[]): Promise<Group> {
-    const group = await this.getGroupOrThrow(groupId);
-    const validatedPermissions = this.validatePermissions(permissions);
-    const currentPermissions = this.parsePermissions(group.permissions);
-
-    const updatedPermissions = this.mergePermissions(
-      currentPermissions,
-      validatedPermissions,
-    );
-
-    return this.updateGroupPermissions(group, updatedPermissions);
-  }
-
-  async removePermissions(
+  async updatePermissions(
     groupId: string,
     permissions: string[],
   ): Promise<Group> {
     const group = await this.getGroupOrThrow(groupId);
     const validatedPermissions = this.validatePermissions(permissions);
-    const currentPermissions = this.parsePermissions(group.permissions);
 
-    const updatedPermissions = this.filterPermissions(
-      currentPermissions,
-      validatedPermissions,
-    );
-
-    return this.updateGroupPermissions(group, updatedPermissions);
+    return this.updateGroupPermissions(group, validatedPermissions);
   }
 
   private async getGroupOrThrow(groupId: string): Promise<Group> {
     const group = await this.findById(groupId);
     if (!group) throw new GroupNotFoundEntityException();
     return group;
-  }
-
-  private parsePermissions(
-    permissionsString: string | null | undefined,
-  ): Set<string> {
-    if (!permissionsString?.trim()) return new Set();
-
-    return new Set(
-      permissionsString
-        .split(',')
-        .map((p) => p.trim())
-        .filter((p) => p),
-    );
   }
 
   private validatePermissions(permissions: string[]): PermissionValue[] {
@@ -172,32 +140,17 @@ export class GroupsService {
       throw new InvalidPermissionsValueException();
     }
 
-    return Array.from(new Set(permissions)) as PermissionValue[];
-  }
-
-  private mergePermissions(
-    current: Set<string>,
-    toAdd: PermissionValue[],
-  ): Set<string> {
-    toAdd.forEach((permission) => current.add(permission));
-    return current;
-  }
-
-  private filterPermissions(
-    current: Set<string>,
-    toRemove: PermissionValue[],
-  ): Set<string> {
-    const removeSet = new Set(toRemove);
-    return new Set([...current].filter((p) => !removeSet.has(p)));
+    return permissions;
   }
 
   private async updateGroupPermissions(
     group: Group,
-    permissions: Set<string>,
+    permissions: PermissionValue[],
   ): Promise<Group> {
-    group.permissions = Array.from(permissions).join(',');
+    group.permissions = permissions.join(',');
+    const permissionSet = new Set(permissions);
 
-    this.permissionCacheService.invalidateGroup(group.id, permissions);
+    this.permissionCacheService.invalidateGroup(group.id, permissionSet);
 
     return this.groupRepository.save(group);
   }

@@ -13,11 +13,11 @@ import {
 import { ApiResponse } from 'src/core/decorators';
 import { GroupsService } from 'src/groups/groups.service';
 import {
-  AddGroupPermissionsDto,
   AddUsersToGroupDto,
   AddWorkOrderDiagnosticApproversDto,
   CreateGroupDto,
   ResponseGroupDto,
+  UpdateGroupPermissionsDto,
 } from 'src/groups/dto';
 import { GroupMapper } from './mappers';
 import { AuthGuard } from 'src/auth/decorators';
@@ -41,6 +41,17 @@ export class GroupsController {
     @Body() createGroupDto: CreateGroupDto,
   ): Promise<{ group: ResponseGroupDto }> {
     const group = await this.groupsService.create(createGroupDto);
+    return { group: GroupMapper.toResponseDto(group) };
+  }
+
+  @Get(':id')
+  @AuthGuard(Permissions.groups.view_all)
+  @ApiResponse(200, 'Grupo encontrado')
+  async findById(
+    @Param('id') id: string,
+  ): Promise<{ group: ResponseGroupDto }> {
+    const group = await this.groupsService.findById(id);
+    if (!group) throw new GroupNotFoundException();
     return { group: GroupMapper.toResponseDto(group) };
   }
 
@@ -87,29 +98,16 @@ export class GroupsController {
     await this.groupsService.delete(groupId);
   }
 
-  @Post(':groupId/permissions')
+  @Patch(':groupId/permissions')
   @AuthGuard(Permissions.groups.manage_permissions)
   @ApiResponse(200, 'Permisos de grupo actualizados')
-  async update(
+  async updatePermissions(
     @Param('groupId', new ParseUUIDPipe({ version: '7' }))
     groupId: string,
-    @Body() addGroupPermisionsDto: AddGroupPermissionsDto,
+    @Body() updateGroupPermisionsDto: UpdateGroupPermissionsDto,
   ): Promise<{ group: ResponseGroupDto }> {
-    const { permissions } = addGroupPermisionsDto;
-    const group = await this.groupsService.addPermissions(groupId, permissions);
-    return { group: GroupMapper.toResponseDto(group) };
-  }
-
-  @Delete(':groupId/permissions')
-  @AuthGuard(Permissions.groups.manage_permissions)
-  @ApiResponse(200, 'Permisos de grupo actualizados')
-  async removePermissions(
-    @Param('groupId', new ParseUUIDPipe({ version: '7' }))
-    groupId: string,
-    @Body() deleteGroupPermissionsDto: AddGroupPermissionsDto,
-  ): Promise<{ group: ResponseGroupDto }> {
-    const { permissions } = deleteGroupPermissionsDto;
-    const group = await this.groupsService.removePermissions(
+    const { permissions } = updateGroupPermisionsDto;
+    const group = await this.groupsService.updatePermissions(
       groupId,
       permissions,
     );
