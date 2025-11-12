@@ -51,7 +51,10 @@ export class GroupsController {
   async findById(
     @Param('id') id: string,
   ): Promise<{ group: ResponseGroupDto }> {
-    const group = await this.groupsService.findById(id);
+    const group = await this.groupsService.findById(id, [
+      'users',
+      'woDiagnosticApprovers',
+    ]);
     if (!group) throw new GroupNotFoundException();
     return { group: GroupMapper.toResponseDto(group) };
   }

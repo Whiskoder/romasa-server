@@ -30,12 +30,12 @@ export class EmployeesController {
   }
 
   @Get()
-  @ApiResponse(200, 'Lista de empleados enconrtada')
+  @ApiResponse(200, 'Lista de empleados encontrada')
   @AuthGuard(Permissions.employees.view_all)
   @UseInterceptors(
     new SearchFilterAndPaginationInterceptor<EmployeeSearchView>(
       ['rfc', 'employeeNumber', 'fullName'],
-      [],
+      ['userId'],
     ),
   )
   async findAll(@Req() request: Request) {

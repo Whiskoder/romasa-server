@@ -138,6 +138,7 @@ export class AuthService {
       groupId,
     });
 
+    await this.cookieService.clearAuthCookies(res);
     await this.setAuthCookies(res, user);
 
     return user;

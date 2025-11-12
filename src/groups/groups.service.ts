@@ -133,7 +133,10 @@ export class GroupsService {
   }
 
   private async getGroupOrThrow(groupId: string): Promise<Group> {
-    const group = await this.findById(groupId);
+    const group = await this.findById(groupId, [
+      'users',
+      'woDiagnosticApprovers',
+    ]);
     if (!group) throw new GroupNotFoundEntityException();
     return group;
   }

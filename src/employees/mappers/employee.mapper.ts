@@ -16,6 +16,7 @@ export class EmployeeMapper {
       licenseType: entity.licenseType,
       licenseIssueDate: entity.licenseIssueDate,
       licenseExpiryDate: entity.licenseExpiryDate,
+      userId: entity.userId,
     });
 
     return dto;

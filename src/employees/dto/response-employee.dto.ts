@@ -5,4 +5,5 @@ export class ResponseEmployeeDto {
   firstName: string;
   fatherName: string;
   motherName: string;
+  userId: string;
 }

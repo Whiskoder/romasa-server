@@ -1,6 +1,7 @@
 import { ViewColumn, ViewEntity } from 'typeorm';
 import { DataSource } from 'typeorm/browser';
 import { Employee } from './employee.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @ViewEntity({
   name: 'employee_search_view',
@@ -24,7 +25,10 @@ import { Employee } from './employee.entity';
 					)
 				)`,
         'fullName',
-      ),
+      )
+
+      .leftJoin(User, 'u', 'u.employeeId = employees.LNGCLVEMP ')
+      .addSelect('u.id', 'userId'),
 })
 export class EmployeeSearchView {
   @ViewColumn()
@@ -47,4 +51,7 @@ export class EmployeeSearchView {
 
   @ViewColumn()
   fatherName: string;
+
+  @ViewColumn()
+  userId: string;
 }
