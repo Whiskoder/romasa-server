@@ -10,6 +10,7 @@ export class GroupMapper {
       id: entity.id,
       name: entity.name,
       isActive: entity.isActive,
+      description: entity.description,
       permissions: entity.permissions
         ? entity.permissions.split(',')
         : undefined,

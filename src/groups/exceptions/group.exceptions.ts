@@ -10,6 +10,12 @@ export class GroupAlreadyExistsEntityException extends UnprocessableEntityExcept
   }
 }
 
+export class AtLeastOnePropertyRequiredException extends UnprocessableEntityException {
+  constructor(message = 'Al menos una propiedad es requerida') {
+    super({ message, errorCode: 'GRP_ERR_AT_LEAST_ONE_PROPERTY_REQUIRED' });
+  }
+}
+
 export class GroupNotFoundEntityException extends UnprocessableEntityException {
   constructor(message = 'Grupo no encontrado') {
     super({ message, errorCode: 'GRP_ERR_NOT_FOUND' });

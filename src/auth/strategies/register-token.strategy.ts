@@ -29,7 +29,7 @@ export class RegisterTokenStrategy extends PassportStrategy(
   }
 
   async validate(req: any, payload: any, done: VerifiedCallback) {
-    const { employeeId, email, type } = payload;
+    const { employeeId, email, groupId, type } = payload;
     if (type !== TokenType.register_token)
       return done(
         new InvalidTokenException('El token no es del tipo register_token'),
@@ -37,6 +37,7 @@ export class RegisterTokenStrategy extends PassportStrategy(
 
     req.employeeId = employeeId;
     req.email = email;
+    req.groupId = groupId;
 
     done(null, payload);
   }

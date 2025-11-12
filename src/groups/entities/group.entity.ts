@@ -20,6 +20,9 @@ export class Group {
   @Column({ type: 'nvarchar', length: 100, nullable: false, unique: true })
   name: string;
 
+  @Column({ type: 'nvarchar', length: 255, nullable: true })
+  description: string;
+
   @Column({ type: 'bit', default: true })
   isActive: boolean;
 

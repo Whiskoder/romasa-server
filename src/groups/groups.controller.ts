@@ -17,6 +17,7 @@ import {
   AddWorkOrderDiagnosticApproversDto,
   CreateGroupDto,
   ResponseGroupDto,
+  UpdateGroupDto,
   UpdateGroupPermissionsDto,
 } from 'src/groups/dto';
 import { GroupMapper } from './mappers';
@@ -78,13 +79,12 @@ export class GroupsController {
   @Patch(':groupId')
   @AuthGuard(Permissions.groups.update)
   @ApiResponse(200, 'Grupo actualizado')
-  async updateName(
+  async update(
     @Param('groupId', new ParseUUIDPipe({ version: '7' }))
     groupId: string,
-    @Body() updateGroupDto: CreateGroupDto,
+    @Body() updateGroupDto: UpdateGroupDto,
   ): Promise<{ group: ResponseGroupDto }> {
-    const { name } = updateGroupDto;
-    const group = await this.groupsService.updateName(groupId, name);
+    const group = await this.groupsService.update(groupId, updateGroupDto);
     return { group: GroupMapper.toResponseDto(group) };
   }
 

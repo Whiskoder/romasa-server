@@ -1,5 +1,5 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 
 import { GroupsController } from 'src/groups/groups.controller';
 import { GroupsService } from 'src/groups/groups.service';
@@ -8,7 +8,11 @@ import { UsersModule } from 'src/users/users.module';
 import { PermissionsModule } from 'src/permissions/permissions.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Group]), PermissionsModule, UsersModule],
+  imports: [
+    TypeOrmModule.forFeature([Group]),
+    PermissionsModule,
+    forwardRef(() => UsersModule),
+  ],
   controllers: [GroupsController],
   providers: [GroupsService],
   exports: [GroupsService, TypeOrmModule],

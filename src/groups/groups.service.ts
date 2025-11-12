@@ -1,12 +1,13 @@
 import { Repository } from 'typeorm';
 
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Group } from 'src/groups/entities/group.entity';
 import { NullableType } from 'src/core/types';
-import { CreateGroupDto } from './dto';
+import { CreateGroupDto, UpdateGroupDto } from './dto';
 import {
+  AtLeastOnePropertyRequiredException,
   GroupAlreadyExistsEntityException,
   GroupNotFoundEntityException,
   GroupUsersNotFoundEntityException,
@@ -30,6 +31,7 @@ export class GroupsService {
     @InjectRepository(Group)
     private readonly groupRepository: Repository<Group>,
 
+    @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
     private readonly permissionCacheService: PermissionCacheService,
   ) {}
@@ -50,15 +52,20 @@ export class GroupsService {
     return entity;
   }
 
-  async updateName(id: string, name: string): Promise<Group> {
+  async update(id: string, updateGroupDto: UpdateGroupDto): Promise<Group> {
+    const { name, description } = updateGroupDto;
+    if (!name && !description) throw new AtLeastOnePropertyRequiredException();
     const existingGroup = await this.findByName(name);
-    if (existingGroup) throw new GroupAlreadyExistsEntityException();
+    if (existingGroup && existingGroup.id !== id)
+      throw new GroupAlreadyExistsEntityException();
 
     const entity = await this.groupRepository.findOne({ where: { id } });
     if (!entity) throw new GroupNotFoundEntityException();
 
     const $name = name.trim().toLowerCase();
     entity.name = $name;
+    const $description = description.trim().toLowerCase();
+    entity.description = $description;
 
     return this.groupRepository.save(entity);
   }

@@ -6,6 +6,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsPositive,
+  IsUUID,
   ValidateNested,
 } from 'class-validator';
 
@@ -15,6 +16,10 @@ export class SendRegisterLinkDto {
   @ValidateNested({ each: true })
   @Type(() => MemberDto)
   members: MemberDto[];
+
+  @IsUUID()
+  @IsNotEmpty()
+  groupId: string;
 }
 
 export class MemberDto {

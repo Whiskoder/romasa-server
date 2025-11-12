@@ -5,6 +5,7 @@ export class ResponseGroupDto {
   name: string;
   isActive: boolean;
   permissions: string;
+  description: string;
   users: User[];
   createdAt: Date;
   updatedAt: Date;

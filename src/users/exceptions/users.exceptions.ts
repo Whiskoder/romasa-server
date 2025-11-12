@@ -20,3 +20,9 @@ export class UserEmployeeNotFoundException extends UnprocessableEntityException 
     super({ message, errorCode: 'USR_ERR_EMPLOYEE_NOT_FOUND' });
   }
 }
+
+export class UserGroupNotFoundException extends UnprocessableEntityException {
+  constructor(message = 'El grupo no existe') {
+    super({ message, errorCode: 'USR_ERR_GROUP_NOT_FOUND' });
+  }
+}

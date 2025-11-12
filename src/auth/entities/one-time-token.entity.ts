@@ -13,6 +13,9 @@ export class OneTimeToken {
   @PrimaryColumn('uuid')
   id: string;
 
+  @Column({ type: 'text', nullable: true })
+  groupId: string;
+
   @Column({ type: 'uuid', nullable: true })
   userId: string;
 

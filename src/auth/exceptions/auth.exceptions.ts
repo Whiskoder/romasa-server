@@ -38,6 +38,14 @@ export class EmployeeNotInRequestException extends UnauthorizedException {
   }
 }
 
+export class GroupNotInRequestException extends UnauthorizedException {
+  constructor(
+    message = 'No se encontró el grupo en la solicitud. ¿Falta un guard de autenticación?',
+  ) {
+    super({ message, errorCode: 'AUTH_ERR_GROUP_MISSING' });
+  }
+}
+
 export class EmailNotInRequestException extends UnauthorizedException {
   constructor(
     message = 'No se encontró el email en la solicitud. ¿Falta un guard de autenticación?',

@@ -29,6 +29,8 @@ import { NotificationsService } from 'src/notifications/notifications.service';
 import { UserAlreadyExistsException } from 'src/users/exceptions';
 import { Employee } from 'src/employees/entities';
 import { NotificationDto } from 'src/notifications/dto';
+import { GroupsService } from 'src/groups/groups.service';
+import { GroupNotFoundException } from 'src/groups/exceptions';
 
 @Injectable()
 export class AuthService {
@@ -40,6 +42,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly employeeService: EmployeesService,
     private readonly cryptoService: CryptoService,
+    private readonly groupService: GroupsService,
     private readonly configService: ConfigService<AllConfigType>,
     private readonly notificationsService: NotificationsService,
   ) {}
@@ -125,12 +128,14 @@ export class AuthService {
     password: string,
     email: string,
     employeeId: number,
+    groupId: string,
     res: Response,
   ): Promise<User> {
     const user = await this.usersService.create({
       password,
       email,
       employeeId,
+      groupId,
     });
 
     await this.setAuthCookies(res, user);
@@ -141,7 +146,10 @@ export class AuthService {
   async sendRegisterLink(
     sendRegisterLinkDto: SendRegisterLinkDto,
   ): Promise<void> {
-    const { members } = sendRegisterLinkDto;
+    const { members, groupId } = sendRegisterLinkDto;
+
+    const group = await this.groupService.findById(groupId);
+    if (!group) throw new GroupNotFoundException();
 
     const employeeIds = members.map((m) => m.employeeId);
     const emails = members.map((m) => m.email);
@@ -171,6 +179,7 @@ export class AuthService {
 
       const oneTimeToken = this.oneTimeTokensRepository.create({
         id: uuidPlugin.v7(),
+        groupId: group.id,
         employeeId: employee.id,
         tokenType: OneTimeTokenType.register_token,
         nonce: nonces[index],
@@ -187,7 +196,7 @@ export class AuthService {
     });
 
     let notificationsDto: NotificationDto[] = [];
-    oneTimeTokens.forEach((token, index) => {
+    oneTimeTokens.forEach((token) => {
       const { email, nonce, employeeId } = token;
 
       const employee = employees.find((e) => e.id === employeeId) as Employee;
@@ -227,6 +236,7 @@ export class AuthService {
       res,
       oneTimeToken.employeeId,
       oneTimeToken.email,
+      oneTimeToken.groupId,
     );
 
     oneTimeToken.isExpired = true;
@@ -239,10 +249,12 @@ export class AuthService {
     res: Response,
     employeeId: number,
     email: string,
+    groupId: string,
   ) {
     const registerToken = await this.tokenService.generateRegisterToken(
       employeeId,
       email,
+      groupId,
     );
 
     await this.cookieService.setTokenCookie(res, registerToken);

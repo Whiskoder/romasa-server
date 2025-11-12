@@ -16,8 +16,7 @@ import { GroupsModule } from 'src/groups/groups.module';
     CryptoModule,
     EmployeesModule,
     NotificationsModule,
-
-    // GroupsModule,
+    forwardRef(() => GroupsModule),
   ],
   controllers: [UsersController],
   providers: [UsersService],

@@ -65,10 +65,12 @@ export class TokenService {
   async generateRegisterToken(
     employeeId: number,
     email: string,
+    groupId: string,
   ): Promise<string> {
     const payload = {
       employeeId,
       email,
+      groupId,
       type: TokenType.register_token,
     };
 

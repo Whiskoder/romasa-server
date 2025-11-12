@@ -37,6 +37,7 @@ import {
 import { User } from 'src/users/entities/user.entity';
 import { Permissions } from 'src/permissions/constants';
 import { ReqHeaders } from 'src/core/decorators';
+import { GetGroupId } from './decorators/get-group-id.decorator';
 
 @Controller({
   version: '1',
@@ -62,6 +63,7 @@ export class AuthController {
     @Body() registerUserDto: RegisterUserDto,
     @GetEmployeeId() employeeId: number,
     @GetEmail() email: string,
+    @GetGroupId() groupId: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ user: ResponseUserDto }> {
     const { password } = registerUserDto;
@@ -69,6 +71,7 @@ export class AuthController {
       password,
       email,
       employeeId,
+      groupId,
       res,
     );
     return { user: UserMapper.toResponseDto(userDto) };
