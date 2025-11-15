@@ -42,12 +42,6 @@ export const MagicLinkEmail = ({
               <strong>Romasa Taller</strong>.
             </Text>
 
-            <Text className="text-[#333] text-sm my-6">Datos de acceso:</Text>
-
-            <Text className="text-[#333] text-sm my-6 bg-zinc-200 p-4 rounded-md">
-              {recipientEmail}
-            </Text>
-
             <Text className="text-[#333] text-sm my-6">
               Utilice el siguiente enlace seguro para registrar su cuenta:
             </Text>

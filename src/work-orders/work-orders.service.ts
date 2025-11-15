@@ -157,7 +157,7 @@ export class WorkOrdersService {
       const domain = this.configService.get<string>('app.frontendDomain', {
         infer: true,
       });
-      const reportLink = `${domain}/service-request/details/${trackingCode}`;
+      const reportLink = `${domain}/service-requests/details/${trackingCode}`;
       const users = approvalConfig.users;
 
       const notifications = users.map((user) => {
